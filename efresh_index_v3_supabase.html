@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>EFresh Lavandaria</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+    body{background:#eaf2f7;color:#0f172a}
+    .app{max-width:430px;margin:0 auto;min-height:100vh;background:#f8fafc;position:relative;padding-bottom:85px;overflow:hidden}
+    .screen{display:none;padding:22px}.screen.active{display:block}
+    button{border:0;cursor:pointer}.blue{color:#0258a8}.green{color:#22b84a}.mt{margin-top:22px}
+    .btn{width:100%;padding:17px;border-radius:18px;background:linear-gradient(90deg,#0284c7,#10b981);color:white;font-weight:800;font-size:16px;box-shadow:0 12px 28px rgba(16,185,129,.22)}
+    .btn-dark{background:#0f172a}.btn-light{background:white;color:#0284c7;border:1px solid #e2e8f0;box-shadow:none}.notice{display:none;padding:12px;border-radius:16px;margin-bottom:12px;font-size:13px;font-weight:700}.success{display:block;background:#ecfdf5;color:#047857;border:1px solid #bbf7d0}.error{display:block;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+
+    /* SPLASH PREMIUM */
+    #splash{padding:0;min-height:100vh;background:linear-gradient(180deg,#f8fcff 0%,#eef9ff 44%,#00519f 45%,#003e80 88%,#ffffff 89%);position:relative;overflow:hidden}
+    .splash-wrap{min-height:100vh;position:relative;text-align:center;padding:18px 24px 18px;display:flex;flex-direction:column;justify-content:space-between}
+    .machine{position:absolute;right:-40px;top:58px;width:150px;height:150px;border-radius:30px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 12px rgba(2,88,168,.08);opacity:.65}
+    .machine:before{content:"";position:absolute;left:38px;top:42px;width:72px;height:72px;border-radius:50%;border:10px solid rgba(2,88,168,.22);background:rgba(255,255,255,.35)}
+    .towels-left,.towels-right{position:absolute;border-radius:14px;filter:drop-shadow(0 12px 18px rgba(2,88,168,.12))}
+    .towels-left{left:-12px;top:120px;width:125px;height:95px;background:repeating-linear-gradient(180deg,#fff 0 18px,#edf7ff 19px 29px)}
+    .towels-right{right:-8px;top:240px;width:105px;height:85px;background:repeating-linear-gradient(180deg,#eafff0 0 18px,#3cbce7 19px 38px,#fff 39px 55px)}
+    .bubble{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,rgba(48,176,240,.75) 38%,rgba(0,93,174,.2));box-shadow:0 0 20px rgba(0,128,255,.18)}
+    .b1{width:28px;height:28px;left:38px;top:260px}.b2{width:18px;height:18px;left:84px;top:215px}.b3{width:34px;height:34px;right:48px;top:185px}.b4{width:20px;height:20px;right:95px;top:335px}.b5{width:15px;height:15px;left:58px;bottom:210px}
+    .splash-logo-area{position:relative;z-index:2;margin-top:55px}
+    .logo-ring{width:190px;height:190px;margin:0 auto 10px;border-radius:50%;background:rgba(255,255,255,.86);box-shadow:0 18px 55px rgba(2,88,168,.14), inset 0 0 0 8px rgba(2,132,199,.08);display:flex;align-items:center;justify-content:center;position:relative}
+    .logo-ring:before{content:"";position:absolute;inset:14px;border-radius:50%;border:12px solid #0258a8;border-right-color:#22b84a;border-bottom-color:#0ea5e9;transform:rotate(-18deg)}
+    .logo-ring:after{content:"";position:absolute;left:42px;bottom:44px;width:110px;height:32px;background:linear-gradient(160deg,#0258a8,#0ea5e9);border-radius:0 0 70px 70px;clip-path:polygon(0 45%,20% 65%,45% 38%,70% 58%,100% 35%,100% 100%,0 100%)}
+    .leaf{position:absolute;right:38px;top:33px;width:56px;height:32px;background:linear-gradient(135deg,#65d33d,#119b46);border-radius:55px 0 55px 0;transform:rotate(-18deg);z-index:3}
+    .leaf:after{content:"";position:absolute;left:8px;top:15px;width:40px;height:2px;background:rgba(255,255,255,.8);transform:rotate(-12deg)}
+    .ef-main{position:relative;z-index:4;font-size:44px;font-weight:950;letter-spacing:-3px;color:#0258a8;margin-top:-2px}
+    .brand-name{font-size:42px;font-weight:950;letter-spacing:-2px;line-height:1;margin-top:8px}
+    .brand-sub{letter-spacing:9px;color:#0258a8;font-weight:800;font-size:13px;margin-top:8px}
+    .splash-title{position:relative;z-index:3;margin-top:18px}
+    .splash-title h2{font-size:26px;font-weight:950;color:#0258a8}.splash-title h2 span{color:#22b84a}.splash-title p{font-size:17px;color:#64748b;margin-top:6px}
+    .water-wave{position:absolute;left:-20%;right:-20%;top:425px;height:130px;background:radial-gradient(ellipse at top,rgba(255,255,255,.95) 0 38%,transparent 39%),linear-gradient(90deg,#0ea5e9,#0258a8);border-radius:50% 50% 0 0/40% 40% 0 0;z-index:1;box-shadow:0 -8px 30px rgba(14,165,233,.22)}
+    .water-line{position:absolute;left:-10%;right:-10%;top:390px;height:80px;border-radius:50%;border-top:8px solid rgba(14,165,233,.45);z-index:1}
+    .splash-action{position:relative;z-index:3;margin-top:26px}
+    .premium-btn{width:100%;height:74px;border-radius:26px;color:#fff;font-size:22px;font-weight:950;background:linear-gradient(90deg,#7ed321 0%,#10b981 45%,#0076c9 100%);box-shadow:0 18px 45px rgba(0,81,159,.32),inset 0 0 0 2px rgba(255,255,255,.65);display:flex;align-items:center;justify-content:center;gap:22px}
+    .premium-btn span:last-child{font-size:34px;font-weight:400}
+    .features{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:26px;color:white}
+    .feature{padding:12px 4px;border-right:1px solid rgba(255,255,255,.25)}.feature:last-child{border-right:0}
+    .feature-icon{width:58px;height:58px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(135deg,#078bd3,#22b84a);display:flex;align-items:center;justify-content:center;font-size:27px;box-shadow:0 10px 28px rgba(0,0,0,.12)}
+    .feature b{font-size:13px;color:#70d8ff}.feature:nth-child(2) b{color:#92e23d}.feature p{font-size:11px;line-height:1.35;margin-top:5px;color:rgba(255,255,255,.9)}
+    .bottom-slogan{position:relative;z-index:3;padding:14px 0 6px;color:#0258a8;font-size:18px;font-weight:900}.bottom-slogan span{color:#22b84a}
+    .outline-icons{position:absolute;inset:auto 0 116px 0;height:210px;opacity:.09;background-image:linear-gradient(45deg,transparent 95%,#fff 95%);z-index:2}
+
+    /* APP NORMAL */
+    .center{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:white}
+    .logo-circle{width:105px;height:105px;border-radius:50%;background:linear-gradient(135deg,#0284c7,#10b981);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 18px 45px rgba(2,132,199,.25);color:white;font-size:38px;font-weight:900}
+    .logo-text{font-size:44px;font-weight:900;letter-spacing:-2px}
+    .sub{letter-spacing:8px;color:#64748b;font-size:12px;margin-top:4px}.slogan-blue{color:#0284c7;font-weight:700;margin-top:18px}.slogan-green{color:#10b981;font-size:14px;margin-top:4px}
+    .card{background:white;border-radius:26px;padding:20px;box-shadow:0 10px 35px rgba(15,23,42,.06);margin-bottom:16px}.hero{background:linear-gradient(135deg,#0284c7,#10b981);color:white}.hero p{color:rgba(255,255,255,.9)}
+    input,textarea,select{width:100%;padding:15px;border:1px solid #e2e8f0;border-radius:17px;background:white;outline:none;font-size:15px}textarea{min-height:90px;resize:none}.field{margin-bottom:12px}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.header h1{font-size:27px;font-weight:900}.small{font-size:13px;color:#64748b}.icon-btn{width:45px;height:45px;border-radius:16px;background:white;box-shadow:0 6px 20px rgba(15,23,42,.08)}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.service,.quick{background:white;border-radius:22px;padding:16px;box-shadow:0 6px 22px rgba(15,23,42,.05);text-align:left}.service.active{border:2px solid #10b981;background:#ecfdf5}.quick{text-align:center;font-size:12px;font-weight:800;color:#334155}.emoji{font-size:24px;margin-bottom:8px}
+    .bottom{position:fixed;left:0;right:0;bottom:0;max-width:430px;margin:0 auto;background:white;border-top:1px solid #e2e8f0;padding:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bottom button{padding:10px;border-radius:16px;background:white;color:#94a3b8;font-size:12px;font-weight:800}.bottom button.active{background:#ecfdf5;color:#10b981}
+    .step{display:flex;gap:13px}.dot{width:32px;height:32px;border-radius:50%;background:#e2e8f0;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-weight:900}.dot.done{background:#10b981;color:white}.line{width:4px;height:26px;background:#e2e8f0;margin:0 auto}.line.done{background:#10b981}.step-text{padding-top:7px;font-weight:700}.admin-stat{background:white;border-radius:22px;padding:16px;box-shadow:0 6px 22px rgba(15,23,42,.05)}.admin-stat h3{font-size:24px;margin-top:5px}.order-row{background:white;border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 6px 22px rgba(15,23,42,.05)}.row{display:flex;justify-content:space-between;gap:12px}.status{color:#10b981;font-weight:900;font-size:13px}.chat-box{height:410px;background:white;border-radius:26px;padding:16px;box-shadow:0 6px 22px rgba(15,23,42,.05);display:flex;flex-direction:column}.messages{flex:1}.msg{max-width:80%;padding:11px 13px;border-radius:17px;margin-bottom:8px;font-size:14px}.support{background:#f1f5f9}.client{background:#0284c7;color:white;margin-left:auto}.chat-input{display:flex;gap:8px}.chat-input input{flex:1}.chat-input button{width:85px;border-radius:16px;background:#10b981;color:white;font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="splash" class="screen active">
+      <div class="splash-wrap">
+        <div class="machine"></div><div class="towels-left"></div><div class="towels-right"></div>
+        <div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div><div class="bubble b5"></div>
+        <div class="water-line"></div><div class="water-wave"></div><div class="outline-icons"></div>
+
+        <div class="splash-logo-area">
+          <div class="logo-ring"><div class="leaf"></div><div class="ef-main">EF</div></div>
+          <div class="brand-name"><span class="blue">EF</span><span class="green">resh</span></div>
+          <div class="brand-sub">LAVANDARIA</div>
+          <div class="splash-title">
+            <h2>Mais tempo <span>para si.</span></h2>
+            <p>O futuro da lavandaria chegou.</p>
+          </div>
+        </div>
+
+        <div class="splash-action">
+          <button class="premium-btn" onclick="show('login')"><span>Entrar no App</span><span>→</span></button>
+          <div class="features">
+            <div class="feature"><div class="feature-icon">⏱</div><b>Poupe tempo</b><p>Deixe a lavandaria connosco.</p></div>
+            <div class="feature"><div class="feature-icon">🛡</div><b>Confiança total</b><p>Segurança e qualidade.</p></div>
+            <div class="feature"><div class="feature-icon">🚚</div><b>Vamos até si</b><p>Recolha e entrega rápida.</p></div>
+          </div>
+        </div>
+
+        <div class="bottom-slogan">Juntos por um futuro <span>mais limpo.</span></div>
+      </div>
+    </section>
+
+    <section id="login" class="screen center">
+      <div style="width:100%">
+        <div class="logo-circle" style="width:85px;height:85px;font-size:30px">EF</div>
+        <div class="logo-text" style="font-size:36px"><span class="blue">EF</span><span class="green">resh</span></div>
+        <p class="small mt">Lavandaria com recolha e entrega.</p>
+        <div class="field mt"><input id="email" placeholder="Email ou telefone" value="efreshlavandaria@gmail.com"></div>
+        <div class="field"><input id="nomeCliente" placeholder="Nome do cliente" value="Cliente EFresh"></div>
+        <div class="field"><input id="telefoneCliente" placeholder="Telefone" value="+258"></div>
+        <button class="btn" onclick="enterApp('client')">Entrar como Cliente</button>
+        <button class="btn btn-light mt" onclick="enterApp('admin')">Entrar como Admin</button>
+      </div>
+    </section>
+
+    <section id="home" class="screen">
+      <div class="header"><div><p class="small">Olá, chefe 👋</p><h1><span class="blue">EF</span><span class="green">resh</span></h1></div><button class="icon-btn">🔔</button></div>
+      <div class="card hero"><p>Pedido atual</p><h2 id="currentStatus">Em lavagem</h2><p id="currentService">Roupa normal + engomadoria</p><p class="mt">⏰ Entrega prevista: Hoje, 18:00</p></div>
+      <button class="btn btn-dark" onclick="goTab('order')">+ Fazer Pedido</button>
+      <div class="grid-4 mt">
+        <button class="quick" onclick="goTab('order')"><div class="emoji">🚚</div>Recolha</button>
+        <button class="quick" onclick="goTab('tracking')"><div class="emoji">📦</div>Tracking</button>
+        <button class="quick" onclick="goTab('payments')"><div class="emoji">💳</div>Pagar</button>
+        <button class="quick" onclick="goTab('chat')"><div class="emoji">💬</div>Suporte</button>
+      </div>
+      <h3 class="mt">Serviços populares</h3>
+      <div class="card"><b>Roupa normal</b><p class="small">A partir de 150 MT/kg</p></div>
+      <div class="card"><b>Engomadoria</b><p class="small">A partir de 50 MT/peça</p></div>
+    </section>
+
+    <section id="order" class="screen">
+      <div class="header"><h1>Novo pedido</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
+      <div id="orderMsg" class="notice"></div>
+      <div class="grid-2" id="services"></div>
+      <div class="mt">
+        <div class="field"><input id="qty" placeholder="Quantidade / peso estimado"></div>
+        <div class="field"><input id="address" placeholder="Endereço de recolha"></div>
+        <div class="field"><input id="time" placeholder="Data e horário"></div>
+        <div class="field"><textarea id="obs" placeholder="Observações: roupa delicada, não usar perfume, urgência..."></textarea></div>
+        <div class="card"><b>Resumo</b><p class="small" id="selectedText">Serviço selecionado: Roupa normal</p><p class="small">Preço final será confirmado após pesagem.</p></div>
+        <button class="btn" id="submitBtn" onclick="submitOrder()">Confirmar Pedido</button>
+      </div>
+    </section>
+
+    <section id="tracking" class="screen">
+      <div class="header"><h1>Tracking</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
+      <div class="card"><b id="trackId">EFW-0001</b><p class="small" id="trackService">Roupa normal + engomadoria</p><p class="status" id="trackStatus">Em lavagem</p></div>
+      <div class="card" id="steps"></div>
+    </section>
+
+    <section id="payments" class="screen">
+      <div class="header"><h1>Pagamentos</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
+      <div class="card"><b>M-Pesa</b><p class="small">Pagamento por carteira móvel</p></div>
+      <div class="card"><b>E-Mola</b><p class="small">Pagamento por carteira móvel</p></div>
+      <div class="card"><b>Pagamento na entrega</b><p class="small">Disponível para clientes selecionados</p></div>
+    </section>
+
+    <section id="chat" class="screen">
+      <div class="header"><h1>Suporte</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
+      <div class="chat-box"><div class="messages" id="messages"><div class="msg support">Olá 👋 Bem-vindo à EFresh. Como podemos ajudar?</div></div><div class="chat-input"><input id="chatText" placeholder="Escreva aqui..."><button onclick="sendMsg()">Enviar</button></div></div>
+    </section>
+
+    <section id="profile" class="screen">
+      <div class="header"><h1>Perfil</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
+      <div class="card" style="text-align:center"><div class="logo-circle" style="width:75px;height:75px;font-size:26px">EF</div><h2>Cliente EFresh</h2><p class="small">efreshlavandaria@gmail.com</p></div>
+      <div class="card">Dados pessoais</div><div class="card">Endereços</div><div class="card">Recibos</div><div class="card">Definições</div>
+    </section>
+
+    <section id="admin" class="screen">
+      <div class="header"><div><p class="small">Painel Administrativo</p><h1><span class="blue">EF</span><span class="green">resh</span></h1></div><button class="icon-btn" onclick="show('login')">↩</button></div>
+      <button class="btn btn-light" onclick="loadAdminOrders()">Atualizar pedidos do Supabase</button>
+      <div id="adminMsg" class="notice mt"></div>
+      <div class="grid-2"><div class="admin-stat"><p class="small">Pedidos</p><h3 id="statOrders">3</h3></div><div class="admin-stat"><p class="small">Recolhas</p><h3>2</h3></div><div class="admin-stat"><p class="small">Entregas</p><h3>1</h3></div><div class="admin-stat"><p class="small">Receita</p><h3>5.500 MT</h3></div></div>
+      <input class="mt" placeholder="Pesquisar pedido ou cliente">
+      <h3 class="mt">Pedidos reais no Supabase</h3>
+      <div id="adminOrders"></div>
+    </section>
+
+    <nav class="bottom" id="bottomNav" style="display:none">
+      <button id="nav-home" class="active" onclick="goTab('home')">⌂<br>Início</button>
+      <button id="nav-order" onclick="goTab('order')">+<br>Pedido</button>
+      <button id="nav-tracking" onclick="goTab('tracking')">□<br>Tracking</button>
+      <button id="nav-profile" onclick="goTab('profile')">👤<br>Perfil</button>
+    </nav>
+  </div>
+
+  <script>
+    const SUPABASE_REST_URL = "https://ijzrogjjpdhgxntsjdmg.supabase.co/rest/v1";
+    const SUPABASE_KEY = "sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg";
+
+    const services = [
+      ['Roupa normal','150 MT/kg','👕'],['Engomadoria','50 MT/peça','✨'],['Fatos','450 MT','🛡️'],['Vestidos','350 MT','⭐'],['Edredons','650 MT','📦'],['Tênis','300 MT','👟']
+    ];
+    const steps = ['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue'];
+    let selectedService = 'Roupa normal';
+    let currentStep = 0;
+    let currentPedidoId = null;
+
+    function apiHeaders(prefer) {
+      const h = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json"
+      };
+      if (prefer) h["Prefer"] = prefer;
+      return h;
+    }
+
+    async function apiGet(table, query="") {
+      const res = await fetch(`${SUPABASE_REST_URL}/${table}${query}`, { headers: apiHeaders() });
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json();
+    }
+
+    async function apiPost(table, body) {
+      const res = await fetch(`${SUPABASE_REST_URL}/${table}`, {
+        method: "POST",
+        headers: apiHeaders("return=representation"),
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json();
+    }
+
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = "notice " + (type || "success");
+      el.innerText = text;
+    }
+
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById('bottomNav').style.display=['home','order','tracking','payments','chat','profile'].includes(id)?'grid':'none';
+    }
+
+    function enterApp(role) { 
+      if(role==='admin') {
+        show('admin'); 
+        loadAdminOrders();
+      } else {
+        show('home'); 
+        renderServices(); 
+        renderSteps();
+      }
+    }
+
+    function goTab(id) {
+      show(id);
+      document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
+      const nav=document.getElementById('nav-'+id);
+      if(nav)nav.classList.add('active');
+      if(id==='order')renderServices();
+      if(id==='tracking')renderSteps();
+    }
+
+    function renderServices() {
+      const box=document.getElementById('services');
+      box.innerHTML='';
+      services.forEach(s=>{
+        const div=document.createElement('button');
+        div.className='service '+(s[0]===selectedService?'active':'');
+        div.innerHTML='<div class="emoji">'+s[2]+'</div><b>'+s[0]+'</b><p class="small">A partir de '+s[1]+'</p>';
+        div.onclick=()=>{
+          selectedService=s[0];
+          document.getElementById('selectedText').innerText='Serviço selecionado: '+selectedService;
+          renderServices();
+        };
+        box.appendChild(div);
+      });
+    }
+
+    function renderSteps() {
+      const box=document.getElementById('steps');
+      box.innerHTML='';
+      steps.forEach((s,i)=>{
+        box.innerHTML+=`<div class="step"><div><div class="dot ${i<=currentStep?'done':''}">${i<currentStep?'✓':i+1}</div>${i<steps.length-1?`<div class="line ${i<currentStep?'done':''}"></div>`:''}</div><div class="step-text">${s}</div></div>`;
+      });
+    }
+
+    async function criarCliente() {
+      const nome = document.getElementById('nomeCliente')?.value || 'Cliente EFresh';
+      const email = document.getElementById('email')?.value || 'cliente@efresh.co.mz';
+      const telefone = document.getElementById('telefoneCliente')?.value || '';
+      const endereco = document.getElementById('address')?.value || '';
+      const rows = await apiPost("clientes", { nome, email, telefone, endereco });
+      return rows[0].id;
+    }
+
+    async function submitOrder() {
+      const btn = document.getElementById('submitBtn');
+      btn.innerText = "A gravar pedido...";
+      btn.disabled = true;
+
+      try {
+        const cliente_id = await criarCliente();
+        const pedido = {
+          cliente_id,
+          servico: selectedService,
+          quantidade: document.getElementById('qty').value || '',
+          endereco_recolha: document.getElementById('address').value || '',
+          horario: document.getElementById('time').value || '',
+          observacoes: document.getElementById('obs').value || '',
+          estado: 'Pedido recebido',
+          valor: 'A confirmar'
+        };
+
+        const rows = await apiPost("pedidos", pedido);
+        const p = rows[0];
+        currentPedidoId = p.id;
+        currentStep = 0;
+
+        document.getElementById('trackId').innerText = 'EFW-' + String(p.id).padStart(4,'0');
+        document.getElementById('trackService').innerText = p.servico;
+        document.getElementById('trackStatus').innerText = p.estado;
+        document.getElementById('currentStatus').innerText = p.estado;
+        document.getElementById('currentService').innerText = p.servico;
+
+        showMsg('orderMsg', 'Pedido gravado com sucesso no Supabase ✅', 'success');
+        goTab('tracking');
+      } catch(e) {
+        showMsg('orderMsg', 'Erro ao gravar pedido: ' + e.message, 'error');
+      } finally {
+        btn.innerText = "Confirmar Pedido";
+        btn.disabled = false;
+      }
+    }
+
+    async function loadAdminOrders() {
+      const box = document.getElementById('adminOrders');
+      const msg = document.getElementById('adminMsg');
+      if(box) box.innerHTML = '<div class="card">A carregar pedidos...</div>';
+
+      try {
+        const pedidos = await apiGet("pedidos", "?select=*&order=criado_em.desc");
+        document.getElementById('statOrders').innerText = pedidos.length;
+        if(msg) {
+          msg.className = 'notice success';
+          msg.innerText = 'Ligação ao Supabase activa ✅';
+        }
+
+        if(!box) return;
+        if(pedidos.length === 0) {
+          box.innerHTML = '<div class="card">Ainda não há pedidos gravados.</div>';
+          return;
+        }
+
+        box.innerHTML='';
+        pedidos.forEach(o=>{
+          const safeServico = (o.servico || '').replace(/'/g, "");
+          const safeEstado = (o.estado || '').replace(/'/g, "");
+          box.innerHTML += `<div class="order-row">
+            <div class="row">
+              <div>
+                <b>EFW-${String(o.id).padStart(4,'0')}</b>
+                <p class="small">${o.servico || '-'}</p>
+                <p class="small">${o.quantidade || ''}</p>
+                <p class="small">${o.endereco_recolha || 'Sem endereço'}</p>
+              </div>
+              <div style="text-align:right">
+                <p class="status">${o.estado || '-'}</p>
+                <b>${o.valor || 'A confirmar'}</b>
+                <p class="small">${o.horario || ''}</p>
+              </div>
+            </div>
+            <div class="grid-2 mt">
+              <button class="btn btn-light" onclick="alert('Contacto será ligado na próxima versão')">Ligar</button>
+              <button class="btn" onclick="abrirPedido(${o.id}, '${safeServico}', '${safeEstado}')">Abrir</button>
+            </div>
+          </div>`;
+        });
+      } catch(e) {
+        if(msg) {
+          msg.className = 'notice error';
+          msg.innerText = 'Erro Supabase: ' + e.message;
+        }
+        if(box) box.innerHTML = '<div class="card">Erro ao carregar pedidos.</div>';
+      }
+    }
+
+    function abrirPedido(id, servico, estado) {
+      currentPedidoId = id;
+      currentStep = steps.indexOf(estado);
+      if(currentStep < 0) currentStep = 0;
+      document.getElementById('trackId').innerText = 'EFW-' + String(id).padStart(4,'0');
+      document.getElementById('trackService').innerText = servico;
+      document.getElementById('trackStatus').innerText = estado;
+      show('tracking');
+      renderSteps();
+    }
+
+    function sendMsg() {
+      const input=document.getElementById('chatText');
+      if(!input.value.trim())return;
+      const msg=document.createElement('div');
+      msg.className='msg client';
+      msg.innerText=input.value;
+      document.getElementById('messages').appendChild(msg);
+      input.value='';
+    }
+  </script>
+</body>
+</html>
