@@ -241,6 +241,131 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   }
 </style>
 
+
+<style id="efresh-v10-invoice-upload">
+  .ef-invoice-premium{
+    background:#fff;
+    color:#0f172a;
+    border-radius:24px;
+    border:1px solid #e2e8f0;
+    overflow:hidden;
+    box-shadow:0 22px 70px rgba(15,23,42,.16);
+  }
+  .ef-invoice-head{
+    background:linear-gradient(135deg,#0284c7,#10b981);
+    color:white;
+    padding:22px;
+    position:relative;
+  }
+  .ef-invoice-head h2{color:white;margin:0;font-size:28px;letter-spacing:-1px}
+  .ef-invoice-head p{color:rgba(255,255,255,.88);margin-top:5px;font-size:13px}
+  .ef-invoice-badge{
+    display:inline-block;
+    margin-top:12px;
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.28);
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:900;
+  }
+  .ef-invoice-body{padding:20px}
+  .ef-invoice-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .ef-invoice-box{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:18px;
+    padding:13px;
+  }
+  .ef-invoice-box small{
+    display:block;
+    color:#64748b;
+    font-weight:900;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:5px;
+  }
+  .ef-invoice-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:14px;
+    font-size:13px;
+  }
+  .ef-invoice-table th{
+    background:#eef8ff;
+    color:#075985;
+    padding:10px;
+    text-align:left;
+    border-bottom:1px solid #bae6fd;
+    font-size:11px;
+    text-transform:uppercase;
+  }
+  .ef-invoice-table td{
+    padding:11px 10px;
+    border-bottom:1px solid #e2e8f0;
+    vertical-align:top;
+  }
+  .ef-invoice-total{
+    margin-top:16px;
+    background:linear-gradient(135deg,#071424,#08213d);
+    color:white;
+    border-radius:20px;
+    padding:16px;
+  }
+  .ef-invoice-total .row{margin-bottom:8px}
+  .ef-invoice-total .grand{
+    font-size:24px;
+    font-weight:1000;
+    color:white;
+  }
+  .ef-invoice-foot{
+    padding:16px 20px 20px;
+    border-top:1px solid #e2e8f0;
+    font-size:12px;
+    color:#64748b;
+    line-height:1.45;
+  }
+  .ef-qr{
+    width:76px;height:76px;border-radius:12px;
+    background:
+      linear-gradient(90deg,#111 10px,transparent 10px 18px,#111 18px 26px,transparent 26px),
+      linear-gradient(#111 10px,transparent 10px 18px,#111 18px 26px,transparent 26px);
+    background-size:26px 26px;
+    border:8px solid white;
+    box-shadow:0 8px 22px rgba(15,23,42,.18);
+  }
+  .ef-upload-card{
+    border:1px dashed #38bdf8;
+    background:#f0f9ff;
+    border-radius:20px;
+    padding:14px;
+    margin-top:12px;
+  }
+  .ef-file-name{
+    display:block;
+    margin-top:8px;
+    font-size:12px;
+    color:#075985;
+    font-weight:800;
+  }
+  @media print{
+    body *{visibility:hidden!important}
+    #modal, #modal *{visibility:visible!important}
+    #modal{position:absolute!important;inset:0!important;background:white!important;display:block!important}
+    .modalBox{max-width:100%!important;border-radius:0!important;box-shadow:none!important}
+    .ib,.btn{display:none!important}
+  }
+  @media(max-width:430px){
+    .ef-invoice-row{grid-template-columns:1fr}
+  }
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -312,7 +437,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
 <section id="docs" class="screen">
  <div class="header"><h1>Documentos</h1><button class="ib" onclick="tab('home')">⌂</button></div>
  <div class="card"><h3>Faturas e recibos</h3><p class="small mt2">Consulte valores, estado de pagamento e recibos digitais.</p><div id="clientDocs" class="mt"></div></div>
- <div class="card mt"><h3>Comprovativos</h3><p class="small mt2">Anexe comprovativo de pagamento ou foto relacionada ao pedido.</p><div class="field"><label>Referência do pedido</label><input id="proofRef" placeholder="Ex: EFW-0001"></div><div class="field"><label>Ficheiro / descrição</label><input id="proofName" placeholder="Ex: comprovativo M-Pesa / foto da roupa"></div><button class="btn mt" onclick="saveProof()">Guardar comprovativo</button><div id="proofList" class="mt"></div></div>
+ <div class="card mt"><h3>Comprovativos</h3><p class="small mt2">Carregue o comprovativo de pagamento ou foto relacionada ao pedido.</p><div class="field"><label>Referência do pedido</label><input id="proofRef" placeholder="Ex: EFW-0001"></div><div class="ef-upload-card"><label><b>Selecionar ficheiro</b></label><input id="proofFile" type="file" accept="image/*,.pdf" onchange="previewProofFile()"><span class="ef-file-name" id="proofFileName">Nenhum ficheiro selecionado</span></div><div class="field"><label>Descrição / método de pagamento</label><input id="proofName" placeholder="Ex: M-Pesa, e-Mola, transferência bancária"></div><button class="btn mt" onclick="saveProof()">Guardar comprovativo</button><div id="proofList" class="mt"></div></div>
  <div class="card mt"><h3>Termos e privacidade</h3><p class="small mt2">Dados usados apenas para recolha, entrega, contacto, cobrança e histórico do serviço.</p><button class="btn btn2 mt2" onclick="openTerms()">Ver termos</button></div>
 </section>
 
@@ -401,7 +526,58 @@ function renderTrackingList(){let b=trackingList;if(!docs.length){b.innerHTML='<
 function selectTracking(id){currentPedidoId=id;let d=docs.find(x=>x.pedido==id);let a=assignments[id]||{};currentStep=d?.estado==='Pago'?8:0;trackId.innerText='EFW-'+String(id).padStart(4,'0');trackService.innerText=d?.tipo||'Pedido EFresh';trackStatus.innerText=d?.estado||'Em curso';driverLine.innerText='Motorista: '+(a.motorista||'não atribuído');operatorLine.innerText='Operador: '+(a.operador||'não atribuído');trackingDetail.style.display='block';renderSteps()}
 function renderSteps(){stepsBox.innerHTML='';STAGES.forEach((s,i)=>stepsBox.innerHTML+=`<div class="step"><div><div class="dot ${i<=currentStep?'done':''}">${i<currentStep?'✓':i+1}</div>${i<STAGES.length-1?`<div class="line ${i<currentStep?'done':''}"></div>`:''}</div><div style="padding-top:5px;font-weight:850">${s}</div></div>`)}
 function renderDocs(){clearNotif('docs');renderProofs();if(!docs.length){clientDocs.innerHTML='<p class="small">Ainda não há documentos.</p>';return}clientDocs.innerHTML=docs.map(d=>`<div class="item"><div class="row"><div><b>${d.ref}</b><p class="small">${d.tipo} • Pedido EFW-${String(d.pedido).padStart(4,'0')}</p></div><span class="pill ${d.estado==='Pago'?'ok':'warn'}">${d.estado}</span></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><button class="btn btn2 mini mt2" onclick="printDoc('${d.ref}')">Ver/Imprimir</button></div>`).join('')}
-function printDoc(ref){let d=docs.find(x=>x.ref===ref);modalTitle.innerText=d.tipo+' '+d.ref;modalBody.innerHTML=`<div class="card"><h2>EFresh Lavandaria</h2><p class="small">Documento: ${d.ref}</p><p class="small">Data: ${d.data}</p><hr class="mt"><div class="row mt"><span>Pedido</span><b>EFW-${String(d.pedido).padStart(4,'0')}</b></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><div class="row mt2"><span>Estado</span><b>${d.estado}</b></div><button class="btn mt" onclick="window.print()">Imprimir / PDF</button></div>`;modal.style.display='flex'}
+function printDoc(ref){
+  let d=docs.find(x=>x.ref===ref);
+  let pedido = (orders||[]).find(o=>String(o.id)===String(d?.pedido)) || (localOrders||[]).find(o=>String(o.id)===String(d?.pedido)) || {};
+  let invoiceNo = d.ref;
+  let reciboNo = d.tipo==='Recibo' ? d.ref : 'A emitir após pagamento';
+  let clientName = nomeCliente?.value || 'Cliente EFresh';
+  let clientPhone = telefoneCliente?.value || '+258';
+  let serviceDesc = pedido.servico || 'Serviço de lavandaria';
+  let qty = pedido.quantidade || 'A confirmar';
+  let addressLine = pedido.endereco_recolha || profileAddress?.value || 'Endereço do cliente';
+  let valor = parseFloat(d.valor||0);
+  let iva = 0;
+  let subtotal = valor;
+  modalTitle.innerText = (d.tipo||'Fatura')+' '+invoiceNo;
+  modalBody.innerHTML=`<div class="ef-invoice-premium">
+    <div class="ef-invoice-head">
+      <div class="row">
+        <div>
+          <h2><span>EF</span>resh Lavandaria</h2>
+          <p>Mais tempo para si. O futuro da lavandaria chegou.</p>
+          <span class="ef-invoice-badge">${d.tipo||'FATURA'} DIGITAL</span>
+        </div>
+        <div class="ef-qr"></div>
+      </div>
+    </div>
+    <div class="ef-invoice-body">
+      <div class="ef-invoice-row">
+        <div class="ef-invoice-box"><small>Emitido a</small><b>${clientName}</b><br><span class="small">${clientPhone}</span><br><span class="small">${addressLine}</span></div>
+        <div class="ef-invoice-box"><small>Documento</small><b>${invoiceNo}</b><br><span class="small">Data: ${d.data}</span><br><span class="small">Recibo: ${reciboNo}</span></div>
+      </div>
+      <table class="ef-invoice-table">
+        <thead><tr><th>Descrição</th><th>Qtd/Peso</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>${serviceDesc}</td><td>${qty}</td><td>${subtotal.toLocaleString('pt-MZ')} MT</td></tr>
+          <tr><td>Transporte / recolha e entrega</td><td>Incluído na estimativa</td><td>Incluído</td></tr>
+        </tbody>
+      </table>
+      <div class="ef-invoice-total">
+        <div class="row"><span>Subtotal</span><b>${subtotal.toLocaleString('pt-MZ')} MT</b></div>
+        <div class="row"><span>IVA</span><b>${iva.toLocaleString('pt-MZ')} MT</b></div>
+        <div class="row"><span>Total</span><b class="grand">${valor.toLocaleString('pt-MZ')} MT</b></div>
+        <div class="row"><span>Estado</span><b>${d.estado}</b></div>
+      </div>
+    </div>
+    <div class="ef-invoice-foot">
+      <b>Nota:</b> Documento emitido electronicamente pela EFresh Lavandaria. O valor da lavagem pode ser ajustado após pesagem real, conforme informado ao cliente. Para validação interna, use a referência ${invoiceNo}.
+      <br><br>
+      <button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button>
+    </div>
+  </div>`;
+  modal.style.display='flex';
+}
 function closeModal(){modal.style.display='none'}
 async function loadAdmin(){adminContent.innerHTML='<div class="card">A carregar...</div>';try{orders=await get('pedidos','?select=*&order=criado_em.desc')}catch(e){orders=[]}try{clients=await get('clientes','?select=*&order=criado_em.desc')}catch(e){clients=[]}try{drivers=await get('motoristas','?select=*&order=criado_em.desc')}catch(e){drivers=[]}orders=[...orders,...localOrders];kOrders.innerText=filterByRole(orders).length;kPend.innerText=filterByRole(orders).filter(o=>o.estado!=='Entregue').length;kMoney.innerText=filterByRole(orders).reduce((a,o)=>a+(parseFloat(o.valor)||0),0)+' MT';msg('adminMsg','Dados carregados ✅');renderAdmin()}
 function filterByRole(list){if(currentRole==='admin'||currentRole==='financeiro')return list;if(currentRole==='operador')return list.filter(o=>(assignments[o.id]||{}).operador===currentUser);if(currentRole==='motorista')return list.filter(o=>(assignments[o.id]||{}).motorista===currentUser);return list}
@@ -455,19 +631,37 @@ function renderHistory(id){
   const arr=historyLog[id]||[];
   return arr.length ? `<div class="timeline-log">${arr.map(h=>`<div><b>${h.at}</b><br>${h.text}<br><span class="tiny">${h.user}</span></div>`).join('')}</div>` : '<p class="small">Sem histórico ainda.</p>';
 }
+function previewProofFile(){
+  const f=document.getElementById('proofFile')?.files?.[0];
+  const label=document.getElementById('proofFileName');
+  if(label) label.textContent = f ? (f.name+' • '+Math.round(f.size/1024)+' KB') : 'Nenhum ficheiro selecionado';
+}
 function saveProof(){
   const ref=(document.getElementById('proofRef')?.value||'').trim();
-  const name=(document.getElementById('proofName')?.value||'').trim();
-  if(!ref || !name){alert('Preencha a referência e o comprovativo.');return}
-  proofs.push({ref,name,data:today(),estado:'Recebido'});
+  const desc=(document.getElementById('proofName')?.value||'').trim();
+  const file=document.getElementById('proofFile')?.files?.[0];
+  if(!ref){alert('Preencha a referência do pedido.');return}
+  if(!file){alert('Selecione o ficheiro do comprovativo.');return}
+  const proof={
+    ref,
+    name: desc || file.name,
+    fileName:file.name,
+    fileType:file.type || 'ficheiro',
+    fileSize:Math.round(file.size/1024)+' KB',
+    data:today(),
+    estado:'Recebido'
+  };
+  proofs.push(proof);
   saveLocal('ef_proofs',proofs);
   incNotif('docs');
   renderProofs();
-  alert('Comprovativo guardado.');
+  document.getElementById('proofFile').value='';
+  previewProofFile();
+  alert('Comprovativo carregado e guardado.');
 }
 function renderProofs(){
   const el=document.getElementById('proofList'); if(!el) return;
-  el.innerHTML = proofs.length ? proofs.slice().reverse().map(p=>`<div class="item"><div class="proof-row"><div><b>${p.ref}</b><p class="small">${p.name}</p><span class="pill ok">${p.estado}</span></div><span class="tiny">${p.data}</span></div></div>`).join('') : '<p class="small">Sem comprovativos.</p>';
+  el.innerHTML = proofs.length ? proofs.slice().reverse().map(p=>`<div class="item"><div class="proof-row"><div><b>${p.ref}</b><p class="small">${p.name}</p><span class="pill ok">${p.estado}</span><p class="tiny">${p.fileName||'ficheiro'} • ${p.fileSize||''} • ${p.fileType||''}</p></div><span class="tiny">${p.data}</span></div></div>`).join('') : '<p class="small">Sem comprovativos.</p>';
 }
 function openTerms(){
   modalTitle.innerText='Termos de uso e privacidade EFresh';
