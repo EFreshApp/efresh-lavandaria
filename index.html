@@ -409,7 +409,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
     
   </div>
   <button class="btn mt" onclick="authEnter()">Continuar</button>
-  <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.</div>
+  <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button></div>
  </div>
  <p class="tiny mt">V11: login real simples, sincronização cliente/admin, POP, recibos, financeiro e tarefas.</p>
 </section>
@@ -1065,6 +1065,151 @@ function saveStaff(){
   users.push({nome,apelido,telefone,pass,role:role.toLowerCase()});
   localStorage.setItem('ef_users',JSON.stringify(users));
   renderTeam();
+}
+
+
+/* ===== EFresh V13 - login definitivo e sem bloqueio por localStorage antigo ===== */
+function normalizePhone(v){return (v||'').replace(/\D+/g,'').trim()}
+function samePhone(a,b){
+  const x=normalizePhone(a), y=normalizePhone(b);
+  if(!x || !y) return false;
+  return x===y || x.endsWith(y) || y.endsWith(x);
+}
+function getUsers(){
+  try{return JSON.parse(localStorage.getItem('ef_users')||'[]')}catch(e){return []}
+}
+function setUsers(list){
+  localStorage.setItem('ef_users', JSON.stringify(list));
+  users=list;
+}
+function forceRootAdmin(){
+  let list=getUsers();
+
+  // remove qualquer admin root antigo duplicado ou número antigo igual
+  list=list.filter(u=>{
+    if(!u) return false;
+    if(u.root) return false;
+    if(samePhone(u.telefone,'845178833')) return false;
+    if(samePhone(u.telefone,'258845178833')) return false;
+    return true;
+  });
+
+  // ROOT fixo solicitado
+  list.unshift({
+    nome:'Edmilson',
+    apelido:'Fumo',
+    telefone:'845178833',
+    pass:'123456',
+    role:'admin',
+    root:true
+  });
+
+  setUsers(list);
+}
+forceRootAdmin();
+
+function setAuthMode(mode){
+  authMode=mode;
+  document.getElementById('btnLoginMode')?.classList.toggle('active',mode==='login');
+  document.getElementById('btnRegisterMode')?.classList.toggle('active',mode==='register');
+  document.getElementById('registerFields')?.classList.toggle('hidden',mode!=='register');
+
+  // no registo público, nunca mostrar perfil/cargo
+  const regRole=document.getElementById('regRole');
+  if(regRole){
+    const wrap=regRole.closest('.field');
+    if(wrap) wrap.style.display='none';
+  }
+}
+
+function loginUserObject(u){
+  currentUser=(u.nome+' '+(u.apelido||'')).trim();
+  currentRole=u.role || 'cliente';
+
+  nomeCliente.value=currentUser;
+  telefoneCliente.value=u.telefone;
+
+  if(currentRole==='cliente'){
+    enterClient();
+  }else{
+    showAdminForRole();
+  }
+}
+
+function authEnter(){
+  forceRootAdmin();
+
+  const tel=normalizePhone(document.getElementById('loginPhone')?.value);
+  const pass=document.getElementById('loginPass')?.value||'';
+
+  if(!tel || !pass){
+    alert('Preencha número de celular e password.');
+    return;
+  }
+
+  let list=getUsers();
+
+  if(authMode==='register'){
+    const nome=(document.getElementById('regNome')?.value||'').trim();
+    const apelido=(document.getElementById('regApelido')?.value||'').trim();
+
+    if(!nome || !apelido){
+      alert('Preencha nome e apelido.');
+      return;
+    }
+
+    if(list.some(u=>samePhone(u.telefone,tel))){
+      alert('Este número já tem conta. Use Entrar.');
+      setAuthMode('login');
+      return;
+    }
+
+    const novoCliente={
+      nome:nome,
+      apelido:apelido,
+      telefone:tel,
+      pass:pass,
+      role:'cliente',
+      root:false
+    };
+
+    list.push(novoCliente);
+    setUsers(list);
+
+    // entra automaticamente depois de criar cliente
+    alert('Conta de cliente criada com sucesso.');
+    loginUserObject(novoCliente);
+    return;
+  }
+
+  const u=list.find(x=>samePhone(x.telefone,tel) && String(x.pass)===String(pass));
+
+  if(!u){
+    alert('Número ou password incorreto.\n\nAdmin principal:\n845178833 / 123456\n\nCliente: crie conta primeiro.');
+    return;
+  }
+
+  loginUserObject(u);
+}
+
+function saveRootAdmin(){
+  const nome=document.getElementById('rootNome').value.trim()||'Edmilson';
+  const apelido=document.getElementById('rootApelido').value.trim()||'Fumo';
+  const telefone=document.getElementById('rootTelefone').value.trim()||'845178833';
+  const pass=document.getElementById('rootPass').value||'123456';
+
+  let list=getUsers().filter(u=>!u.root && !samePhone(u.telefone,telefone) && !samePhone(u.telefone,'845178833'));
+  list.unshift({nome,apelido,telefone,pass,role:'admin',root:true});
+  setUsers(list);
+
+  alert('Administrador principal atualizado.');
+  closeModal();
+}
+
+function resetLoginDataOnly(){
+  localStorage.removeItem('ef_users');
+  forceRootAdmin();
+  alert('Login reiniciado. Use 845178833 / 123456 para administrador.');
 }
 
 </script>
