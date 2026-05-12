@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="theme-color" content="#0284c7"/>
-<title>EFresh Lavandaria Pro V8</title>
+<title>EFresh Lavandaria Pro V27 Supabase Base</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif}
 :root{--b:#0284c7;--g:#10b981;--d:#071424;--m:#64748b;--l:#e2e8f0;--bg:#eef8ff;--r:#ef4444;--y:#f59e0b}
@@ -3015,6 +3015,332 @@ V21 LOGIN OK
     window.loadAdmin=async function(){await oldLoadAdmin(); const badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent=V26;};
   }
   document.addEventListener('DOMContentLoaded',function(){const badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent=V26; if(typeof setLoginDebug==='function') setLoginDebug(V26+' - opções de apagar clientes e pedidos adicionadas.');});
+})();
+</script>
+
+<style id="efresh-v27-supabase-base-style">
+  .app-version-badge{z-index:90!important}
+  .cloud-badge{display:inline-block;padding:5px 8px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:11px;font-weight:900;margin-top:6px}
+  .cloud-error{display:inline-block;padding:5px 8px;border-radius:999px;background:#fef2f2;color:#991b1b;font-size:11px;font-weight:900;margin-top:6px}
+</style>
+<script id="efresh-v27-supabase-base">
+(function(){
+  const V27='V27 SUPABASE BASE OK';
+  const API=(typeof SUPABASE_REST_URL!=='undefined'?SUPABASE_REST_URL:'https://ijzrogjjpdhgxntsjdmg.supabase.co/rest/v1');
+  const KEY=(typeof SUPABASE_KEY!=='undefined'?SUPABASE_KEY:'sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg');
+  const RPC=API.replace('/rest/v1','/rest/v1/rpc');
+  let currentClient=null;
+  let cloudDocs=[];
+  let cloudProofs=[];
+  let cloudHistory={};
+  let cloudFunds=[];
+  let cloudInvoices=[];
+  let cloudReceipts=[];
+
+  function el(id){return document.getElementById(id)}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+  function digits(v){return String(v||'').replace(/\D/g,'')}
+  function normPhone(v){let d=digits(v); if(!d) return ''; if(d.startsWith('258')) return '+'+d; if(d.length===9) return '+258'+d; return '+'+d}
+  function today27(){return (typeof today==='function')?today():new Date().toISOString().slice(0,10)}
+  function money(v){return (Number(v)||0).toLocaleString('pt-MZ')+' MT'}
+  function headers(prefer){let h={apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'}; if(prefer) h.Prefer=prefer; return h}
+  async function apiFetch(path,opts={}){const r=await fetch(API+path,{headers:{...headers(opts.prefer),...(opts.headers||{})},...opts}); const txt=await r.text(); if(!r.ok) throw new Error(txt||('HTTP '+r.status)); return txt?JSON.parse(txt):null}
+  async function sGet(table,q=''){return apiFetch('/'+table+q)}
+  async function sPost(table,body){return apiFetch('/'+table,{method:'POST',headers:headers('return=representation'),body:JSON.stringify(body)})}
+  async function sPatch(table,id,body){return apiFetch('/'+table+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:headers('return=representation'),body:JSON.stringify(body)})}
+  async function sDelete(table,id){return apiFetch('/'+table+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:headers('return=minimal')})}
+  async function sRpc(name,body){const r=await fetch(RPC+'/'+name,{method:'POST',headers:headers(),body:JSON.stringify(body||{})}); const txt=await r.text(); if(!r.ok) throw new Error(txt||('RPC '+r.status)); return txt?JSON.parse(txt):null}
+  function setBadge(){const b=document.querySelector('.app-version-badge'); if(b) b.textContent=V27; const t=document.querySelector('#login .tiny'); if(t) t.textContent=V27+' - Supabase como base principal';}
+  function setSession(u,role,type){localStorage.setItem('ef_session',JSON.stringify({id:u.id,nome:u.nome,apelido:u.apelido||'',telefone:u.telefone||'',role,type,at:Date.now()}));}
+  function getSession(){try{return JSON.parse(localStorage.getItem('ef_session')||'null')}catch(e){return null}}
+  function showErr(id,txt){try{msg(id,txt,'error')}catch(e){alert(txt)}}
+  function showOk(id,txt){try{msg(id,txt,'success')}catch(e){console.log(txt)}}
+  function orderNo(o){return o?.numero || ('EFW-'+String(o?.id||0).padStart(5,'0'))}
+  function faturaNo(f){return f?.numero || ('FAT-'+String(f?.id||0).padStart(5,'0'))}
+  function reciboNo(r){return r?.numero || ('RCB-'+String(r?.id||0).padStart(5,'0'))}
+  function getStageIndex(estado){const arr=(typeof STAGES!=='undefined'?STAGES:['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue']); const i=arr.indexOf(estado); return i>=0?i:0}
+
+  async function initSession(){
+    const s=getSession(); if(!s) return;
+    currentUser=s.nome||'Cliente'; currentRole=s.role||'cliente';
+    if(el('nomeCliente')) el('nomeCliente').value=currentUser;
+    if(el('telefoneCliente')) el('telefoneCliente').value=s.telefone||'';
+    if(s.type==='cliente') currentClient={id:s.id,nome:s.nome,telefone:s.telefone,apelido:s.apelido};
+  }
+
+  window.authEnterV17=window.authEnter=async function(){
+    const phone=normPhone(el('loginPhone')?.value||'');
+    const pass=el('loginPass')?.value||'';
+    if(!phone||!pass){alert('Preencha número e código.');return}
+    const mode=(typeof authMode!=='undefined'?authMode:'login');
+    try{
+      if(mode==='register'){
+        const nome=(el('regNome')?.value||'').trim();
+        const apelido=(el('regApelido')?.value||'').trim();
+        if(!nome||!apelido){alert('Preencha nome e apelido.');return}
+        const exists=await sGet('clientes','?select=*&telefone=eq.'+encodeURIComponent(phone)+'&limit=1');
+        if(exists.length){alert('Este número já tem conta. Use Entrar.');return}
+        const c=(await sPost('clientes',{nome,apelido,telefone:phone,senha:pass,activo:true}))[0];
+        currentClient=c; currentUser=(nome+' '+apelido).trim(); currentRole='cliente';
+        setSession(c,'cliente','cliente');
+        if(el('nomeCliente')) el('nomeCliente').value=currentUser;
+        if(el('telefoneCliente')) el('telefoneCliente').value=phone;
+        alert('Conta criada com sucesso.');
+        await enterClientSupabase();
+        return;
+      }
+      let fun=await sGet('funcionarios','?select=*&telefone=eq.'+encodeURIComponent(phone)+'&senha=eq.'+encodeURIComponent(pass)+'&activo=eq.true&limit=1');
+      if(!fun.length && digits(phone).endsWith('845178833') && String(pass)==='123456'){
+        fun=[{id:0,nome:'Administrador',telefone:phone,role:'admin',cargo:'Administrador'}];
+      }
+      if(fun.length){
+        const u=fun[0]; currentUser=u.nome||'Administrador'; currentRole=(u.role||u.cargo||'admin').toLowerCase(); if(currentRole==='administrador') currentRole='admin';
+        setSession(u,currentRole,'funcionario');
+        if(el('nomeCliente')) el('nomeCliente').value=currentUser;
+        if(el('telefoneCliente')) el('telefoneCliente').value=phone;
+        showAdminForRole();
+        return;
+      }
+      const cli=await sGet('clientes','?select=*&telefone=eq.'+encodeURIComponent(phone)+'&senha=eq.'+encodeURIComponent(pass)+'&activo=eq.true&limit=1');
+      if(!cli.length){alert('Número ou código incorreto. Crie conta ou verifique os dados.');return}
+      currentClient=cli[0]; currentUser=(cli[0].nome+' '+(cli[0].apelido||'')).trim(); currentRole='cliente';
+      setSession(cli[0],'cliente','cliente');
+      if(el('nomeCliente')) el('nomeCliente').value=currentUser;
+      if(el('telefoneCliente')) el('telefoneCliente').value=phone;
+      await enterClientSupabase();
+    }catch(e){alert('Erro no login Supabase: '+e.message)}
+  };
+
+  async function enterClientSupabase(){
+    if(el('hello')) el('hello').innerText=(currentUser||'Cliente').split(' ')[0];
+    if(typeof syncProfile==='function') syncProfile();
+    await refreshClientData();
+    if(typeof show==='function') show('home');
+    const nav=el('nav'); if(nav) nav.style.display='grid';
+    renderActive();
+  }
+  window.enterClient=enterClientSupabase;
+
+  async function refreshCloudLists(){
+    orders=await sGet('pedidos','?select=*&order=criado_em.desc');
+    clients=await sGet('clientes','?select=*&order=criado_em.desc');
+    drivers=await sGet('motoristas','?select=*&order=criado_em.desc');
+    try{staff=await sGet('funcionarios','?select=*&order=criado_em.desc')}catch(e){staff=[]}
+    try{cloudInvoices=await sGet('faturas','?select=*&order=criado_em.desc')}catch(e){cloudInvoices=[]}
+    try{cloudReceipts=await sGet('recibos','?select=*&order=criado_em.desc')}catch(e){cloudReceipts=[]}
+    try{cloudProofs=await sGet('comprovativos','?select=*&order=criado_em.desc')}catch(e){cloudProofs=[]}
+    try{cloudFunds=await sGet('requisicoes_fundos','?select=*&order=criado_em.desc')}catch(e){cloudFunds=[]}
+  }
+
+  async function refreshClientData(){
+    if(!currentClient){const s=getSession(); if(s&&s.type==='cliente') currentClient={id:s.id,nome:s.nome,telefone:s.telefone};}
+    if(!currentClient?.id){orders=[]; cloudInvoices=[]; cloudReceipts=[]; cloudProofs=[]; docs=[]; return;}
+    orders=await sGet('pedidos','?select=*&cliente_id=eq.'+encodeURIComponent(currentClient.id)+'&order=criado_em.desc');
+    cloudInvoices=await sGet('faturas','?select=*&cliente_id=eq.'+encodeURIComponent(currentClient.id)+'&order=criado_em.desc').catch(()=>[]);
+    cloudReceipts=await sGet('recibos','?select=*&cliente_id=eq.'+encodeURIComponent(currentClient.id)+'&order=criado_em.desc').catch(()=>[]);
+    cloudProofs=await sGet('comprovativos','?select=*&cliente_id=eq.'+encodeURIComponent(currentClient.id)+'&order=criado_em.desc').catch(()=>[]);
+    docs=[...cloudInvoices.map(f=>({id:f.id,ref:faturaNo(f),pedido:f.pedido_id,tipo:'Fatura',valor:f.total||f.valor,estado:f.estado||'Pendente',data:f.data_emissao||String(f.criado_em||'').slice(0,10),raw:f})),...cloudReceipts.map(r=>({id:r.id,ref:reciboNo(r),pedido:r.pedido_id,tipo:'Recibo',valor:r.valor,estado:'Pago',data:r.data_pagamento||String(r.criado_em||'').slice(0,10),raw:r}))];
+  }
+
+  window.submitOrder=async function(){
+    const btn=el('submitBtn'); if(btn){btn.innerText='A gravar na nuvem...';btn.disabled=true}
+    try{
+      const est=calcEstimate();
+      let c=currentClient;
+      const phone=normPhone(el('telefoneCliente')?.value||el('loginPhone')?.value||'');
+      const nome=(el('nomeCliente')?.value||currentUser||'Cliente EFresh').trim();
+      if(!c?.id){
+        let found=[]; if(phone) found=await sGet('clientes','?select=*&telefone=eq.'+encodeURIComponent(phone)+'&limit=1');
+        c=found[0]||(await sPost('clientes',{nome,telefone:phone,endereco:el('address')?.value||'',senha:el('loginPass')?.value||'123456',activo:true}))[0];
+        currentClient=c; setSession(c,'cliente','cliente');
+      }
+      const pedido={
+        cliente_id:c.id,
+        cliente_nome:nome,
+        cliente_telefone:c.telefone||phone,
+        servico:est.servicos,
+        quantidade:(el('pecas')?.value?el('pecas').value+' peças ':'')+(el('kg')?.value?el('kg').value+' kg':''),
+        kg_estimado:est.kgAuto||0,
+        pecas:Number(el('pecas')?.value||0),
+        endereco_recolha:el('address')?.value||'',
+        horario:(el('pickupDate')?.value||'')+' das '+(el('hIni')?.value||'')+' às '+(el('hFim')?.value||''),
+        data_recolha:el('pickupDate')?.value||null,
+        hora_inicio:el('hIni')?.value||null,
+        hora_fim:el('hFim')?.value||null,
+        observacoes:el('obs')?.value||'',
+        estado:'Pedido recebido',
+        valor:est.totalGeral,
+        transporte:est.transporte
+      };
+      const p=(await sPost('pedidos',pedido))[0];
+      currentPedidoId=p.id;
+      await refreshClientData();
+      if(el('trackId')) el('trackId').innerText=orderNo(p);
+      if(el('trackService')) el('trackService').innerText=p.servico||'';
+      if(el('trackStatus')) el('trackStatus').innerText=p.estado||'';
+      if(el('hStatus')) el('hStatus').innerText=p.estado||'';
+      if(el('hValor')) el('hValor').innerText=money(p.valor);
+      showOk('orderMsg','Pedido gravado no Supabase ✅');
+      if(typeof tab==='function') tab('tracking');
+      renderTrackingList();
+    }catch(e){showErr('orderMsg','Erro ao gravar no Supabase: '+e.message)}
+    finally{if(btn){btn.innerText='Confirmar pedido';btn.disabled=false}}
+  };
+
+  window.renderActive=function(){
+    const box=el('activeRequests'); if(!box) return;
+    const list=(orders||[]).slice(0,3);
+    box.innerHTML=list.length?'<div class="card"><h3>Progresso das solicitações</h3>'+list.map(o=>{const pct=Math.round((getStageIndex(o.estado)/(STAGES.length-1))*100)||10;return '<div class="item"><div class="row"><b>'+orderNo(o)+'</b><span class="pill warn">'+esc(o.estado||'Pedido recebido')+'</span></div><div class="progress mt2"><div class="bar" style="width:'+pct+'%"></div></div></div>'}).join('')+'</div>':'';
+  };
+
+  window.renderTrackingList=async function(){
+    const b=el('trackingList'); if(!b) return;
+    try{if(currentRole==='cliente') await refreshClientData()}catch(e){}
+    if(!orders.length){b.innerHTML='<p class="small">Sem pedidos para acompanhar.</p>'; if(el('trackingDetail')) el('trackingDetail').style.display='none'; return}
+    b.innerHTML=orders.map(o=>'<button class="btn btn2 mt2" onclick="selectTracking(\''+esc(o.id)+'\')">'+orderNo(o)+' • '+esc(o.estado||'')+'</button>').join('');
+  };
+
+  window.selectTracking=async function(id){
+    currentPedidoId=id;
+    const o=(orders||[]).find(x=>String(x.id)===String(id)) || (await sGet('pedidos','?select=*&id=eq.'+encodeURIComponent(id)+'&limit=1'))[0];
+    if(!o) return;
+    if(el('trackId')) el('trackId').innerText=orderNo(o);
+    if(el('trackService')) el('trackService').innerText=o.servico||'Pedido EFresh';
+    if(el('trackStatus')) el('trackStatus').innerText=o.estado||'Em curso';
+    if(el('driverLine')) el('driverLine').innerText='Motorista: '+(o.motorista_nome||'não atribuído');
+    if(el('operatorLine')) el('operatorLine').innerText='Operador: '+(o.operador_nome||'não atribuído');
+    if(el('trackingDetail')) el('trackingDetail').style.display='block';
+    currentStep=getStageIndex(o.estado);
+    renderSteps();
+  };
+
+  const oldTab=window.tab;
+  window.tab=function(id){
+    if(typeof oldTab==='function') oldTab(id); else if(typeof show==='function') show(id);
+    if(id==='tracking') renderTrackingList();
+    if(id==='docs') renderDocs();
+  };
+
+  window.renderDocs=async function(){
+    const box=el('clientDocs'); if(!box) return;
+    try{await refreshClientData()}catch(e){box.innerHTML='<p class="small">Erro ao carregar documentos: '+esc(e.message)+'</p>';return}
+    renderProofs();
+    if(!docs.length){box.innerHTML='<p class="small">Ainda não há documentos.</p>';return}
+    box.innerHTML=docs.map(d=>'<div class="item"><div class="row"><div><b>'+esc(d.ref)+'</b><p class="small">'+esc(d.tipo)+' • Pedido '+esc(d.pedido||'-')+'</p></div><span class="pill '+(d.estado==='Pago'?'ok':'warn')+'">'+esc(d.estado)+'</span></div><div class="row mt2"><span>Valor</span><b>'+money(d.valor)+'</b></div><button class="btn btn2 mini mt2" onclick="printDoc(\''+esc(d.ref)+'\')">Ver/Imprimir</button></div>').join('');
+  };
+
+  window.printDoc=function(ref){
+    const d=(docs||[]).find(x=>x.ref===ref); if(!d){alert('Documento não encontrado.');return}
+    const pedido=(orders||[]).find(o=>String(o.id)===String(d.pedido))||{};
+    const clientName=(currentClient?(currentClient.nome+' '+(currentClient.apelido||'')):(el('nomeCliente')?.value||'Cliente EFresh'));
+    const clientPhone=currentClient?.telefone||el('telefoneCliente')?.value||'+258';
+    const valor=Number(d.valor||0);
+    openNormalPanelV24((d.tipo||'Documento')+' '+d.ref, '<div class="ef-invoice-premium"><div class="ef-invoice-head"><div class="row"><div><h2><span>EF</span>resh Lavandaria</h2><p>Mais tempo para si. O futuro da lavandaria chegou.</p><span class="ef-invoice-badge">'+esc((d.tipo||'FATURA').toUpperCase())+' DIGITAL</span></div><div class="ef-qr"></div></div></div><div class="ef-invoice-body"><div class="ef-invoice-row"><div class="ef-invoice-box"><small>Emitido a</small><b>'+esc(clientName)+'</b><br><span class="small">'+esc(clientPhone)+'</span><br><span class="small">'+esc(pedido.endereco_recolha||'Endereço do cliente')+'</span></div><div class="ef-invoice-box"><small>Documento</small><b>'+esc(d.ref)+'</b><br><span class="small">Data: '+esc(d.data||today27())+'</span><br><span class="small">Pedido: '+esc(orderNo(pedido))+'</span></div></div><table class="ef-invoice-table"><thead><tr><th>Descrição</th><th>Qtd/Peso</th><th>Valor</th></tr></thead><tbody><tr><td>'+esc(pedido.servico||'Serviço de lavandaria')+'</td><td>'+esc(pedido.quantidade||'A confirmar')+'</td><td>'+money(valor)+'</td></tr><tr><td>Transporte / recolha e entrega</td><td>Incluído</td><td>'+money(pedido.transporte||0)+'</td></tr></tbody></table><div class="ef-invoice-total"><div class="row"><span>Subtotal</span><b>'+money(valor)+'</b></div><div class="row"><span>IVA</span><b>0 MT</b></div><div class="row"><span>Total</span><b class="grand">'+money(valor)+'</b></div><div class="row"><span>Estado</span><b>'+esc(d.estado||'')+'</b></div></div></div><div class="ef-invoice-foot"><b>Nota:</b> Documento emitido electronicamente pela EFresh Lavandaria. Para validação interna, use a referência '+esc(d.ref)+'.<br><br><button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button></div></div>', 'docs');
+  };
+
+  window.loadAdmin=async function(){
+    const box=el('adminContent'); if(box) box.innerHTML='<div class="card">A carregar dados do Supabase...</div>';
+    try{await refreshCloudLists();}
+    catch(e){showErr('adminMsg','Erro Supabase: '+e.message); orders=[]; clients=[]; drivers=[]; staff=[];}
+    const list=filterByRole(orders||[]);
+    if(el('kOrders')) el('kOrders').innerText=list.length;
+    if(el('kPend')) el('kPend').innerText=list.filter(o=>o.estado!=='Entregue').length;
+    if(el('kMoney')) el('kMoney').innerText=money(list.reduce((a,o)=>a+(Number(o.valor)||0),0));
+    showOk('adminMsg','Dados carregados do Supabase ✅');
+    renderAdmin(); setBadge();
+  };
+
+  window.filterByRole=function(list){
+    if(currentRole==='admin'||currentRole==='financeiro') return list;
+    if(currentRole==='operador') return list.filter(o=>(o.operador_nome||'')===currentUser);
+    if(currentRole==='motorista') return list.filter(o=>(o.motorista_nome||'')===currentUser);
+    return list;
+  };
+
+  window.renderOrders=function(){
+    const box=el('adminContent'); if(!box) return;
+    const list=filterByRole(orders||[]);
+    box.innerHTML=list.length?list.map(o=>'<div class="item"><div class="row"><div><b>'+orderNo(o)+'</b><p class="small">'+esc(o.servico||'')+'</p><p class="small">'+esc(o.endereco_recolha||'')+'</p><span class="tag">Operador: '+esc(o.operador_nome||'-')+'</span> <span class="tag">Motorista: '+esc(o.motorista_nome||'-')+'</span></div><span class="pill '+(o.estado==='Entregue'?'ok':'warn')+'">'+esc(o.estado||'')+'</span></div><div class="field"><select onchange="setEstado(\''+esc(o.id)+'\',this.value)">'+STAGES.map(s=>'<option '+(s===o.estado?'selected':'')+'>'+esc(s)+'</option>').join('')+'</select></div><div class="grid2 mt2"><button class="btn btn2 mini '+(currentRole==='admin'?'':'locked')+'" onclick="openAssign(\''+esc(o.id)+'\')">Atribuir</button><button class="btn mini" onclick="openWork(\''+esc(o.id)+'\')">Executar</button></div><div class="delete-zone"><h3>Zona de eliminação</h3><p class="small">Remove este pedido, fatura, recibo, comprovativos e histórico ligado ao pedido.</p><button class="btn dangerBtn mini '+(currentRole==='admin'?'':'locked')+'" onclick="deleteOrderV26(\''+esc(o.id)+'\')">Apagar pedido</button></div></div>').join(''):'<div class="card">Sem pedidos nesta conta/função.</div>';
+  };
+
+  window.setEstado=async function(id,estado){
+    try{await sPatch('pedidos',id,{estado}); await loadAdmin();}
+    catch(e){showErr('adminMsg','Erro ao atualizar estado: '+e.message)}
+  };
+
+  window.openAssign=function(id){
+    if(currentRole!=='admin'){alert('Apenas administrador atribui trabalhos.');return}
+    const ops=(staff||[]).filter(s=>['operador','admin','administrador'].includes(String(s.role||s.cargo||'').toLowerCase()));
+    const mots=(drivers||[]);
+    openNormalPanelV24('Atribuir '+id,'<div class="card"><div class="field"><label>Operador / lavandaria</label><select id="assignOp">'+ops.map(s=>'<option value="'+esc(s.id)+'|'+esc(s.nome)+'">'+esc(s.nome)+'</option>').join('')+'</select></div><div class="field"><label>Motorista / transportador</label><select id="assignMot">'+mots.map(s=>'<option value="'+esc(s.id)+'|'+esc(s.nome)+'">'+esc(s.nome)+'</option>').join('')+'</select></div><button class="btn mt" onclick="saveAssign(\''+esc(id)+'\')">Guardar atribuição</button></div>','admin');
+  };
+  window.saveAssign=async function(id){
+    const [opId,opName]=String(el('assignOp')?.value||'|').split('|');
+    const [motId,motName]=String(el('assignMot')?.value||'|').split('|');
+    try{await sPatch('pedidos',id,{operador_id:opId?Number(opId):null,operador_nome:opName||null,motorista_id:motId?Number(motId):null,motorista_nome:motName||null}); closeModal(); await loadAdmin();}
+    catch(e){alert('Erro ao atribuir: '+e.message)}
+  };
+
+  window.openWork=async function(id){
+    const o=(orders||[]).find(x=>String(x.id)===String(id)) || (await sGet('pedidos','?select=*&id=eq.'+encodeURIComponent(id)+'&limit=1'))[0];
+    const hist=await sGet('historico_pedidos','?select=*&pedido_id=eq.'+encodeURIComponent(id)+'&order=criado_em.asc').catch(()=>[]);
+    const h=hist.length?'<div class="timeline-log">'+hist.map(x=>'<div><b>'+esc(String(x.criado_em||'').slice(0,19).replace('T',' '))+'</b><br>'+esc(x.evento||'')+(x.estado_novo?' → '+esc(x.estado_novo):'')+'<br><span class="tiny">'+esc(x.utilizador||'Sistema')+'</span></div>').join('')+'</div>':'<p class="small">Sem histórico ainda.</p>';
+    openNormalPanelV24('Executar '+orderNo(o), '<div class="card"><p><b>Serviço:</b> '+esc(o.servico||'')+'</p><p><b>Endereço:</b> '+esc(o.endereco_recolha||'-')+'</p><p><b>Horário:</b> '+esc(o.horario||'-')+'</p><p><b>Estado:</b> '+esc(o.estado||'-')+'</p><h3 class="mt">Histórico operacional</h3>'+h+'<div class="grid2 mt"><button class="btn btn2" onclick="setEstado(\''+id+'\',\'Motorista a caminho\');closeModal()">Iniciar rota</button><button class="btn btn2" onclick="setEstado(\''+id+'\',\'Roupa recolhida\');closeModal()">Recolhido</button><button class="btn btn2" onclick="setEstado(\''+id+'\',\'Em lavagem\');closeModal()">Iniciar lavagem</button><button class="btn btn2" onclick="setEstado(\''+id+'\',\'Controle de qualidade\');closeModal()">Finalizar serviço</button><button class="btn" onclick="setEstado(\''+id+'\',\'Entregue\');closeModal()">Concluir</button><button class="btn btn2" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.endereco_recolha||'Maputo')+'\',\'_blank\')">Mapa</button></div></div>','admin');
+  };
+
+  window.renderTeam=function(){
+    const box=el('adminContent'); if(!box) return;
+    if(currentRole!=='admin'){box.innerHTML='<div class="card">Sem permissão para criar perfis.</div>';return}
+    box.innerHTML='<div class="card"><h3>Criar perfil</h3><div class="field"><label>Nome</label><input id="stNome"></div><div class="field"><label>Telefone</label><input id="stTel"></div><div class="field"><label>Password</label><input id="stSenha" value="123456"></div><div class="field"><label>Cargo</label><select id="stRole"><option value="admin">Administrador</option><option value="financeiro">Financeiro</option><option value="operador">Operador</option><option value="motorista">Motorista</option><option value="atendimento">Atendimento</option></select></div><button class="btn mt" onclick="saveStaff()">Criar perfil</button></div><div class="card mt"><h3>Perfis criados</h3>'+(staff||[]).map(s=>'<div class="item"><div class="row"><div><b>'+esc(s.nome)+'</b><p class="small">'+esc(s.telefone||'')+'</p></div><span class="role">'+esc(s.role||s.cargo||'')+'</span></div><button class="btn dangerBtn mini mt2" onclick="delStaff(\''+esc(s.id)+'\')">Remover</button></div>').join('')+'</div>';
+  };
+  window.saveStaff=async function(){
+    const role=el('stRole')?.value||'operador'; const nome=el('stNome')?.value||'Funcionário'; const telefone=normPhone(el('stTel')?.value||'');
+    try{await sPost('funcionarios',{nome,telefone,email:'',senha:el('stSenha')?.value||'123456',cargo:role,role,activo:true}); await loadAdmin(); adminTab('equipe')}
+    catch(e){alert('Erro ao criar perfil: '+e.message)}
+  };
+  window.delStaff=async function(id){if(!confirm('Remover este funcionário?')) return; try{await sDelete('funcionarios',id); await loadAdmin(); adminTab('equipe')}catch(e){alert('Erro ao remover: '+e.message)}};
+
+  window.openDrivers=function(){
+    const blocks=(drivers||[]).map(m=>{const jobs=(orders||[]).filter(o=>String(o.motorista_id||'')===String(m.id)||o.motorista_nome===m.nome); return '<div class="item"><b>'+esc(m.nome)+'</b><p class="small">'+esc(m.telefone||'')+'</p>'+(jobs.length?jobs.map(o=>'<span class="tag">'+orderNo(o)+' • '+esc(o.estado||'')+'</span>').join(''):'<p class="small">Sem tarefas.</p>')+'</div>'}).join('')||'<p class="small">Sem motoristas.</p>';
+    openNormalPanelV24('Motoristas',blocks,'admin');
+  };
+
+  window.openFunds=async function(){
+    try{cloudFunds=await sGet('requisicoes_fundos','?select=*&order=criado_em.desc')}catch(e){cloudFunds=[]}
+    const list=cloudFunds.length?cloudFunds.map(f=>'<div class="item"><div class="row"><div><b>'+esc(f.motivo||'Requisição')+'</b><p class="small">'+esc(f.funcionario_nome||'')+' • '+String(f.criado_em||'').slice(0,10)+'</p></div><span class="pill '+(f.estado==='Aprovado'?'ok':'warn')+'">'+esc(f.estado||'Pendente')+'</span></div><div class="row mt2"><span>Valor</span><b>'+money(f.valor)+'</b></div>'+(currentRole==='admin'?'<button class="btn btn2 mini mt2" onclick="approveFundV27(\''+f.id+'\')">Aprovar</button>':'')+'</div>').join(''):'<p class="small">Sem requisições.</p>';
+    openNormalPanelV24('Requisição de fundos','<div class="card"><h3>Solicitar fundos</h3><div class="field"><label>Solicitante</label><input id="fundWho" value="'+esc(currentUser||'Administrador')+'"></div><div class="field"><label>Produto / necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div><div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div><button class="btn mt" onclick="saveFundV24()">Submeter</button></div><div class="card mt"><h3>Histórico</h3>'+list+'</div>','admin');
+  };
+  window.saveFundV24=async function(){try{await sPost('requisicoes_fundos',{funcionario_nome:el('fundWho')?.value||currentUser||'',motivo:el('fundDesc')?.value||'',valor:Number(el('fundVal')?.value||0),estado:'Pendente'}); alert('Requisição gravada no Supabase.'); openFunds()}catch(e){alert('Erro: '+e.message)}};
+  window.approveFundV27=async function(id){try{await sPatch('requisicoes_fundos',id,{estado:'Aprovado',aprovado_por:currentUser||'Admin'}); openFunds()}catch(e){alert(e.message)}};
+
+  window.openFinancePanel=async function(){
+    await refreshCloudLists();
+    const total=(orders||[]).reduce((a,o)=>a+(Number(o.valor)||0),0); const paid=(cloudReceipts||[]).reduce((a,r)=>a+(Number(r.valor)||0),0); const pending=Math.max(0,total-paid); const fundTotal=(cloudFunds||[]).reduce((a,f)=>a+(Number(f.valor)||0),0);
+    openNormalPanelV24('Painel financeiro EFresh','<div class="finance-grid"><div class="finance-box"><small>Receita estimada</small><b>'+money(total)+'</b></div><div class="finance-box"><small>Recebido</small><b>'+money(paid)+'</b></div><div class="finance-box"><small>Pendente</small><b>'+money(pending)+'</b></div><div class="finance-box"><small>Fundos solicitados</small><b>'+money(fundTotal)+'</b></div></div><div class="card mt"><h3>Faturas</h3>'+(cloudInvoices.length?cloudInvoices.slice(0,20).map(f=>'<div class="item"><b>'+faturaNo(f)+'</b><p class="small">Pedido '+esc(f.pedido_id)+' • '+money(f.total||f.valor)+' • '+esc(f.estado||'')+'</p></div>').join(''):'<p class="small">Sem faturas.</p>')+'</div>','admin');
+  };
+
+  window.saveProof=async function(){
+    const ref=(el('proofRef')?.value||'').trim(); const desc=(el('proofName')?.value||'').trim(); const file=el('proofFile')?.files?.[0];
+    if(!ref){alert('Preencha a referência do pedido.');return}
+    if(!currentClient?.id){alert('Faça login como cliente.');return}
+    const num=ref.replace(/[^0-9]/g,''); let pedido=(orders||[]).find(o=>orderNo(o)===ref||String(o.id)===num||String(o.id)===ref);
+    if(!pedido){alert('Pedido não encontrado nesta conta.');return}
+    try{await sPost('comprovativos',{pedido_id:pedido.id,cliente_id:currentClient.id,tipo:'Comprovativo',nome_ficheiro:file?file.name:'sem ficheiro',descricao:desc||'Comprovativo',estado:'Recebido'}); if(file){el('proofFile').value=''; if(typeof previewProofFile==='function') previewProofFile()} alert('Comprovativo guardado no Supabase.'); renderDocs()}
+    catch(e){alert('Erro ao guardar comprovativo: '+e.message)}
+  };
+  window.renderProofs=function(){const box=el('proofList'); if(!box) return; box.innerHTML=cloudProofs.length?cloudProofs.map(p=>'<div class="item"><div class="proof-row"><div><b>Pedido '+esc(p.pedido_id)+'</b><p class="small">'+esc(p.descricao||'Comprovativo')+'</p><span class="pill ok">'+esc(p.estado||'Recebido')+'</span><p class="tiny">'+esc(p.nome_ficheiro||'ficheiro')+'</p></div><span class="tiny">'+String(p.criado_em||'').slice(0,10)+'</span></div></div>').join(''):'<p class="small">Sem comprovativos.</p>'};
+
+  window.sendMsg=async function(){const txt=el('chatText')?.value||''; if(!txt.trim())return; if(el('messages')) el('messages').innerHTML+='<div class="msg clientMsg">'+esc(txt)+'</div>'; try{await sPost('mensagens',{cliente_id:currentClient?.id||null,pedido_id:currentPedidoId||null,remetente:currentUser||'Cliente',tipo_remetente:currentRole||'cliente',mensagem:txt,lida:false})}catch(e){} if(el('chatText')) el('chatText').value=''};
+
+  window.deleteOrderV26=async function(id){if(currentRole!=='admin'){alert('Apenas administrador pode apagar pedidos.');return} if(!confirm('Apagar definitivamente o pedido '+id+'?')) return; try{await sRpc('apagar_pedido_completo',{p_pedido_id:Number(id)}); await loadAdmin(); alert('Pedido apagado no Supabase.')}catch(e){alert('Erro ao apagar: '+e.message)}};
+  window.deleteClientV26=async function(cid){if(currentRole!=='admin'){alert('Apenas administrador pode apagar clientes.');return} if(!confirm('Apagar este cliente e todos os dados ligados?')) return; try{await sRpc('apagar_cliente_completo',{p_cliente_id:Number(cid)}); await loadAdmin(); closeModal(); alert('Cliente apagado no Supabase.')}catch(e){alert('Erro ao apagar cliente: '+e.message)}};
+  window.openClientsPanelV26=function(){if(currentRole!=='admin'){alert('Apenas administrador pode gerir clientes.');return} const list=(clients||[]).map(c=>'<div class="item"><div class="row"><div><b>'+esc((c.nome||'')+' '+(c.apelido||''))+'</b><p class="small">'+esc(c.telefone||'')+'</p></div><button class="btn dangerBtn mini" onclick="deleteClientV26(\''+esc(c.id)+'\')">Apagar</button></div></div>').join('')||'<p class="small">Sem clientes.</p>'; openNormalPanelV24('Clientes',list,'admin')};
+
+  window.openCompleted=function(){const list=(orders||[]).filter(o=>o.estado==='Entregue'); openNormalPanelV24('Pedidos concluídos',list.map(o=>'<div class="item"><b>'+orderNo(o)+'</b><p class="small">'+esc(o.servico||'')+' • '+money(o.valor)+'</p></div>').join('')||'<p class="small">Sem concluídos.</p>','admin')};
+
+  function boot(){setBadge(); initSession(); const s=getSession(); if(s&&s.type==='funcionario'){currentUser=s.nome; currentRole=s.role; if(el('nomeCliente')) el('nomeCliente').value=currentUser; if(el('telefoneCliente')) el('telefoneCliente').value=s.telefone||''} }
+  document.addEventListener('DOMContentLoaded',boot);
+  setTimeout(boot,300);
 })();
 </script>
 
