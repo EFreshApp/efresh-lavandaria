@@ -399,6 +399,8 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
     <button id="btnLoginMode" class="active" onclick="setAuthMode('login')">Entrar</button>
     <button id="btnRegisterMode" onclick="setAuthMode('register')">Criar conta</button>
   </div>
+  <input type="hidden" id="nomeCliente" value="Cliente EFresh">
+  <input type="hidden" id="telefoneCliente" value="">
   <div class="field"><label>Número de celular</label><input id="loginPhone" placeholder="+25884xxxxxxx"></div>
   <div class="field"><label>Código / Password</label><input id="loginPass" type="password" placeholder="Digite o código"></div>
   <div id="registerFields" class="hidden">
@@ -408,10 +410,10 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
     </div>
     
   </div>
-  <button class="btn mt" onclick="authEnterV15()">Continuar</button>
+  <button class="btn mt" onclick="authEnterV17()">Continuar</button>
   <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button><div id="loginDebug" style="margin-top:8px;font-size:12px;color:#0369a1;font-weight:800"></div></div>
  </div>
- <p class="tiny mt">V15: login debug definitivo</p>
+ <p class="tiny mt">V17: login cliente corrigido sem erro nomeCliente</p>
 </section>
 
 <section id="home" class="screen">
@@ -1215,7 +1217,7 @@ function resetLoginDataOnly(){
 </script>
 
 <div style="position:fixed;right:10px;bottom:10px;z-index:9999;background:#071424;color:#fff;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:900;box-shadow:0 8px 20px #0003">
-V15 LOGIN OK
+V17 LOGIN OK
 </div>
 
 
@@ -1314,6 +1316,319 @@ V15 LOGIN OK
   };
   window.efUsersV15();
   window.setLoginDebug('Pronto. Admin: 845178833 / 123456');
+})();
+</script>
+
+
+<script id="efresh-v16-client-register-fix">
+(function(){
+  function el(id){return document.getElementById(id)}
+  function digits(v){return String(v||'').replace(/\D+/g,'')}
+  function readUsers(){try{return JSON.parse(localStorage.getItem('ef_users')||'[]')}catch(e){return []}}
+  function writeUsers(list){localStorage.setItem('ef_users',JSON.stringify(list)); window.users=list}
+
+  window.forceRootAdminV16=function(){
+    let list=readUsers().filter(u=>{
+      const p=digits(u.telefone);
+      return !(u.root || p.endsWith('845178833'));
+    });
+    list.unshift({nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456',role:'admin',root:true});
+    writeUsers(list);
+    return list;
+  };
+
+  window.loginV16=function(u){
+    window.currentUser=((u.nome||'')+' '+(u.apelido||'')).trim();
+    window.currentRole=u.role || 'cliente';
+    window.currentClientPhone=digits(u.telefone);
+
+    const n=el('nomeCliente'); if(n) n.value=window.currentUser;
+    const t=el('telefoneCliente'); if(t) t.value=u.telefone||'';
+
+    if(typeof setLoginDebug==='function') setLoginDebug('Login OK: '+window.currentUser+' / '+window.currentRole);
+
+    if(window.currentRole==='cliente'){
+      if(typeof enterClient==='function') enterClient();
+      else if(typeof show==='function') show('home');
+    }else{
+      if(typeof showAdminForRole==='function') showAdminForRole();
+      else if(typeof show==='function') show('admin');
+    }
+  };
+
+  window.authEnterV15=function(){
+    try{
+      const tel=digits(el('loginPhone')?.value);
+      const pass=String(el('loginPass')?.value||'');
+      const isRegister = window.authMode === 'register' || (el('registerFields') && !el('registerFields').classList.contains('hidden'));
+
+      if(typeof setLoginDebug==='function') setLoginDebug('A verificar... telefone='+tel+' modo='+(isRegister?'criar cliente':'entrar'));
+
+      if(!tel || !pass){
+        alert('Preencha número e password.');
+        return;
+      }
+
+      let list=window.forceRootAdminV16();
+
+      if(isRegister){
+        const nome=(el('regNome')?.value||'').trim();
+        const apelido=(el('regApelido')?.value||'').trim();
+
+        if(!nome || !apelido){
+          alert('Preencha nome e apelido.');
+          return;
+        }
+
+        const exists=list.find(u=>{
+          const p=digits(u.telefone);
+          return p===tel || p.endsWith(tel) || tel.endsWith(p);
+        });
+
+        if(exists){
+          if(String(exists.pass)===pass){
+            window.loginV16(exists);
+            return;
+          }
+          alert('Este número já existe. Use Entrar com a password correta.');
+          if(typeof setAuthMode==='function') setAuthMode('login');
+          return;
+        }
+
+        const novo={nome:nome,apelido:apelido,telefone:tel,pass:pass,role:'cliente',root:false,createdAt:new Date().toISOString()};
+        list.push(novo);
+        writeUsers(list);
+
+        alert('Conta de cliente criada com sucesso.');
+        window.loginV16(novo);
+        return;
+      }
+
+      const u=list.find(x=>{
+        const p=digits(x.telefone);
+        return (p===tel || p.endsWith(tel) || tel.endsWith(p)) && String(x.pass)===pass;
+      });
+
+      if(!u){
+        alert('Número ou password incorreto. Admin: 845178833 / 123456');
+        if(typeof setLoginDebug==='function') setLoginDebug('Não encontrou utilizador.');
+        return;
+      }
+
+      window.loginV16(u);
+
+    }catch(e){
+      if(typeof setLoginDebug==='function') setLoginDebug('ERRO: '+e.message);
+      alert('Erro no login: '+e.message);
+    }
+  };
+
+  window.resetLoginDataOnly=function(){
+    localStorage.removeItem('ef_users');
+    window.forceRootAdminV16();
+    if(typeof setLoginDebug==='function') setLoginDebug('Acessos reiniciados. Admin: 845178833 / 123456');
+    alert('Acessos reiniciados. Use 845178833 / 123456');
+  };
+
+  // isolamento definitivo de cliente por número
+  window.getCurrentClientOrders=function(){
+    const phone = digits(window.currentClientPhone || el('telefoneCliente')?.value || el('loginPhone')?.value);
+    const all = (typeof getAllOrders==='function') ? getAllOrders() : ((window.localOrders||[]).concat(window.orders||[]));
+    if(!phone) return [];
+    return all.filter(o=>{
+      const op=digits(o.cliente_telefone || o.telefone || '');
+      return op && (op===phone || op.endsWith(phone) || phone.endsWith(op));
+    });
+  };
+
+  window.submitOrder = async function(){
+    const submitBtn=el('submitBtn');
+    if(submitBtn){submitBtn.innerText='A gravar...';submitBtn.disabled=true;}
+    try{
+      const est = (typeof calcEstimate==='function') ? calcEstimate() : {servicos:'Serviço EFresh',totalGeral:0};
+      const phone = digits(window.currentClientPhone || el('telefoneCliente')?.value || el('loginPhone')?.value);
+      const clienteNome = window.currentUser || el('nomeCliente')?.value || 'Cliente EFresh';
+
+      const p={
+        id:Date.now(),
+        cliente_nome:clienteNome,
+        cliente_telefone:phone,
+        servico:est.servicos,
+        quantidade:(el('pecas')?.value?el('pecas').value+' peças ':'')+(el('kg')?.value?el('kg').value+' kg':''),
+        endereco_recolha:el('address')?.value||'',
+        horario:(el('pickupDate')?.value||'')+' das '+(el('hIni')?.value||'')+' às '+(el('hFim')?.value||''),
+        observacoes:el('obs')?.value||'',
+        estado:'Pedido recebido',
+        valor:String(est.totalGeral||0),
+        criado_em:new Date().toISOString()
+      };
+
+      window.localOrders = JSON.parse(localStorage.getItem('ef_local_orders')||'[]');
+      window.localOrders.push(p);
+      localStorage.setItem('ef_local_orders',JSON.stringify(window.localOrders));
+
+      window.docs = JSON.parse(localStorage.getItem('ef_docs')||'[]');
+      window.docs.push({ref:'FAT-'+String(p.id).padStart(4,'0'),pedido:p.id,tipo:'Fatura',valor:est.totalGeral||0,estado:'Pendente',data:(typeof today==='function'?today():new Date().toISOString().slice(0,10)),cliente_telefone:phone});
+      localStorage.setItem('ef_docs',JSON.stringify(window.docs));
+
+      if(typeof notifyNewOrder==='function') notifyNewOrder(p.id);
+      if(typeof addHistory==='function') addHistory(p.id,'Pedido criado pelo cliente '+clienteNome+'.');
+      if(typeof msg==='function') msg('orderMsg','Pedido gravado com sucesso ✅');
+      if(typeof updateClientHome==='function') updateClientHome();
+      if(typeof renderTrackingList==='function') renderTrackingList();
+      if(typeof selectTracking==='function') selectTracking(p.id);
+      if(typeof tab==='function') tab('tracking');
+    }finally{
+      if(submitBtn){submitBtn.innerText='Confirmar pedido';submitBtn.disabled=false;}
+    }
+  };
+
+  window.forceRootAdminV16();
+  if(typeof setLoginDebug==='function') setLoginDebug('V16 pronto. Cliente registra sem erro. Admin: 845178833 / 123456');
+})();
+</script>
+
+
+<script id="efresh-v17-final-login-fix">
+(function(){
+  function el(id){return document.getElementById(id)}
+  function digits(v){return String(v||'').replace(/\D+/g,'')}
+  function readUsers(){try{return JSON.parse(localStorage.getItem('ef_users')||'[]')}catch(e){return []}}
+  function writeUsers(list){localStorage.setItem('ef_users',JSON.stringify(list)); window.users=list}
+
+  window.forceRootAdminV17=function(){
+    let list=readUsers().filter(u=>{
+      const p=digits(u.telefone);
+      return !(u.root || p.endsWith('845178833'));
+    });
+    list.unshift({nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456',role:'admin',root:true});
+    writeUsers(list);
+    return list;
+  };
+
+  window.safeSetClientFields=function(nome, telefone){
+    let n=el('nomeCliente');
+    let t=el('telefoneCliente');
+    if(!n){
+      n=document.createElement('input'); n.type='hidden'; n.id='nomeCliente'; document.body.appendChild(n);
+    }
+    if(!t){
+      t=document.createElement('input'); t.type='hidden'; t.id='telefoneCliente'; document.body.appendChild(t);
+    }
+    n.value=nome||'Cliente EFresh';
+    t.value=telefone||'';
+  };
+
+  window.loginV17=function(u){
+    window.currentUser=((u.nome||'')+' '+(u.apelido||'')).trim();
+    window.currentRole=u.role || 'cliente';
+    window.currentClientPhone=digits(u.telefone);
+    window.safeSetClientFields(window.currentUser, u.telefone);
+
+    if(typeof setLoginDebug==='function') setLoginDebug('Login OK: '+window.currentUser+' / '+window.currentRole);
+
+    if(window.currentRole==='cliente'){
+      if(typeof enterClient==='function') enterClient();
+      else if(typeof show==='function') show('home');
+    }else{
+      if(typeof showAdminForRole==='function') showAdminForRole();
+      else if(typeof show==='function') show('admin');
+    }
+  };
+
+  window.authEnterV17=function(){
+    try{
+      const tel=digits(el('loginPhone')?.value);
+      const pass=String(el('loginPass')?.value||'');
+      const isRegister = window.authMode === 'register' || (el('registerFields') && !el('registerFields').classList.contains('hidden'));
+
+      if(typeof setLoginDebug==='function') setLoginDebug('A verificar... telefone='+tel+' modo='+(isRegister?'criar cliente':'entrar'));
+
+      if(!tel || !pass){
+        alert('Preencha número e password.');
+        return;
+      }
+
+      let list=window.forceRootAdminV17();
+
+      if(isRegister){
+        const nome=(el('regNome')?.value||'').trim();
+        const apelido=(el('regApelido')?.value||'').trim();
+
+        if(!nome || !apelido){
+          alert('Preencha nome e apelido.');
+          return;
+        }
+
+        const exists=list.find(u=>{
+          const p=digits(u.telefone);
+          return p===tel || p.endsWith(tel) || tel.endsWith(p);
+        });
+
+        if(exists){
+          if(String(exists.pass)===pass){
+            window.loginV17(exists);
+            return;
+          }
+          alert('Este número já existe. Use Entrar com a password correta.');
+          if(typeof setAuthMode==='function') setAuthMode('login');
+          return;
+        }
+
+        const novo={nome:nome,apelido:apelido,telefone:tel,pass:pass,role:'cliente',root:false,createdAt:new Date().toISOString()};
+        list.push(novo);
+        writeUsers(list);
+
+        alert('Conta de cliente criada com sucesso.');
+        window.loginV17(novo);
+        return;
+      }
+
+      const u=list.find(x=>{
+        const p=digits(x.telefone);
+        return (p===tel || p.endsWith(tel) || tel.endsWith(p)) && String(x.pass)===pass;
+      });
+
+      if(!u){
+        alert('Número ou password incorreto. Admin: 845178833 / 123456');
+        if(typeof setLoginDebug==='function') setLoginDebug('Não encontrou utilizador.');
+        return;
+      }
+
+      window.loginV17(u);
+    }catch(e){
+      if(typeof setLoginDebug==='function') setLoginDebug('ERRO V17: '+e.message);
+      alert('Erro V17: '+e.message);
+    }
+  };
+
+  // override all older names too
+  window.authEnter = window.authEnterV17;
+  window.authEnterV15 = window.authEnterV17;
+  window.loginV15 = window.loginV17;
+  window.loginV16 = window.loginV17;
+
+  window.resetLoginDataOnly=function(){
+    localStorage.removeItem('ef_users');
+    window.forceRootAdminV17();
+    if(typeof setLoginDebug==='function') setLoginDebug('Acessos reiniciados. Admin: 845178833 / 123456');
+    alert('Acessos reiniciados. Use 845178833 / 123456');
+  };
+
+  // client isolation by phone
+  window.getCurrentClientOrders=function(){
+    const phone = digits(window.currentClientPhone || el('telefoneCliente')?.value || el('loginPhone')?.value);
+    const all = (typeof getAllOrders==='function') ? getAllOrders() : ((window.localOrders||[]).concat(window.orders||[]));
+    if(!phone) return [];
+    return all.filter(o=>{
+      const op=digits(o.cliente_telefone || o.telefone || '');
+      return op && (op===phone || op.endsWith(phone) || phone.endsWith(op));
+    });
+  };
+
+  window.forceRootAdminV17();
+  window.safeSetClientFields('', '');
+  if(typeof setLoginDebug==='function') setLoginDebug('V17 pronto. Admin: 845178833 / 123456');
 })();
 </script>
 
