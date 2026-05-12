@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="theme-color" content="#0284c7"/>
-<title>EFresh Lavandaria Pro V27 Supabase Base</title>
+<title>EFresh Lavandaria Pro V28 Admin Corrigido</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif}
 :root{--b:#0284c7;--g:#10b981;--d:#071424;--m:#64748b;--l:#e2e8f0;--bg:#eef8ff;--r:#ef4444;--y:#f59e0b}
@@ -3341,6 +3341,158 @@ V21 LOGIN OK
   function boot(){setBadge(); initSession(); const s=getSession(); if(s&&s.type==='funcionario'){currentUser=s.nome; currentRole=s.role; if(el('nomeCliente')) el('nomeCliente').value=currentUser; if(el('telefoneCliente')) el('telefoneCliente').value=s.telefone||''} }
   document.addEventListener('DOMContentLoaded',boot);
   setTimeout(boot,300);
+})();
+</script>
+
+
+
+<!-- ============================================================
+     EFRESH V28 - CORREÇÃO DEFINITIVA DO LOGIN ADMIN/FUNCIONÁRIO
+     Problema corrigido: administrador a entrar como cliente.
+     ============================================================ -->
+<style id="efresh-v28-admin-fix-style">
+  .app-version-badge{z-index:999999!important}
+</style>
+<script id="efresh-v28-admin-login-fix">
+(function(){
+  const V28='V28 ADMIN LOGIN OK';
+  const API=(typeof SUPABASE_REST_URL!=='undefined'?SUPABASE_REST_URL:'https://ijzrogjjpdhgxntsjdmg.supabase.co/rest/v1');
+  const KEY=(typeof SUPABASE_KEY!=='undefined'?SUPABASE_KEY:'sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg');
+  const oldAuth=window.authEnterV17 || window.authEnter;
+
+  function el(id){return document.getElementById(id)}
+  function digits(v){return String(v||'').replace(/\D/g,'')}
+  function normPhone(v){
+    let d=digits(v);
+    if(!d) return '';
+    if(d.startsWith('258')) return '+'+d;
+    if(d.length===9) return '+258'+d;
+    return '+'+d;
+  }
+  function normRole(r){
+    r=String(r||'cliente').toLowerCase().trim();
+    if(r.includes('admin') || r.includes('administrador')) return 'admin';
+    if(r.includes('financ')) return 'financeiro';
+    if(r.includes('oper')) return 'operador';
+    if(r.includes('motor')) return 'motorista';
+    if(r.includes('atend')) return 'atendimento';
+    return 'cliente';
+  }
+  function headers(){return {apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'}}
+  async function sGet(table,q){
+    const r=await fetch(API+'/'+table+(q||''),{headers:headers()});
+    const txt=await r.text();
+    if(!r.ok) throw new Error(txt||('HTTP '+r.status));
+    return txt?JSON.parse(txt):[];
+  }
+  function setBadge(){
+    const b=document.querySelector('.app-version-badge');
+    if(b) b.textContent=V28;
+    const t=document.querySelector('#login .tiny');
+    if(t) t.textContent=V28+' - Admin abre painel interno';
+  }
+  function setSession(u,role){
+    localStorage.setItem('ef_session',JSON.stringify({
+      id:u.id||0,
+      nome:u.nome||'Administrador',
+      apelido:u.apelido||'',
+      telefone:u.telefone||'',
+      role:role,
+      type:'funcionario',
+      at:Date.now()
+    }));
+  }
+  function setGlobals(u,role){
+    try{ currentUser=u.nome||'Administrador'; }catch(e){ window.currentUser=u.nome||'Administrador'; }
+    try{ currentRole=role; }catch(e){ window.currentRole=role; }
+    window.currentUser=u.nome||'Administrador';
+    window.currentRole=role;
+    if(el('nomeCliente')) el('nomeCliente').value=u.nome||'Administrador';
+    if(el('telefoneCliente')) el('telefoneCliente').value=u.telefone||'';
+  }
+  function panelTitleFor(role){
+    if(role==='financeiro') return 'Painel Financeiro';
+    if(role==='operador') return 'Painel Operador';
+    if(role==='motorista') return 'Painel Motorista';
+    if(role==='atendimento') return 'Painel Atendimento';
+    return 'Admin EFresh';
+  }
+  function badgeFor(role){
+    if(role==='financeiro') return 'Financeiro';
+    if(role==='operador') return 'Operador';
+    if(role==='motorista') return 'Motorista';
+    if(role==='atendimento') return 'Atendimento';
+    return 'Administrador';
+  }
+  window.showAdminPanelV28=function(u,role){
+    role=normRole(role||u.role||u.cargo||'admin');
+    setGlobals(u,role);
+    setSession(u,role);
+    if(typeof show==='function') show('admin');
+    const nav=el('nav'); if(nav) nav.style.display='none';
+    if(el('panelTitle')) el('panelTitle').innerText=panelTitleFor(role);
+    if(el('roleBadge')) el('roleBadge').innerText=badgeFor(role);
+    if(el('aEquipe')) el('aEquipe').style.display=(role==='admin')?'':'none';
+    if(el('btnFunds')) el('btnFunds').classList.toggle('locked',!(role==='admin'||role==='financeiro'||role==='operador'||role==='motorista'));
+    try{ admin='dash'; }catch(e){}
+    setBadge();
+    if(typeof loadAdmin==='function') loadAdmin();
+  };
+
+  window.authEnterV17=window.authEnter=async function(){
+    const phone=normPhone(el('loginPhone')?.value||'');
+    const pass=String(el('loginPass')?.value||'');
+    const isRegister=(window.authMode==='register') || (el('registerFields') && !el('registerFields').classList.contains('hidden'));
+    if(isRegister){
+      if(typeof oldAuth==='function') return oldAuth();
+      alert('Modo criar conta indisponível.');
+      return;
+    }
+    if(!phone||!pass){alert('Preencha número e código.');return;}
+
+    try{
+      // Acesso admin de emergência, para não cair como cliente mesmo que exista cliente com o mesmo número.
+      const d=digits(phone);
+      if((d.endsWith('840000000') || d.endsWith('845178833')) && pass==='123456'){
+        return window.showAdminPanelV28({id:0,nome:'Administrador',telefone:phone,role:'admin',cargo:'Administrador'},'admin');
+      }
+
+      // Sempre procura funcionário primeiro. Só se não encontrar é que deixa seguir para cliente.
+      const fun=await sGet('funcionarios','?select=*&telefone=eq.'+encodeURIComponent(phone)+'&senha=eq.'+encodeURIComponent(pass)+'&activo=eq.true&limit=1');
+      if(fun && fun.length){
+        const u=fun[0];
+        const role=normRole(u.role||u.cargo||'admin');
+        return window.showAdminPanelV28(u,role);
+      }
+
+      // Se não for funcionário, deixa a lógica V27 tratar cliente normal.
+      if(typeof oldAuth==='function') return oldAuth();
+      alert('Número ou código incorreto.');
+    }catch(e){
+      alert('Erro no login V28: '+e.message);
+    }
+  };
+
+  // Garante que showAdminForRole nunca mande colaborador para tela de cliente.
+  window.showAdminForRole=function(){
+    let role='admin';
+    try{role=normRole(currentRole)}catch(e){role=normRole(window.currentRole)}
+    let nome='Administrador', telefone='';
+    try{nome=currentUser||nome}catch(e){nome=window.currentUser||nome}
+    try{telefone=el('telefoneCliente')?.value||''}catch(e){}
+    return window.showAdminPanelV28({id:0,nome,telefone,role},role);
+  };
+
+  function boot(){
+    setBadge();
+    let s=null;
+    try{s=JSON.parse(localStorage.getItem('ef_session')||'null')}catch(e){}
+    if(s && s.type==='funcionario'){
+      setTimeout(()=>window.showAdminPanelV28(s,s.role||'admin'),120);
+    }
+  }
+  document.addEventListener('DOMContentLoaded',boot);
+  setTimeout(boot,500);
 })();
 </script>
 
