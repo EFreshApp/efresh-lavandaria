@@ -426,6 +426,84 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   }
 </style>
 
+
+<style id="efresh-v20-modal-real-fix">
+  body.modal-open{
+    overflow:hidden!important;
+  }
+
+  #modal{
+    position:fixed!important;
+    top:0!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    width:100vw!important;
+    height:100vh!important;
+    z-index:2147483647!important;
+    background:rgba(15,23,42,.62)!important;
+    display:none;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    padding:18px 10px 110px!important;
+    box-sizing:border-box!important;
+  }
+
+  #modal .modalBox,
+  .modalBox{
+    position:relative!important;
+    z-index:2147483647!important;
+    width:min(680px,96vw)!important;
+    margin:26px auto 130px!important;
+    background:#fff!important;
+    border-radius:28px!important;
+    box-shadow:0 30px 90px rgba(15,23,42,.38)!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding:22px!important;
+    box-sizing:border-box!important;
+  }
+
+  #modalTitle{
+    font-size:28px!important;
+    line-height:1.1!important;
+    margin:0 58px 16px 0!important;
+    color:#0f172a!important;
+    display:block!important;
+    position:relative!important;
+    z-index:2!important;
+  }
+
+  #modalBody{
+    position:relative!important;
+    z-index:2!important;
+    max-height:none!important;
+    overflow:visible!important;
+    display:block!important;
+    color:#0f172a!important;
+  }
+
+  #modal .x,
+  #modal .close,
+  #modal button[onclick="closeModal()"]{
+    position:absolute!important;
+    top:18px!important;
+    right:18px!important;
+    z-index:3!important;
+  }
+
+  #modal .card,
+  #modal .item{
+    background:#fff!important;
+  }
+
+  .app-version-badge{
+    z-index:2147483646!important;
+  }
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -458,7 +536,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   <button class="btn mt" onclick="authEnterV17()">Continuar</button>
   <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button><div id="loginDebug" style="margin-top:8px;font-size:12px;color:#0369a1;font-weight:800"></div></div>
  </div>
- <p class="tiny mt">V19: documentos isolados e modais corrigidos</p>
+ <p class="tiny mt">V20: modais corrigidos sobre tela</p>
 </section>
 
 <section id="home" class="screen">
@@ -1262,7 +1340,7 @@ function resetLoginDataOnly(){
 </script>
 
 <div class="app-version-badge" style="background:#071424;color:#fff;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:900;box-shadow:0 8px 20px #0003">
-V19 LOGIN OK
+V20 LOGIN OK
 </div>
 
 
@@ -2049,6 +2127,124 @@ V19 LOGIN OK
   addCleanButtonV19();
 
   if(typeof setLoginDebug==='function') setLoginDebug('V19 pronto. Docs isolados e modais corrigidos.');
+})();
+</script>
+
+
+<script id="efresh-v20-modal-real-fix-js">
+(function(){
+  function el(id){return document.getElementById(id)}
+
+  window.openModalV20=function(title, bodyHtml){
+    let modal=el('modal');
+    if(!modal){
+      modal=document.createElement('div');
+      modal.id='modal';
+      modal.innerHTML='<div class="modalBox"><button class="ib" style="position:absolute;right:18px;top:18px" onclick="closeModal()">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div></div>';
+      document.body.appendChild(modal);
+    }
+
+    let box=modal.querySelector('.modalBox');
+    if(!box){
+      modal.innerHTML='<div class="modalBox"><button class="ib" style="position:absolute;right:18px;top:18px" onclick="closeModal()">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div></div>';
+    }
+
+    el('modalTitle').innerText=title||'EFresh';
+    el('modalBody').innerHTML=bodyHtml||'';
+    document.body.classList.add('modal-open');
+    modal.style.display='flex';
+    modal.scrollTop=0;
+    setTimeout(()=>{modal.scrollTop=0},50);
+  };
+
+  window.closeModal=function(){
+    const modal=el('modal');
+    if(modal) modal.style.display='none';
+    document.body.classList.remove('modal-open');
+  };
+
+  window.openFunds=function(){
+    openModalV20('Requisição de fundos', `<div class="card">
+      <h3>Solicitar fundos</h3>
+      <div class="field"><label>Solicitante</label><input id="fundWho" value="${window.currentUser||'Administrador'}"></div>
+      <div class="field"><label>Finalidade</label><input id="fundDesc" placeholder="Ex: detergente, combustível, material"></div>
+      <div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="0"></div>
+      <div class="field"><label>Observações</label><textarea id="fundObs" placeholder="Detalhes da necessidade"></textarea></div>
+      <button class="btn mt" onclick="saveFundV20()">Guardar requisição</button>
+    </div>
+    <div class="card mt"><h3>Requisições existentes</h3><div id="fundListV20"></div></div>`);
+    renderFundListV20();
+  };
+
+  window.saveFundV20=function(){
+    function read(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return []}}
+    const f={
+      id:Date.now(),
+      solicitante:el('fundWho')?.value||window.currentUser||'',
+      desc:el('fundDesc')?.value||'',
+      val:el('fundVal')?.value||0,
+      obs:el('fundObs')?.value||'',
+      status:'Pendente',
+      data:new Date().toISOString().slice(0,10)
+    };
+    if(!f.desc || !f.val){alert('Preencha finalidade e valor.');return}
+    let funds=read('ef_funds');
+    funds.push(f);
+    localStorage.setItem('ef_funds',JSON.stringify(funds));
+    window.funds=funds;
+    renderFundListV20();
+    alert('Requisição guardada.');
+  };
+
+  window.renderFundListV20=function(){
+    function read(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return []}}
+    const box=el('fundListV20'); if(!box) return;
+    const funds=read('ef_funds');
+    box.innerHTML=funds.length?funds.slice().reverse().map(f=>`<div class="item"><div class="row"><div><b>${f.desc}</b><p class="small">${f.solicitante||''} • ${f.data}</p><p class="tiny">${f.obs||''}</p></div><span class="pill warn">${f.status}</span></div><div class="row mt2"><span>Valor</span><b>${f.val} MT</b></div></div>`).join(''):'<p class="small">Sem requisições.</p>';
+  };
+
+  window.openTerms=function(){
+    openModalV20('Termos de uso e privacidade', `<div class="card">
+      <h3>EFresh Lavandaria</h3>
+      <p class="small mt2">Os dados do cliente são usados apenas para identificação, recolha, entrega, contacto, cobrança, emissão de faturas/recibos e histórico do serviço.</p>
+      <p class="small mt2">Cada cliente acede apenas aos próprios pedidos, documentos e comprovativos ligados ao seu número de celular.</p>
+      <p class="small mt2">A confirmação final de preço pode depender da pesagem real da roupa e validação da equipa.</p>
+      <button class="btn mt" onclick="closeModal()">Entendi</button>
+    </div>`);
+  };
+
+  window.openWork=function(id){
+    const orders=((window.localOrders||[]).concat(window.orders||[]));
+    const o=orders.find(x=>String(x.id)===String(id)) || {};
+    const ST=window.STAGES || ['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Controle de qualidade','Em entrega','Entregue'];
+    const idx=Math.max(0,ST.indexOf(o.estado||'Pedido recebido'));
+    const next=ST[Math.min(idx+1,ST.length-1)];
+    const a=(window.assignments||{})[id]||{};
+    openModalV20('Executar EFW-'+String(id).padStart(4,'0'), `<div class="card">
+      <p><b>Estado atual:</b> ${o.estado||'Pedido recebido'}</p>
+      <p><b>Próximo passo:</b> ${next}</p>
+      <p><b>Serviço:</b> ${o.servico||''}</p>
+      <p><b>Endereço:</b> ${o.endereco_recolha||'-'}</p>
+      <p><b>Horário:</b> ${o.horario||'-'}</p>
+      <p><b>Operador:</b> ${a.operador||'-'}</p>
+      <p><b>Motorista:</b> ${a.motorista||'-'}</p>
+      <div class="grid2 mt">
+        <button class="btn" onclick="setEstado('${id}','${next}');closeModal()">Avançar</button>
+        <button class="btn btn2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Mapa</button>
+      </div>
+    </div>`);
+  };
+
+  window.openDrivers=function(){
+    const orders=((window.localOrders||[]).concat(window.orders||[]));
+    const html=orders.length?orders.map(o=>`<div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.endereco_recolha||'-'}</p><p class="small">${o.horario||''}</p><button class="btn btn2 mini mt2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Abrir rota</button></div>`).join(''):'<p class="small">Sem rotas para motorista.</p>';
+    openModalV20('Plano dos motoristas', `<div class="card">${html}</div>`);
+  };
+
+  // Corrige botões antigos que chamem funções antigas
+  window.openMotoristas=window.openDrivers;
+
+  if(typeof setLoginDebug==='function') setLoginDebug('V20 pronto. Modal sobreposto corrigido.');
 })();
 </script>
 
