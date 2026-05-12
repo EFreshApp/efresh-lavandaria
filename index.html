@@ -413,7 +413,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   <button class="btn mt" onclick="authEnterV17()">Continuar</button>
   <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button><div id="loginDebug" style="margin-top:8px;font-size:12px;color:#0369a1;font-weight:800"></div></div>
  </div>
- <p class="tiny mt">V17: login cliente corrigido sem erro nomeCliente</p>
+ <p class="tiny mt">V18: perfis internos corrigidos por função</p>
 </section>
 
 <section id="home" class="screen">
@@ -1217,7 +1217,7 @@ function resetLoginDataOnly(){
 </script>
 
 <div style="position:fixed;right:10px;bottom:10px;z-index:9999;background:#071424;color:#fff;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:900;box-shadow:0 8px 20px #0003">
-V17 LOGIN OK
+V18 LOGIN OK
 </div>
 
 
@@ -1629,6 +1629,225 @@ V17 LOGIN OK
   window.forceRootAdminV17();
   window.safeSetClientFields('', '');
   if(typeof setLoginDebug==='function') setLoginDebug('V17 pronto. Admin: 845178833 / 123456');
+})();
+</script>
+
+
+<script id="efresh-v18-role-routing-fix">
+(function(){
+  function el(id){return document.getElementById(id)}
+  function digits(v){return String(v||'').replace(/\D+/g,'')}
+  function normRole(r){
+    r=String(r||'cliente').toLowerCase().trim();
+    if(r.includes('admin')) return 'admin';
+    if(r.includes('financ')) return 'financeiro';
+    if(r.includes('oper')) return 'operador';
+    if(r.includes('motor')) return 'motorista';
+    if(r.includes('atend')) return 'atendimento';
+    return 'cliente';
+  }
+  function readUsers(){try{return JSON.parse(localStorage.getItem('ef_users')||'[]')}catch(e){return []}}
+  function writeUsers(list){localStorage.setItem('ef_users',JSON.stringify(list)); window.users=list}
+  function readStaff(){try{return JSON.parse(localStorage.getItem('ef_staff')||'[]')}catch(e){return []}}
+  function writeStaff(list){localStorage.setItem('ef_staff',JSON.stringify(list)); window.staff=list}
+
+  // normaliza usuários antigos já criados para não virarem admin por engano
+  window.fixAllUserRolesV18=function(){
+    let list=readUsers().map(u=>{
+      u.role=normRole(u.role);
+      if(digits(u.telefone).endsWith('845178833')){
+        u.role='admin'; u.root=true; u.nome='Edmilson'; u.apelido='Fumo'; u.pass=u.pass || '123456';
+      }
+      return u;
+    });
+
+    // garante root principal
+    if(!list.some(u=>u.root || digits(u.telefone).endsWith('845178833'))){
+      list.unshift({nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456',role:'admin',root:true});
+    }
+
+    writeUsers(list);
+
+    let st=readStaff().map(s=>{
+      s.role=normRole(s.role);
+      return s;
+    });
+    writeStaff(st);
+  };
+
+  window.routeByRoleV18=function(){
+    const role=normRole(window.currentRole);
+    window.currentRole=role;
+
+    if(role==='cliente'){
+      if(typeof enterClient==='function') enterClient();
+      else if(typeof show==='function') show('home');
+      return;
+    }
+
+    // todos os colaboradores entram no painel interno, mas com permissões e lista filtrada
+    if(typeof show==='function') show('admin');
+    if(el('roleBadge')) el('roleBadge').innerText =
+      role==='admin' ? 'Administrador' :
+      role==='financeiro' ? 'Financeiro' :
+      role==='operador' ? 'Operador' :
+      role==='motorista' ? 'Motorista' :
+      'Atendimento';
+
+    // esconde/mostra botões conforme função
+    const btnDash=el('aDash'), btnPedidos=el('aPedidos'), btnEquipe=el('aEquipe'), btnMais=el('aMais');
+    if(btnEquipe) btnEquipe.style.display = role==='admin' ? '' : 'none';
+    if(btnMais) btnMais.style.display = (role==='admin' || role==='financeiro') ? '' : '';
+    if(btnDash) btnDash.style.display = '';
+    if(btnPedidos) btnPedidos.style.display = '';
+
+    if(role==='financeiro'){
+      if(typeof openFinancePanel==='function') openFinancePanel();
+      else if(typeof adminTab==='function') adminTab('mais');
+      return;
+    }
+
+    if(role==='operador' || role==='motorista' || role==='atendimento'){
+      if(typeof adminTab==='function') adminTab('pedidos');
+      return;
+    }
+
+    if(typeof loadAdmin==='function') loadAdmin();
+  };
+
+  window.loginV18=function(u){
+    window.currentUser=((u.nome||'')+' '+(u.apelido||'')).trim();
+    window.currentRole=normRole(u.role);
+    window.currentClientPhone=digits(u.telefone);
+
+    const n=el('nomeCliente'); if(n) n.value=window.currentUser;
+    const t=el('telefoneCliente'); if(t) t.value=u.telefone||'';
+
+    if(typeof setLoginDebug==='function') setLoginDebug('Login OK: '+window.currentUser+' / '+window.currentRole);
+
+    routeByRoleV18();
+  };
+
+  window.authEnterV17=function(){
+    try{
+      fixAllUserRolesV18();
+
+      const tel=digits(el('loginPhone')?.value);
+      const pass=String(el('loginPass')?.value||'');
+      const isRegister = window.authMode === 'register' || (el('registerFields') && !el('registerFields').classList.contains('hidden'));
+
+      if(!tel || !pass){ alert('Preencha número e password.'); return; }
+
+      let list=readUsers();
+
+      if(isRegister){
+        const nome=(el('regNome')?.value||'').trim();
+        const apelido=(el('regApelido')?.value||'').trim();
+
+        if(!nome || !apelido){ alert('Preencha nome e apelido.'); return; }
+
+        const exists=list.find(u=>{
+          const p=digits(u.telefone);
+          return p===tel || p.endsWith(tel) || tel.endsWith(p);
+        });
+
+        if(exists){
+          if(String(exists.pass)===pass){ loginV18(exists); return; }
+          alert('Este número já existe. Use Entrar com a password correta.');
+          if(typeof setAuthMode==='function') setAuthMode('login');
+          return;
+        }
+
+        const novo={nome,apelido,telefone:tel,pass,role:'cliente',root:false,createdAt:new Date().toISOString()};
+        list.push(novo);
+        writeUsers(list);
+        alert('Conta de cliente criada com sucesso.');
+        loginV18(novo);
+        return;
+      }
+
+      const u=list.find(x=>{
+        const p=digits(x.telefone);
+        return (p===tel || p.endsWith(tel) || tel.endsWith(p)) && String(x.pass)===pass;
+      });
+
+      if(!u){ alert('Número ou password incorreto.'); return; }
+      loginV18(u);
+
+    }catch(e){
+      alert('Erro V18: '+e.message);
+      if(typeof setLoginDebug==='function') setLoginDebug('ERRO V18: '+e.message);
+    }
+  };
+
+  // todos os nomes antigos apontam para a nova lógica
+  window.authEnter = window.authEnterV17;
+  window.authEnterV15 = window.authEnterV17;
+  window.loginV15 = window.loginV18;
+  window.loginV16 = window.loginV18;
+  window.loginV17 = window.loginV18;
+  window.showAdminForRole = window.routeByRoleV18;
+
+  // guardar colaborador com role correto
+  window.saveStaff=function(){
+    if(window.currentRole!=='admin'){alert('Apenas administrador cria perfis.');return}
+
+    const nome=(el('stNome')?.value||'Funcionário').trim();
+    const apelido=(el('stApelido')?.value||'').trim();
+    const telefone=(el('stTel')?.value||'').trim();
+    const pass=(el('stPass')?.value||'1234').trim();
+    const role=normRole(el('stRole')?.value||'operador');
+
+    if(!telefone){alert('Informe o telefone/login do colaborador.');return}
+
+    let list=readUsers();
+    if(list.some(u=>{
+      const p=digits(u.telefone), t=digits(telefone);
+      return p===t || p.endsWith(t) || t.endsWith(p);
+    })){
+      alert('Este telefone já existe. Use outro ou remova o perfil antigo.');
+      return;
+    }
+
+    let st=readStaff();
+    st.push({nome:(nome+' '+apelido).trim(),role,telefone});
+    writeStaff(st);
+
+    list.push({nome,apelido,telefone,pass,role,root:false});
+    writeUsers(list);
+
+    alert('Perfil criado: '+nome+' / '+role);
+    if(typeof renderTeam==='function') renderTeam();
+  };
+
+  // filtra pedidos por função atribuída
+  window.filterByRole=function(list){
+    list=list||[];
+    const role=normRole(window.currentRole);
+    if(role==='admin' || role==='financeiro') return list;
+
+    if(role==='operador' || role==='motorista' || role==='atendimento'){
+      const me=String(window.currentUser||'').toLowerCase();
+      return list.filter(o=>{
+        const a=(window.assignments||{})[o.id] || {};
+        const op=String(a.operador||'').toLowerCase();
+        const mot=String(a.motorista||'').toLowerCase();
+        return op.includes(me) || me.includes(op) || mot.includes(me) || me.includes(mot);
+      });
+    }
+
+    return [];
+  };
+
+  // bloqueia atribuição para não-admin
+  const oldOpenAssign=window.openAssign;
+  window.openAssign=function(id){
+    if(normRole(window.currentRole)!=='admin'){alert('Apenas administrador atribui trabalhos.');return}
+    if(typeof oldOpenAssign==='function') oldOpenAssign(id);
+  };
+
+  fixAllUserRolesV18();
+  if(typeof setLoginDebug==='function') setLoginDebug('V18 pronto. Perfis entram no painel correto.');
 })();
 </script>
 
