@@ -1,394 +1,219 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>EFresh Lavandaria</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
-    body{background:#eaf2f7;color:#0f172a}
-    .app{max-width:430px;margin:0 auto;min-height:100vh;background:#f8fafc;position:relative;padding-bottom:85px;overflow:hidden}
-    .screen{display:none;padding:22px}.screen.active{display:block}
-    button{border:0;cursor:pointer}.blue{color:#0258a8}.green{color:#22b84a}.mt{margin-top:22px}
-    .btn{width:100%;padding:17px;border-radius:18px;background:linear-gradient(90deg,#0284c7,#10b981);color:white;font-weight:800;font-size:16px;box-shadow:0 12px 28px rgba(16,185,129,.22)}
-    .btn-dark{background:#0f172a}.btn-light{background:white;color:#0284c7;border:1px solid #e2e8f0;box-shadow:none}.notice{display:none;padding:12px;border-radius:16px;margin-bottom:12px;font-size:13px;font-weight:700}.success{display:block;background:#ecfdf5;color:#047857;border:1px solid #bbf7d0}.error{display:block;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
-
-    /* SPLASH PREMIUM */
-    #splash{padding:0;min-height:100vh;background:linear-gradient(180deg,#f8fcff 0%,#eef9ff 44%,#00519f 45%,#003e80 88%,#ffffff 89%);position:relative;overflow:hidden}
-    .splash-wrap{min-height:100vh;position:relative;text-align:center;padding:18px 24px 18px;display:flex;flex-direction:column;justify-content:space-between}
-    .machine{position:absolute;right:-40px;top:58px;width:150px;height:150px;border-radius:30px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 12px rgba(2,88,168,.08);opacity:.65}
-    .machine:before{content:"";position:absolute;left:38px;top:42px;width:72px;height:72px;border-radius:50%;border:10px solid rgba(2,88,168,.22);background:rgba(255,255,255,.35)}
-    .towels-left,.towels-right{position:absolute;border-radius:14px;filter:drop-shadow(0 12px 18px rgba(2,88,168,.12))}
-    .towels-left{left:-12px;top:120px;width:125px;height:95px;background:repeating-linear-gradient(180deg,#fff 0 18px,#edf7ff 19px 29px)}
-    .towels-right{right:-8px;top:240px;width:105px;height:85px;background:repeating-linear-gradient(180deg,#eafff0 0 18px,#3cbce7 19px 38px,#fff 39px 55px)}
-    .bubble{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,rgba(48,176,240,.75) 38%,rgba(0,93,174,.2));box-shadow:0 0 20px rgba(0,128,255,.18)}
-    .b1{width:28px;height:28px;left:38px;top:260px}.b2{width:18px;height:18px;left:84px;top:215px}.b3{width:34px;height:34px;right:48px;top:185px}.b4{width:20px;height:20px;right:95px;top:335px}.b5{width:15px;height:15px;left:58px;bottom:210px}
-    .splash-logo-area{position:relative;z-index:2;margin-top:55px}
-    .logo-ring{width:190px;height:190px;margin:0 auto 10px;border-radius:50%;background:rgba(255,255,255,.86);box-shadow:0 18px 55px rgba(2,88,168,.14), inset 0 0 0 8px rgba(2,132,199,.08);display:flex;align-items:center;justify-content:center;position:relative}
-    .logo-ring:before{content:"";position:absolute;inset:14px;border-radius:50%;border:12px solid #0258a8;border-right-color:#22b84a;border-bottom-color:#0ea5e9;transform:rotate(-18deg)}
-    .logo-ring:after{content:"";position:absolute;left:42px;bottom:44px;width:110px;height:32px;background:linear-gradient(160deg,#0258a8,#0ea5e9);border-radius:0 0 70px 70px;clip-path:polygon(0 45%,20% 65%,45% 38%,70% 58%,100% 35%,100% 100%,0 100%)}
-    .leaf{position:absolute;right:38px;top:33px;width:56px;height:32px;background:linear-gradient(135deg,#65d33d,#119b46);border-radius:55px 0 55px 0;transform:rotate(-18deg);z-index:3}
-    .leaf:after{content:"";position:absolute;left:8px;top:15px;width:40px;height:2px;background:rgba(255,255,255,.8);transform:rotate(-12deg)}
-    .ef-main{position:relative;z-index:4;font-size:44px;font-weight:950;letter-spacing:-3px;color:#0258a8;margin-top:-2px}
-    .brand-name{font-size:42px;font-weight:950;letter-spacing:-2px;line-height:1;margin-top:8px}
-    .brand-sub{letter-spacing:9px;color:#0258a8;font-weight:800;font-size:13px;margin-top:8px}
-    .splash-title{position:relative;z-index:3;margin-top:18px}
-    .splash-title h2{font-size:26px;font-weight:950;color:#0258a8}.splash-title h2 span{color:#22b84a}.splash-title p{font-size:17px;color:#64748b;margin-top:6px}
-    .water-wave{position:absolute;left:-20%;right:-20%;top:425px;height:130px;background:radial-gradient(ellipse at top,rgba(255,255,255,.95) 0 38%,transparent 39%),linear-gradient(90deg,#0ea5e9,#0258a8);border-radius:50% 50% 0 0/40% 40% 0 0;z-index:1;box-shadow:0 -8px 30px rgba(14,165,233,.22)}
-    .water-line{position:absolute;left:-10%;right:-10%;top:390px;height:80px;border-radius:50%;border-top:8px solid rgba(14,165,233,.45);z-index:1}
-    .splash-action{position:relative;z-index:3;margin-top:26px}
-    .premium-btn{width:100%;height:74px;border-radius:26px;color:#fff;font-size:22px;font-weight:950;background:linear-gradient(90deg,#7ed321 0%,#10b981 45%,#0076c9 100%);box-shadow:0 18px 45px rgba(0,81,159,.32),inset 0 0 0 2px rgba(255,255,255,.65);display:flex;align-items:center;justify-content:center;gap:22px}
-    .premium-btn span:last-child{font-size:34px;font-weight:400}
-    .features{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:26px;color:white}
-    .feature{padding:12px 4px;border-right:1px solid rgba(255,255,255,.25)}.feature:last-child{border-right:0}
-    .feature-icon{width:58px;height:58px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(135deg,#078bd3,#22b84a);display:flex;align-items:center;justify-content:center;font-size:27px;box-shadow:0 10px 28px rgba(0,0,0,.12)}
-    .feature b{font-size:13px;color:#70d8ff}.feature:nth-child(2) b{color:#92e23d}.feature p{font-size:11px;line-height:1.35;margin-top:5px;color:rgba(255,255,255,.9)}
-    .bottom-slogan{position:relative;z-index:3;padding:14px 0 6px;color:#0258a8;font-size:18px;font-weight:900}.bottom-slogan span{color:#22b84a}
-    .outline-icons{position:absolute;inset:auto 0 116px 0;height:210px;opacity:.09;background-image:linear-gradient(45deg,transparent 95%,#fff 95%);z-index:2}
-
-    /* APP NORMAL */
-    .center{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:white}
-    .logo-circle{width:105px;height:105px;border-radius:50%;background:linear-gradient(135deg,#0284c7,#10b981);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 18px 45px rgba(2,132,199,.25);color:white;font-size:38px;font-weight:900}
-    .logo-text{font-size:44px;font-weight:900;letter-spacing:-2px}
-    .sub{letter-spacing:8px;color:#64748b;font-size:12px;margin-top:4px}.slogan-blue{color:#0284c7;font-weight:700;margin-top:18px}.slogan-green{color:#10b981;font-size:14px;margin-top:4px}
-    .card{background:white;border-radius:26px;padding:20px;box-shadow:0 10px 35px rgba(15,23,42,.06);margin-bottom:16px}.hero{background:linear-gradient(135deg,#0284c7,#10b981);color:white}.hero p{color:rgba(255,255,255,.9)}
-    input,textarea,select{width:100%;padding:15px;border:1px solid #e2e8f0;border-radius:17px;background:white;outline:none;font-size:15px}textarea{min-height:90px;resize:none}.field{margin-bottom:12px}
-    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.header h1{font-size:27px;font-weight:900}.small{font-size:13px;color:#64748b}.icon-btn{width:45px;height:45px;border-radius:16px;background:white;box-shadow:0 6px 20px rgba(15,23,42,.08)}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.service,.quick{background:white;border-radius:22px;padding:16px;box-shadow:0 6px 22px rgba(15,23,42,.05);text-align:left}.service.active{border:2px solid #10b981;background:#ecfdf5}.quick{text-align:center;font-size:12px;font-weight:800;color:#334155}.emoji{font-size:24px;margin-bottom:8px}
-    .bottom{position:fixed;left:0;right:0;bottom:0;max-width:430px;margin:0 auto;background:white;border-top:1px solid #e2e8f0;padding:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bottom button{padding:10px;border-radius:16px;background:white;color:#94a3b8;font-size:12px;font-weight:800}.bottom button.active{background:#ecfdf5;color:#10b981}
-    .step{display:flex;gap:13px}.dot{width:32px;height:32px;border-radius:50%;background:#e2e8f0;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-weight:900}.dot.done{background:#10b981;color:white}.line{width:4px;height:26px;background:#e2e8f0;margin:0 auto}.line.done{background:#10b981}.step-text{padding-top:7px;font-weight:700}.admin-stat{background:white;border-radius:22px;padding:16px;box-shadow:0 6px 22px rgba(15,23,42,.05)}.admin-stat h3{font-size:24px;margin-top:5px}.order-row{background:white;border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 6px 22px rgba(15,23,42,.05)}.row{display:flex;justify-content:space-between;gap:12px}.status{color:#10b981;font-weight:900;font-size:13px}.chat-box{height:410px;background:white;border-radius:26px;padding:16px;box-shadow:0 6px 22px rgba(15,23,42,.05);display:flex;flex-direction:column}.messages{flex:1}.msg{max-width:80%;padding:11px 13px;border-radius:17px;margin-bottom:8px;font-size:14px}.support{background:#f1f5f9}.client{background:#0284c7;color:white;margin-left:auto}.chat-input{display:flex;gap:8px}.chat-input input{flex:1}.chat-input button{width:85px;border-radius:16px;background:#10b981;color:white;font-weight:800}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#0284c7"/>
+<title>EFresh Lavandaria Pro V8</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif}
+:root{--b:#0284c7;--g:#10b981;--d:#071424;--m:#64748b;--l:#e2e8f0;--bg:#eef8ff;--r:#ef4444;--y:#f59e0b}
+body{background:radial-gradient(circle at top left,#dff7ff,#f8fafc 42%,#effdf7);color:#0f172a}
+.app{max-width:430px;margin:0 auto;min-height:100vh;background:#f8fafc;position:relative;overflow:hidden;padding-bottom:94px;box-shadow:0 0 80px #0001}
+.screen{display:none;padding:20px}.screen.active{display:block;animation:f .2s ease}@keyframes f{from{opacity:.2;transform:translateY(8px)}to{opacity:1}}
+h1{font-size:28px;letter-spacing:-1px}h2{font-size:23px;line-height:1.1}.blue{color:var(--b)}.green{color:var(--g)}
+.small{font-size:13px;color:var(--m);line-height:1.45}.tiny{font-size:11px;color:var(--m)}.mt{margin-top:16px}.mt2{margin-top:9px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.card{background:#fff;border:1px solid var(--l);border-radius:26px;padding:17px;box-shadow:0 18px 50px #0284c71a}
+.btn{width:100%;padding:15px;border:0;border-radius:18px;background:linear-gradient(90deg,var(--b),var(--g));color:white;font-weight:900;font-size:15px;box-shadow:0 14px 30px #10b98133}
+.btn:active{transform:scale(.99)}.btn2{background:#fff;color:var(--b);border:1px solid var(--l);box-shadow:none}.btn3{background:#071424}.dangerBtn{background:#fee2e2;color:#991b1b;box-shadow:none}.warnBtn{background:#fef3c7;color:#92400e;box-shadow:none}
+.mini{padding:10px;border-radius:13px;font-size:12px}.field{margin-top:11px}.field label{font-size:12px;font-weight:900;color:#334155;display:block;margin-bottom:5px}
+input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-radius:16px;background:white;outline:0;font-size:14px}textarea{min-height:82px;resize:none}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.ib{width:42px;height:42px;border-radius:15px;border:1px solid var(--l);background:#fff}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;background:#e0f2fe;color:#0369a1;padding:7px 10px;font-size:12px;font-weight:900}
+.ok{background:#dcfce7;color:#047857}.warn{background:#fef3c7;color:#92400e}.bad{background:#fee2e2;color:#991b1b}.darkp{background:#e2e8f0;color:#334155}.info{background:#e0f2fe;color:#0369a1}
+.notice{display:none;padding:11px;border-radius:14px;font-size:13px;font-weight:800;margin-bottom:10px}.success{display:block;background:#ecfdf5;color:#047857;border:1px solid #bbf7d0}.error{display:block;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:430px;width:100%;background:#fffffff3;backdrop-filter:blur(15px);border-top:1px solid var(--l);display:none;grid-template-columns:repeat(5,1fr);padding:8px 4px 10px;z-index:50}
+.bottom button{border:0;background:transparent;color:#64748b;font-size:10px;font-weight:900;border-radius:14px;padding:7px}.bottom button.active{background:#e0f2fe;color:var(--b)}.ico{font-size:19px;display:block}
+#login{min-height:100vh;text-align:center;background:radial-gradient(circle at 15% 8%,#0ea5e930,transparent 28%),radial-gradient(circle at 90% 26%,#10b98130,transparent 28%),#fff;padding-top:45px}
+.logo{width:125px;height:125px;border-radius:36px;margin:0 auto;background:linear-gradient(135deg,var(--b),var(--g));display:flex;align-items:center;justify-content:center;color:white;font-weight:1000;font-size:46px;box-shadow:0 25px 70px #0284c744}
+.brand{font-size:43px;font-weight:1000;letter-spacing:-2px;margin-top:20px}.sub{letter-spacing:9px;color:#64748b;font-size:12px;font-weight:800}.hero{background:linear-gradient(140deg,#071424,#08213d 55%,#064e3b);color:white;border:0;overflow:hidden;position:relative}.hero .small{color:#dbeafe}
+.service{background:white;border:1px solid var(--l);border-radius:20px;padding:13px;text-align:left}.service.active{background:#ecfdf5;border:2px solid var(--g)}.emoji{font-size:26px}
+.item{background:white;border:1px solid var(--l);border-radius:20px;padding:13px;margin-top:9px}.kpi{background:white;border:1px solid var(--l);border-radius:18px;padding:12px}.kpi b{font-size:18px}
+.step{display:grid;grid-template-columns:32px 1fr;gap:10px}.dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#64748b;font-weight:900}.dot.done{background:linear-gradient(90deg,var(--b),var(--g));color:white}.line{width:3px;height:24px;background:#e2e8f0;margin:4px auto}.line.done{background:var(--g)}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}.tabs button{border:1px solid var(--l);background:#fff;border-radius:14px;padding:10px 4px;font-size:10.5px;font-weight:900;color:#64748b}.tabs button.active{background:#e0f2fe;color:#0369a1}
+.msg{padding:11px 13px;border-radius:16px;margin:7px 0;max-width:82%;font-size:14px}.adminMsg{background:#e0f2fe;color:#075985}.clientMsg{background:#dcfce7;color:#065f46;margin-left:auto}
+.modal{position:fixed;inset:0;background:#0006;display:none;align-items:flex-end;z-index:99}.modalBox{max-width:430px;margin:0 auto;background:#fff;border-radius:28px 28px 0 0;padding:20px;width:100%;max-height:85vh;overflow:auto}
+.table{width:100%;border-collapse:collapse;font-size:12px}.table td,.table th{padding:8px;border-bottom:1px solid var(--l);text-align:left}.mapbox{border:1px solid var(--l);border-radius:18px;overflow:hidden;background:#f8fafc}.mapbox iframe{width:100%;height:170px;border:0}.progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--b),var(--g));width:0%}.donut{width:150px;height:150px;border-radius:50%;margin:auto;background:conic-gradient(var(--g) 0 40%,var(--b) 40% 75%,var(--y) 75% 100%);display:flex;align-items:center;justify-content:center}.donut div{background:#fff;width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900}
+.role{font-size:11px;padding:6px 9px;border-radius:99px;background:#e2e8f0;color:#334155;font-weight:900}.locked{opacity:.45;pointer-events:none}.tag{font-size:11px;background:#f1f5f9;border:1px solid var(--l);padding:5px 7px;border-radius:9px;display:inline-block;margin-top:5px}
+</style>
 </head>
 <body>
-  <div class="app">
-    <section id="splash" class="screen active">
-      <div class="splash-wrap">
-        <div class="machine"></div><div class="towels-left"></div><div class="towels-right"></div>
-        <div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div><div class="bubble b5"></div>
-        <div class="water-line"></div><div class="water-wave"></div><div class="outline-icons"></div>
+<div class="app">
+<section id="login" class="screen active">
+ <div class="logo">EF</div><div class="brand"><span class="blue">EF</span><span class="green">resh</span></div><div class="sub">LAVANDARIA</div>
+ <p class="blue mt2"><b>Mais tempo para si.</b></p><p class="green mt2">O futuro da lavandaria chegou.</p>
+ <div class="card mt" style="text-align:left">
+  <div class="field"><label>Email / Usuário</label><input id="email" value="efreshlavandaria@gmail.com"></div>
+  <div class="field"><label>Nome</label><input id="nomeCliente" value="Cliente EFresh"></div>
+  <div class="field"><label>Telefone</label><input id="telefoneCliente" value="+258"></div>
+  <div class="field"><label>Entrar como</label><select id="roleLogin"><option value="cliente">Cliente</option><option value="admin">Administrador</option><option value="financeiro">Financeiro</option><option value="operador">Operador</option><option value="motorista">Motorista</option></select></div>
+  <button class="btn mt" onclick="enterByRole()">Entrar</button>
+ </div>
+ <p class="tiny mt">V8: cálculos corrigidos, funcionários, motoristas, atribuições e execução por tablet.</p>
+</section>
 
-        <div class="splash-logo-area">
-          <div class="logo-ring"><div class="leaf"></div><div class="ef-main">EF</div></div>
-          <div class="brand-name"><span class="blue">EF</span><span class="green">resh</span></div>
-          <div class="brand-sub">LAVANDARIA</div>
-          <div class="splash-title">
-            <h2>Mais tempo <span>para si.</span></h2>
-            <p>O futuro da lavandaria chegou.</p>
-          </div>
-        </div>
+<section id="home" class="screen">
+ <div class="header"><div><p class="small">Olá,</p><h1 id="hello">Cliente</h1></div><button class="ib" onclick="show('profile')">👤</button></div>
+ <div class="card hero"><span class="pill ok">Premium Delivery Laundry</span><h2 class="mt2">Lavandaria digital com recolha e entrega.</h2><p class="small mt2">Faça pedidos, acompanhe etapas, veja recibos, ligue e fale com a equipa.</p><button class="btn mt" onclick="tab('order')">Solicitar recolha</button></div>
+ <div id="activeRequests" class="mt"></div>
+ <div class="grid2 mt"><div class="kpi"><p class="small">Pedido atual</p><b id="hStatus">—</b></div><div class="kpi"><p class="small">Estimativa</p><b id="hValor">0 MT</b></div></div>
+ <div class="card mt"><div class="row"><h3>Atalhos</h3><span class="pill">Cliente</span></div><div class="grid2 mt2"><button class="service" onclick="tab('tracking')">📍<br><b>Tracking</b></button><button class="service" onclick="tab('docs')">🧾<br><b>Faturas/Recibos</b></button><button class="service" onclick="callEFresh()">📞<br><b>Ligar</b></button><button class="service" onclick="openWhatsApp()">📲<br><b>WhatsApp</b></button></div></div>
+</section>
 
-        <div class="splash-action">
-          <button class="premium-btn" onclick="show('login')"><span>Entrar no App</span><span>→</span></button>
-          <div class="features">
-            <div class="feature"><div class="feature-icon">⏱</div><b>Poupe tempo</b><p>Deixe a lavandaria connosco.</p></div>
-            <div class="feature"><div class="feature-icon">🛡</div><b>Confiança total</b><p>Segurança e qualidade.</p></div>
-            <div class="feature"><div class="feature-icon">🚚</div><b>Vamos até si</b><p>Recolha e entrega rápida.</p></div>
-          </div>
-        </div>
+<section id="order" class="screen">
+ <div class="header"><h1>Novo pedido</h1><button class="ib" onclick="tab('home')">⌂</button></div><div id="orderMsg" class="notice"></div>
+ <div class="card">
+  <h3>1. Escolha os serviços</h3>
+  <div id="services" class="grid2 mt2"></div>
+  <div class="grid2 mt2"><div class="field"><label>Roupa normal - peças</label><input id="pecas" type="number" min="0" placeholder="Ex: 20"></div><div class="field"><label>Kg estimado automático</label><input id="kg" type="number" min="0" placeholder="Auto" readonly></div></div>
+  <div class="grid2"><div class="field"><label>Engomar peças</label><input id="engomarPecas" type="number" min="0" placeholder="Qtd"></div><div class="field"><label>Itens extras</label><input id="itensExtras" type="number" min="0" placeholder="Qtd"></div></div>
+  <p class="small mt2">Cálculo: 1 peça ≈ 0.4 kg. Mínimo operacional: 3 kg. Valor final confirmado após pesagem real.</p>
+ </div>
+ <div class="card mt">
+  <h3>2. Recolha e mapa</h3>
+  <div class="grid2"><div class="field"><label>Data</label><input type="date" id="pickupDate"></div><div class="field"><label>Hora inicial</label><input type="time" id="hIni" value="08:00"></div></div>
+  <div class="field"><label>Hora final</label><input type="time" id="hFim" value="10:00"></div>
+  <div class="field"><label>Endereço / referência Google Maps</label><input id="address" placeholder="Ex: Polana, Av. 24 de Julho, Maputo" oninput="updateMap()"></div>
+  <div class="mapbox mt2"><iframe id="mapFrame" src="https://maps.google.com/maps?q=Maputo%20Mozambique&output=embed"></iframe></div>
+  <div class="grid2 mt2"><button class="btn btn2 mini" onclick="openMap()">Abrir Maps</button><button class="btn btn2 mini" onclick="detectLocation()">Usar localização</button></div>
+ </div>
+ <div class="card mt">
+  <h3>3. Preço estimado</h3>
+  <div id="calcDetails" class="small mt2"></div>
+  <div class="row mt2"><span>Serviços</span><b id="servicoTotal">0 MT</b></div>
+  <div class="row mt2"><span>Transporte</span><b id="transporteTotal">100 MT</b></div>
+  <div class="row mt2"><span>Total estimado</span><b id="estimate">0 MT</b></div>
+  <div class="field"><label>Observações</label><textarea id="obs" placeholder="Roupa delicada, urgência, instruções"></textarea></div>
+  <button class="btn mt" id="submitBtn" onclick="submitOrder()">Confirmar pedido</button>
+ </div>
+</section>
 
-        <div class="bottom-slogan">Juntos por um futuro <span>mais limpo.</span></div>
-      </div>
-    </section>
+<section id="tracking" class="screen">
+ <div class="header"><h1>Tracking</h1><button class="ib" onclick="tab('home')">⌂</button></div>
+ <div class="card"><h3>Selecione a referência</h3><div id="trackingList" class="mt2"></div></div>
+ <div id="trackingDetail" style="display:none" class="mt">
+  <div class="card"><div class="row"><div><p class="small">Referência</p><h2 id="trackId">EFW-0000</h2></div><span id="trackStatus" class="pill darkp">Sem pedido</span></div><p class="small mt2">Serviço</p><h3 id="trackService">—</h3><p class="small mt2" id="driverLine">Motorista: não atribuído</p><p class="small mt2" id="operatorLine">Operador: não atribuído</p></div>
+  <div class="card mt"><h3>Linha do tempo</h3><div id="stepsBox" class="mt"></div></div>
+ </div>
+</section>
 
-    <section id="login" class="screen center">
-      <div style="width:100%">
-        <div class="logo-circle" style="width:85px;height:85px;font-size:30px">EF</div>
-        <div class="logo-text" style="font-size:36px"><span class="blue">EF</span><span class="green">resh</span></div>
-        <p class="small mt">Lavandaria com recolha e entrega.</p>
-        <div class="field mt"><input id="email" placeholder="Email ou telefone" value="efreshlavandaria@gmail.com"></div>
-        <div class="field"><input id="nomeCliente" placeholder="Nome do cliente" value="Cliente EFresh"></div>
-        <div class="field"><input id="telefoneCliente" placeholder="Telefone" value="+258"></div>
-        <button class="btn" onclick="enterApp('client')">Entrar como Cliente</button>
-        <button class="btn btn-light mt" onclick="enterApp('admin')">Entrar como Admin</button>
-      </div>
-    </section>
+<section id="docs" class="screen">
+ <div class="header"><h1>Documentos</h1><button class="ib" onclick="tab('home')">⌂</button></div>
+ <div class="card"><h3>Faturas e recibos</h3><p class="small mt2">Consulte valores, estado de pagamento e recibos digitais.</p><div id="clientDocs" class="mt"></div></div>
+</section>
 
-    <section id="home" class="screen">
-      <div class="header"><div><p class="small">Olá, chefe 👋</p><h1><span class="blue">EF</span><span class="green">resh</span></h1></div><button class="icon-btn">🔔</button></div>
-      <div class="card hero"><p>Pedido atual</p><h2 id="currentStatus">Em lavagem</h2><p id="currentService">Roupa normal + engomadoria</p><p class="mt">⏰ Entrega prevista: Hoje, 18:00</p></div>
-      <button class="btn btn-dark" onclick="goTab('order')">+ Fazer Pedido</button>
-      <div class="grid-4 mt">
-        <button class="quick" onclick="goTab('order')"><div class="emoji">🚚</div>Recolha</button>
-        <button class="quick" onclick="goTab('tracking')"><div class="emoji">📦</div>Tracking</button>
-        <button class="quick" onclick="goTab('payments')"><div class="emoji">💳</div>Pagar</button>
-        <button class="quick" onclick="goTab('chat')"><div class="emoji">💬</div>Suporte</button>
-      </div>
-      <h3 class="mt">Serviços populares</h3>
-      <div class="card"><b>Roupa normal</b><p class="small">A partir de 150 MT/kg</p></div>
-      <div class="card"><b>Engomadoria</b><p class="small">A partir de 50 MT/peça</p></div>
-    </section>
+<section id="chat" class="screen">
+ <div class="header"><h1>Chat</h1><button class="ib" onclick="tab('home')">⌂</button></div>
+ <div class="card"><div id="messages"><div class="msg adminMsg">Olá! Bem-vindo à EFresh. Como podemos ajudar?</div></div><div class="field"><input id="chatText" placeholder="Escreva mensagem..."></div><button class="btn mt2" onclick="sendMsg()">Enviar</button><button class="btn btn2 mt2" onclick="openWhatsApp()">Falar no WhatsApp</button><button class="btn btn2 mt2" onclick="callEFresh()">Ligar para EFresh</button></div>
+</section>
 
-    <section id="order" class="screen">
-      <div class="header"><h1>Novo pedido</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
-      <div id="orderMsg" class="notice"></div>
-      <div class="grid-2" id="services"></div>
-      <div class="mt">
-        <div class="field"><input id="qty" placeholder="Quantidade / peso estimado"></div>
-        <div class="field"><input id="address" placeholder="Endereço de recolha"></div>
-        <div class="field"><input id="time" placeholder="Data e horário"></div>
-        <div class="field"><textarea id="obs" placeholder="Observações: roupa delicada, não usar perfume, urgência..."></textarea></div>
-        <div class="card"><b>Resumo</b><p class="small" id="selectedText">Serviço selecionado: Roupa normal</p><p class="small">Preço final será confirmado após pesagem.</p></div>
-        <button class="btn" id="submitBtn" onclick="submitOrder()">Confirmar Pedido</button>
-      </div>
-    </section>
+<section id="profile" class="screen">
+ <div class="header"><h1>Perfil</h1><button class="ib" onclick="tab('home')">⌂</button></div>
+ <div class="card"><div class="field"><label>Nome</label><input id="profileName"></div><div class="field"><label>Telefone</label><input id="profilePhone"></div><div class="field"><label>Endereço padrão</label><input id="profileAddress"></div><button class="btn mt" onclick="saveProfile()">Guardar</button></div>
+</section>
 
-    <section id="tracking" class="screen">
-      <div class="header"><h1>Tracking</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
-      <div class="card"><b id="trackId">EFW-0001</b><p class="small" id="trackService">Roupa normal + engomadoria</p><p class="status" id="trackStatus">Em lavagem</p></div>
-      <div class="card" id="steps"></div>
-    </section>
+<section id="admin" class="screen">
+ <div class="header"><div><p class="small">Painel Pro</p><h1 id="panelTitle">Admin EFresh</h1></div><button class="ib" onclick="show('login')">↩</button></div>
+ <div id="roleBadge" class="pill darkp mt2">Administrador</div>
+ <div class="tabs mt2"><button id="aDash" class="active" onclick="adminTab('dash')">Dash</button><button id="aPedidos" onclick="adminTab('pedidos')">Pedidos</button><button id="aEquipe" onclick="adminTab('equipe')">Equipe</button><button id="aMais" onclick="adminTab('mais')">Mais</button></div>
+ <div id="adminMsg" class="notice"></div>
+ <div class="grid3"><div class="kpi"><p class="small">Serviços</p><b id="kOrders">0</b></div><div class="kpi"><p class="small">Em curso</p><b id="kPend">0</b></div><div class="kpi"><p class="small">Receita</p><b id="kMoney">0</b></div></div>
+ <div class="grid2 mt2"><button class="btn btn2 mini" onclick="loadAdmin()">Atualizar</button><button class="btn mini" id="btnFunds" onclick="openFunds()">Req. Fundos</button></div>
+ <div id="adminContent" class="mt"></div>
+</section>
 
-    <section id="payments" class="screen">
-      <div class="header"><h1>Pagamentos</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
-      <div class="card"><b>M-Pesa</b><p class="small">Pagamento por carteira móvel</p></div>
-      <div class="card"><b>E-Mola</b><p class="small">Pagamento por carteira móvel</p></div>
-      <div class="card"><b>Pagamento na entrega</b><p class="small">Disponível para clientes selecionados</p></div>
-    </section>
+<nav class="bottom" id="nav">
+ <button id="n-home" class="active" onclick="tab('home')"><span class="ico">⌂</span>Início</button>
+ <button id="n-order" onclick="tab('order')"><span class="ico">＋</span>Pedido</button>
+ <button id="n-tracking" onclick="tab('tracking')"><span class="ico">◎</span>Estado</button>
+ <button id="n-docs" onclick="tab('docs')"><span class="ico">🧾</span>Docs</button>
+ <button id="n-chat" onclick="tab('chat')"><span class="ico">💬</span>Chat</button>
+</nav>
 
-    <section id="chat" class="screen">
-      <div class="header"><h1>Suporte</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
-      <div class="chat-box"><div class="messages" id="messages"><div class="msg support">Olá 👋 Bem-vindo à EFresh. Como podemos ajudar?</div></div><div class="chat-input"><input id="chatText" placeholder="Escreva aqui..."><button onclick="sendMsg()">Enviar</button></div></div>
-    </section>
+<div class="modal" id="modal"><div class="modalBox"><div class="row"><h2 id="modalTitle">Detalhes</h2><button class="ib" onclick="closeModal()">✕</button></div><div id="modalBody" class="mt"></div></div></div>
+</div>
 
-    <section id="profile" class="screen">
-      <div class="header"><h1>Perfil</h1><button class="icon-btn" onclick="goTab('home')">⌂</button></div>
-      <div class="card" style="text-align:center"><div class="logo-circle" style="width:75px;height:75px;font-size:26px">EF</div><h2>Cliente EFresh</h2><p class="small">efreshlavandaria@gmail.com</p></div>
-      <div class="card">Dados pessoais</div><div class="card">Endereços</div><div class="card">Recibos</div><div class="card">Definições</div>
-    </section>
-
-    <section id="admin" class="screen">
-      <div class="header"><div><p class="small">Painel Administrativo</p><h1><span class="blue">EF</span><span class="green">resh</span></h1></div><button class="icon-btn" onclick="show('login')">↩</button></div>
-      <button class="btn btn-light" onclick="loadAdminOrders()">Atualizar pedidos do Supabase</button>
-      <div id="adminMsg" class="notice mt"></div>
-      <div class="grid-2"><div class="admin-stat"><p class="small">Pedidos</p><h3 id="statOrders">3</h3></div><div class="admin-stat"><p class="small">Recolhas</p><h3>2</h3></div><div class="admin-stat"><p class="small">Entregas</p><h3>1</h3></div><div class="admin-stat"><p class="small">Receita</p><h3>5.500 MT</h3></div></div>
-      <input class="mt" placeholder="Pesquisar pedido ou cliente">
-      <h3 class="mt">Pedidos reais no Supabase</h3>
-      <div id="adminOrders"></div>
-    </section>
-
-    <nav class="bottom" id="bottomNav" style="display:none">
-      <button id="nav-home" class="active" onclick="goTab('home')">⌂<br>Início</button>
-      <button id="nav-order" onclick="goTab('order')">+<br>Pedido</button>
-      <button id="nav-tracking" onclick="goTab('tracking')">□<br>Tracking</button>
-      <button id="nav-profile" onclick="goTab('profile')">👤<br>Perfil</button>
-    </nav>
-  </div>
-
-  <script>
-    const SUPABASE_REST_URL = "https://ijzrogjjpdhgxntsjdmg.supabase.co/rest/v1";
-    const SUPABASE_KEY = "sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg";
-
-    const services = [
-      ['Roupa normal','150 MT/kg','👕'],['Engomadoria','50 MT/peça','✨'],['Fatos','450 MT','🛡️'],['Vestidos','350 MT','⭐'],['Edredons','650 MT','📦'],['Tênis','300 MT','👟']
-    ];
-    const steps = ['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue'];
-    let selectedService = 'Roupa normal';
-    let currentStep = 0;
-    let currentPedidoId = null;
-
-    function apiHeaders(prefer) {
-      const h = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY,
-        "Content-Type": "application/json"
-      };
-      if (prefer) h["Prefer"] = prefer;
-      return h;
-    }
-
-    async function apiGet(table, query="") {
-      const res = await fetch(`${SUPABASE_REST_URL}/${table}${query}`, { headers: apiHeaders() });
-      if (!res.ok) throw new Error(await res.text());
-      return await res.json();
-    }
-
-    async function apiPost(table, body) {
-      const res = await fetch(`${SUPABASE_REST_URL}/${table}`, {
-        method: "POST",
-        headers: apiHeaders("return=representation"),
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return await res.json();
-    }
-
-    function showMsg(id, text, type) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.className = "notice " + (type || "success");
-      el.innerText = text;
-    }
-
-    function show(id) {
-      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      document.getElementById('bottomNav').style.display=['home','order','tracking','payments','chat','profile'].includes(id)?'grid':'none';
-    }
-
-    function enterApp(role) { 
-      if(role==='admin') {
-        show('admin'); 
-        loadAdminOrders();
-      } else {
-        show('home'); 
-        renderServices(); 
-        renderSteps();
-      }
-    }
-
-    function goTab(id) {
-      show(id);
-      document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
-      const nav=document.getElementById('nav-'+id);
-      if(nav)nav.classList.add('active');
-      if(id==='order')renderServices();
-      if(id==='tracking')renderSteps();
-    }
-
-    function renderServices() {
-      const box=document.getElementById('services');
-      box.innerHTML='';
-      services.forEach(s=>{
-        const div=document.createElement('button');
-        div.className='service '+(s[0]===selectedService?'active':'');
-        div.innerHTML='<div class="emoji">'+s[2]+'</div><b>'+s[0]+'</b><p class="small">A partir de '+s[1]+'</p>';
-        div.onclick=()=>{
-          selectedService=s[0];
-          document.getElementById('selectedText').innerText='Serviço selecionado: '+selectedService;
-          renderServices();
-        };
-        box.appendChild(div);
-      });
-    }
-
-    function renderSteps() {
-      const box=document.getElementById('steps');
-      box.innerHTML='';
-      steps.forEach((s,i)=>{
-        box.innerHTML+=`<div class="step"><div><div class="dot ${i<=currentStep?'done':''}">${i<currentStep?'✓':i+1}</div>${i<steps.length-1?`<div class="line ${i<currentStep?'done':''}"></div>`:''}</div><div class="step-text">${s}</div></div>`;
-      });
-    }
-
-    async function criarCliente() {
-      const nome = document.getElementById('nomeCliente')?.value || 'Cliente EFresh';
-      const email = document.getElementById('email')?.value || 'cliente@efresh.co.mz';
-      const telefone = document.getElementById('telefoneCliente')?.value || '';
-      const endereco = document.getElementById('address')?.value || '';
-      const rows = await apiPost("clientes", { nome, email, telefone, endereco });
-      return rows[0].id;
-    }
-
-    async function submitOrder() {
-      const btn = document.getElementById('submitBtn');
-      btn.innerText = "A gravar pedido...";
-      btn.disabled = true;
-
-      try {
-        const cliente_id = await criarCliente();
-        const pedido = {
-          cliente_id,
-          servico: selectedService,
-          quantidade: document.getElementById('qty').value || '',
-          endereco_recolha: document.getElementById('address').value || '',
-          horario: document.getElementById('time').value || '',
-          observacoes: document.getElementById('obs').value || '',
-          estado: 'Pedido recebido',
-          valor: 'A confirmar'
-        };
-
-        const rows = await apiPost("pedidos", pedido);
-        const p = rows[0];
-        currentPedidoId = p.id;
-        currentStep = 0;
-
-        document.getElementById('trackId').innerText = 'EFW-' + String(p.id).padStart(4,'0');
-        document.getElementById('trackService').innerText = p.servico;
-        document.getElementById('trackStatus').innerText = p.estado;
-        document.getElementById('currentStatus').innerText = p.estado;
-        document.getElementById('currentService').innerText = p.servico;
-
-        showMsg('orderMsg', 'Pedido gravado com sucesso no Supabase ✅', 'success');
-        goTab('tracking');
-      } catch(e) {
-        showMsg('orderMsg', 'Erro ao gravar pedido: ' + e.message, 'error');
-      } finally {
-        btn.innerText = "Confirmar Pedido";
-        btn.disabled = false;
-      }
-    }
-
-    async function loadAdminOrders() {
-      const box = document.getElementById('adminOrders');
-      const msg = document.getElementById('adminMsg');
-      if(box) box.innerHTML = '<div class="card">A carregar pedidos...</div>';
-
-      try {
-        const pedidos = await apiGet("pedidos", "?select=*&order=criado_em.desc");
-        document.getElementById('statOrders').innerText = pedidos.length;
-        if(msg) {
-          msg.className = 'notice success';
-          msg.innerText = 'Ligação ao Supabase activa ✅';
-        }
-
-        if(!box) return;
-        if(pedidos.length === 0) {
-          box.innerHTML = '<div class="card">Ainda não há pedidos gravados.</div>';
-          return;
-        }
-
-        box.innerHTML='';
-        pedidos.forEach(o=>{
-          const safeServico = (o.servico || '').replace(/'/g, "");
-          const safeEstado = (o.estado || '').replace(/'/g, "");
-          box.innerHTML += `<div class="order-row">
-            <div class="row">
-              <div>
-                <b>EFW-${String(o.id).padStart(4,'0')}</b>
-                <p class="small">${o.servico || '-'}</p>
-                <p class="small">${o.quantidade || ''}</p>
-                <p class="small">${o.endereco_recolha || 'Sem endereço'}</p>
-              </div>
-              <div style="text-align:right">
-                <p class="status">${o.estado || '-'}</p>
-                <b>${o.valor || 'A confirmar'}</b>
-                <p class="small">${o.horario || ''}</p>
-              </div>
-            </div>
-            <div class="grid-2 mt">
-              <button class="btn btn-light" onclick="alert('Contacto será ligado na próxima versão')">Ligar</button>
-              <button class="btn" onclick="abrirPedido(${o.id}, '${safeServico}', '${safeEstado}')">Abrir</button>
-            </div>
-          </div>`;
-        });
-      } catch(e) {
-        if(msg) {
-          msg.className = 'notice error';
-          msg.innerText = 'Erro Supabase: ' + e.message;
-        }
-        if(box) box.innerHTML = '<div class="card">Erro ao carregar pedidos.</div>';
-      }
-    }
-
-    function abrirPedido(id, servico, estado) {
-      currentPedidoId = id;
-      currentStep = steps.indexOf(estado);
-      if(currentStep < 0) currentStep = 0;
-      document.getElementById('trackId').innerText = 'EFW-' + String(id).padStart(4,'0');
-      document.getElementById('trackService').innerText = servico;
-      document.getElementById('trackStatus').innerText = estado;
-      show('tracking');
-      renderSteps();
-    }
-
-    function sendMsg() {
-      const input=document.getElementById('chatText');
-      if(!input.value.trim())return;
-      const msg=document.createElement('div');
-      msg.className='msg client';
-      msg.innerText=input.value;
-      document.getElementById('messages').appendChild(msg);
-      input.value='';
-    }
-  </script>
+<script>
+const SUPABASE_REST_URL="https://ijzrogjjpdhgxntsjdmg.supabase.co/rest/v1";
+const SUPABASE_KEY="sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg";
+const WHATSAPP_NUMBER="258840000000", PHONE_NUMBER="+258840000000";
+const baseServices=[['Roupa normal',140,'👕','kg'],['Engomadoria',50,'✨','peça'],['Fatos',450,'🛡️','un'],['Vestidos',350,'⭐','un'],['Edredons',650,'🛏️','un'],['Tênis',300,'👟','par']];
+const STAGES=['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue'];
+let selected={},currentStep=0,currentPedidoId=null,orders=[],clients=[],drivers=[],admin='dash',currentRole='admin',currentUser='Administrador';
+let docs=JSON.parse(localStorage.getItem('ef_docs')||'[]'), funds=JSON.parse(localStorage.getItem('ef_funds')||'[]'), staff=JSON.parse(localStorage.getItem('ef_staff')||'[]'), assignments=JSON.parse(localStorage.getItem('ef_assignments')||'{}'), localOrders=JSON.parse(localStorage.getItem('ef_local_orders')||'[]');
+if(!staff.length){staff=[{nome:'Administrador',role:'Administrador',telefone:''},{nome:'Financeiro',role:'Financeiro',telefone:''},{nome:'Operador 1',role:'Operador',telefone:''},{nome:'Motorista 1',role:'Motorista',telefone:''}];localStorage.setItem('ef_staff',JSON.stringify(staff))}
+function today(){return new Date().toISOString().slice(0,10)}
+document.addEventListener('DOMContentLoaded',()=>{pickupDate.value=today();renderServices();calcEstimate();renderActive();renderTrackingList();renderDocs();renderSteps()})
+function H(prefer){let h={apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};if(prefer)h.Prefer=prefer;return h}
+async function get(t,q=''){let r=await fetch(`${SUPABASE_REST_URL}/${t}${q}`,{headers:H()});if(!r.ok)throw Error(await r.text());return r.json()}
+async function post(t,b){let r=await fetch(`${SUPABASE_REST_URL}/${t}`,{method:'POST',headers:H('return=representation'),body:JSON.stringify(b)});if(!r.ok)throw Error(await r.text());return r.json()}
+async function patch(t,id,b){let r=await fetch(`${SUPABASE_REST_URL}/${t}?id=eq.${id}`,{method:'PATCH',headers:H('return=representation'),body:JSON.stringify(b)});if(!r.ok)throw Error(await r.text());return r.json()}
+function msg(id,t,type='success'){let e=document.getElementById(id);e.className='notice '+type;e.innerText=t}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');nav.style.display=['home','order','tracking','docs','chat','profile'].includes(id)?'grid':'none'}
+function enterByRole(){let r=roleLogin.value;currentUser=nomeCliente.value||email.value||'Usuário';if(r==='cliente'){enterClient();return}currentRole=r;showAdminForRole()}
+function enterClient(){hello.innerText=(nomeCliente.value||'Cliente').split(' ')[0];syncProfile();show('home');nav.style.display='grid';renderActive()}
+function showAdminForRole(){show('admin');panelTitle.innerText=currentRole==='motorista'?'Painel Motorista':currentRole==='operador'?'Painel Operador':currentRole==='financeiro'?'Painel Financeiro':'Admin EFresh';roleBadge.innerText=currentRole.toUpperCase();applyRolePermissions();loadAdmin()}
+function applyRolePermissions(){let canManage=currentRole==='admin';let canFinance=['admin','financeiro'].includes(currentRole);aEquipe.classList.toggle('locked',!canManage);btnFunds.classList.toggle('locked',!canFinance&&!['operador','motorista'].includes(currentRole))}
+function enter(r){r==='admin'?showAdminForRole():enterClient()}
+function tab(id){show(id);document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'));let n=document.getElementById('n-'+id);if(n)n.classList.add('active');if(id==='order')renderServices();if(id==='tracking')renderTrackingList();if(id==='docs')renderDocs();if(id==='profile')syncProfile()}
+function renderServices(){services.innerHTML='';baseServices.forEach(s=>{let on=!!selected[s[0]];let d=document.createElement('button');d.className='service '+(on?'active':'');d.innerHTML=`<div class="emoji">${s[2]}</div><b>${s[0]}</b><p class="small">${s[1]} MT/${s[3]}</p>`;d.onclick=()=>{selected[s[0]]=!selected[s[0]];renderServices();calcEstimate()};services.appendChild(d)})}
+['pecas','engomarPecas','itensExtras','address'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id){calcEstimate(); if(id==='address')updateMap()}}))
+function calcEstimate(){
+  let total=0, detail=[];
+  let pecasN=Number(pecas?.value||0), eng=Number(engomarPecas?.value||0), extras=Number(itensExtras?.value||0);
+  let kgAuto=pecasN>0 ? Math.max(3, +(pecasN*0.4).toFixed(1)) : 0;
+  if(kg) kg.value = kgAuto || '';
+  if(selected['Roupa normal']||pecasN){let val=kgAuto*140; total+=val; detail.push(`${pecasN||0} peças ≈ ${kgAuto} kg × 140 = ${val} MT`)}
+  if(selected['Engomadoria']||eng){let val=(eng||1)*50; total+=val; detail.push(`Engomadoria: ${eng||1} peça(s) × 50 = ${val} MT`)}
+  if(selected['Fatos']){total+=450; detail.push('Fato: 450 MT')}
+  if(selected['Vestidos']){total+=350; detail.push('Vestido: 350 MT')}
+  if(selected['Edredons']){total+=650; detail.push('Edredom: 650 MT')}
+  if(selected['Tênis']){total+=300; detail.push('Tênis: 300 MT')}
+  if(extras){let val=extras*150; total+=val; detail.push(`Extras: ${extras} × 150 = ${val} MT`)}
+  let transporte=calcTransport(); servicoTotal.innerText=total+' MT'; transporteTotal.innerText=transporte+' MT'; estimate.innerText=(total+transporte)+' MT';
+  calcDetails.innerHTML = detail.length ? detail.map(x=>`<span class="tag">${x}</span>`).join(' ') : '<span class="tag">Selecione serviço ou informe peças.</span>';
+  return {total,totalGeral:total+transporte,transporte,servicos:detail.join(' | ')||'Roupa normal',kgAuto}
+}
+function calcTransport(){let addr=(address?.value||'').toLowerCase(); if(!addr)return 100; if(addr.includes('matola')||addr.includes('marracuene'))return 250; if(addr.includes('costa')||addr.includes('zimpeto')||addr.includes('boane'))return 200; return 100}
+function updateMap(){let q=encodeURIComponent(address.value||'Maputo Mozambique');mapFrame.src='https://maps.google.com/maps?q='+q+'&output=embed'}
+function openMap(){let q=encodeURIComponent(address.value||'Maputo Mozambique');window.open('https://www.google.com/maps/search/?api=1&query='+q,'_blank')}
+function detectLocation(){if(!navigator.geolocation){alert('Localização não suportada.');return}navigator.geolocation.getCurrentPosition(p=>{address.value=p.coords.latitude+','+p.coords.longitude;updateMap();calcEstimate()},()=>alert('Não foi possível obter localização.'))}
+function syncProfile(){profileName.value=nomeCliente.value;profilePhone.value=telefoneCliente.value;profileAddress.value=address?.value||''}
+function saveProfile(){nomeCliente.value=profileName.value;telefoneCliente.value=profilePhone.value;address.value=profileAddress.value;updateMap();alert('Perfil guardado')}
+async function submitOrder(){submitBtn.innerText='A gravar...';submitBtn.disabled=true;try{let est=calcEstimate();let cliente=await post('clientes',{nome:nomeCliente.value||'Cliente EFresh',email:email.value||'',telefone:telefoneCliente.value||'',endereco:address.value||''});let pedido={cliente_id:cliente[0].id,servico:est.servicos,quantidade:(pecas.value?pecas.value+' peças ':'')+(kg.value?kg.value+' kg':''),endereco_recolha:address.value||'',horario:(pickupDate.value||'')+' das '+(hIni.value||'')+' às '+(hFim.value||''),observacoes:obs.value||'',estado:'Pedido recebido',valor:String(est.totalGeral)};let p=(await post('pedidos',pedido))[0];afterOrderCreated(p,est)}catch(e){let id=Date.now();let est=calcEstimate();let p={id,servico:est.servicos,quantidade:(pecas.value?pecas.value+' peças ':'')+(kg.value?kg.value+' kg':''),endereco_recolha:address.value||'',horario:(pickupDate.value||'')+' das '+(hIni.value||'')+' às '+(hFim.value||''),observacoes:obs.value||'',estado:'Pedido recebido',valor:String(est.totalGeral),criado_em:new Date().toISOString()};localOrders.push(p);localStorage.setItem('ef_local_orders',JSON.stringify(localOrders));afterOrderCreated(p,est);msg('orderMsg','Pedido gravado localmente. Supabase indisponível ou sem tabela completa.','success')}finally{submitBtn.innerText='Confirmar pedido';submitBtn.disabled=false}}
+function afterOrderCreated(p,est){currentPedidoId=p.id;currentStep=0;trackId.innerText='EFW-'+String(p.id).padStart(4,'0');trackService.innerText=p.servico;trackStatus.innerText=p.estado;hStatus.innerText=p.estado;hValor.innerText=est.totalGeral+' MT';docs.push({ref:'FAT-'+String(p.id).padStart(4,'0'),pedido:p.id,tipo:'Fatura',valor:est.totalGeral,estado:'Pendente',data:today()});localStorage.setItem('ef_docs',JSON.stringify(docs));msg('orderMsg','Pedido gravado com sucesso ✅');renderActive();renderTrackingList();tab('tracking')}
+function renderActive(){let local=docs.slice(-3).reverse();activeRequests.innerHTML=local.length?'<div class="card"><h3>Progresso das solicitações</h3>'+local.map(d=>{let pct=d.estado==='Pago'?100:25;return `<div class="item"><div class="row"><b>Pedido EFW-${String(d.pedido).padStart(4,'0')}</b><span class="pill warn">${d.estado}</span></div><div class="progress mt2"><div class="bar" style="width:${pct}%"></div></div></div>`}).join('')+'</div>':''}
+function renderTrackingList(){let b=trackingList;if(!docs.length){b.innerHTML='<p class="small">Sem pedidos para acompanhar.</p>';trackingDetail.style.display='none';return}b.innerHTML=docs.map(d=>`<button class="btn btn2 mt2" onclick="selectTracking(${d.pedido})">EFW-${String(d.pedido).padStart(4,'0')} • ${d.estado}</button>`).join('')}
+function selectTracking(id){currentPedidoId=id;let d=docs.find(x=>x.pedido==id);let a=assignments[id]||{};currentStep=d?.estado==='Pago'?8:0;trackId.innerText='EFW-'+String(id).padStart(4,'0');trackService.innerText=d?.tipo||'Pedido EFresh';trackStatus.innerText=d?.estado||'Em curso';driverLine.innerText='Motorista: '+(a.motorista||'não atribuído');operatorLine.innerText='Operador: '+(a.operador||'não atribuído');trackingDetail.style.display='block';renderSteps()}
+function renderSteps(){stepsBox.innerHTML='';STAGES.forEach((s,i)=>stepsBox.innerHTML+=`<div class="step"><div><div class="dot ${i<=currentStep?'done':''}">${i<currentStep?'✓':i+1}</div>${i<STAGES.length-1?`<div class="line ${i<currentStep?'done':''}"></div>`:''}</div><div style="padding-top:5px;font-weight:850">${s}</div></div>`)}
+function renderDocs(){if(!docs.length){clientDocs.innerHTML='<p class="small">Ainda não há documentos.</p>';return}clientDocs.innerHTML=docs.map(d=>`<div class="item"><div class="row"><div><b>${d.ref}</b><p class="small">${d.tipo} • Pedido EFW-${String(d.pedido).padStart(4,'0')}</p></div><span class="pill ${d.estado==='Pago'?'ok':'warn'}">${d.estado}</span></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><button class="btn btn2 mini mt2" onclick="printDoc('${d.ref}')">Ver/Imprimir</button></div>`).join('')}
+function printDoc(ref){let d=docs.find(x=>x.ref===ref);modalTitle.innerText=d.tipo+' '+d.ref;modalBody.innerHTML=`<div class="card"><h2>EFresh Lavandaria</h2><p class="small">Documento: ${d.ref}</p><p class="small">Data: ${d.data}</p><hr class="mt"><div class="row mt"><span>Pedido</span><b>EFW-${String(d.pedido).padStart(4,'0')}</b></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><div class="row mt2"><span>Estado</span><b>${d.estado}</b></div><button class="btn mt" onclick="window.print()">Imprimir / PDF</button></div>`;modal.style.display='flex'}
+function closeModal(){modal.style.display='none'}
+async function loadAdmin(){adminContent.innerHTML='<div class="card">A carregar...</div>';try{orders=await get('pedidos','?select=*&order=criado_em.desc')}catch(e){orders=[]}try{clients=await get('clientes','?select=*&order=criado_em.desc')}catch(e){clients=[]}try{drivers=await get('motoristas','?select=*&order=criado_em.desc')}catch(e){drivers=[]}orders=[...orders,...localOrders];kOrders.innerText=filterByRole(orders).length;kPend.innerText=filterByRole(orders).filter(o=>o.estado!=='Entregue').length;kMoney.innerText=filterByRole(orders).reduce((a,o)=>a+(parseFloat(o.valor)||0),0)+' MT';msg('adminMsg','Dados carregados ✅');renderAdmin()}
+function filterByRole(list){if(currentRole==='admin'||currentRole==='financeiro')return list;if(currentRole==='operador')return list.filter(o=>(assignments[o.id]||{}).operador===currentUser);if(currentRole==='motorista')return list.filter(o=>(assignments[o.id]||{}).motorista===currentUser);return list}
+function adminTab(t){admin=t;['Dash','Pedidos','Equipe','Mais'].forEach(x=>document.getElementById('a'+x).classList.remove('active'));document.getElementById('a'+(t==='dash'?'Dash':t==='equipe'?'Equipe':t==='mais'?'Mais':'Pedidos')).classList.add('active');renderAdmin()}
+function renderAdmin(){if(admin==='dash')return renderDashboard();if(admin==='pedidos')return renderOrders();if(admin==='equipe')return renderTeam();renderMore()}
+function renderDashboard(){let list=filterByRole(orders),done=list.filter(o=>o.estado==='Entregue').length, pend=list.filter(o=>o.estado==='Pedido recebido').length, curso=list.length-done-pend;adminContent.innerHTML=`<div class="card"><h3>Dashboard</h3><div class="donut mt"><div>${list.length}<br><span class="tiny">serviços</span></div></div><div class="grid3 mt"><div class="kpi"><p class="small">Concluídos</p><b>${done}</b></div><div class="kpi"><p class="small">Em curso</p><b>${curso}</b></div><div class="kpi"><p class="small">Pendentes</p><b>${pend}</b></div></div></div><div class="card mt"><h3>Trabalho do dia</h3>${list.slice(0,5).map(o=>`<div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.estado} • ${o.servico}</p></div>`).join('')||'<p class="small mt2">Sem tarefas atribuídas.</p>'}</div><div class="card mt"><h3>Relatório mensal</h3><div class="grid2"><div class="field"><label>De</label><input type="date" id="rDe" value="${today().slice(0,8)}01"></div><div class="field"><label>Até</label><input type="date" id="rAte" value="${today()}"></div></div><button class="btn mt" onclick="printReport()">Exportar PDF</button></div>`}
+function renderOrders(){let list=filterByRole(orders);adminContent.innerHTML=list.length?list.map(o=>{let a=assignments[o.id]||{};return `<div class="item"><div class="row"><div><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.servico}</p><p class="small">${o.endereco_recolha||''}</p><span class="tag">Operador: ${a.operador||'-'}</span> <span class="tag">Motorista: ${a.motorista||'-'}</span></div><span class="pill ${o.estado==='Entregue'?'ok':'warn'}">${o.estado||''}</span></div><div class="field"><select onchange="setEstado(${o.id},this.value)">${STAGES.map(s=>`<option ${s===o.estado?'selected':''}>${s}</option>`).join('')}</select></div><div class="grid2 mt2"><button class="btn btn2 mini" onclick="openAssign('${o.id}')">Atribuir</button><button class="btn mini" onclick="openWork('${o.id}')">Executar</button></div></div>`}).join(''):'<div class="card">Sem pedidos nesta conta/função.</div>'}
+async function setEstado(id,estado){let lo=localOrders.find(x=>String(x.id)===String(id));if(lo){lo.estado=estado;localStorage.setItem('ef_local_orders',JSON.stringify(localOrders));loadAdmin();return}try{await patch('pedidos',id,{estado});msg('adminMsg','Estado atualizado ✅');loadAdmin()}catch(e){msg('adminMsg','Erro: '+e.message,'error')}}
+function openAssign(id){if(currentRole!=='admin'){alert('Apenas administrador atribui trabalhos.');return}let ops=staff.filter(s=>s.role==='Operador'||s.role==='Administrador'), mots=staff.filter(s=>s.role==='Motorista');modalTitle.innerText='Atribuir Pedido EFW-'+String(id).padStart(4,'0');modalBody.innerHTML=`<div class="card"><div class="field"><label>Operador / lavandaria</label><select id="assignOp">${ops.map(s=>`<option>${s.nome}</option>`).join('')}</select></div><div class="field"><label>Motorista / transportador</label><select id="assignMot">${mots.map(s=>`<option>${s.nome}</option>`).join('')}</select></div><button class="btn mt" onclick="saveAssign('${id}')">Guardar atribuição</button></div>`;modal.style.display='flex'}
+function saveAssign(id){assignments[id]={operador:assignOp.value,motorista:assignMot.value};localStorage.setItem('ef_assignments',JSON.stringify(assignments));closeModal();loadAdmin()}
+function openWork(id){let o=orders.find(x=>String(x.id)===String(id));modalTitle.innerText='Executar EFW-'+String(id).padStart(4,'0');modalBody.innerHTML=`<div class="card"><p><b>Serviço:</b> ${o.servico}</p><p><b>Endereço:</b> ${o.endereco_recolha||'-'}</p><p><b>Horário:</b> ${o.horario||'-'}</p><p><b>Estado:</b> ${o.estado||'-'}</p><div class="grid2 mt"><button class="btn btn2" onclick="setEstado('${id}','Motorista a caminho');closeModal()">Iniciar rota</button><button class="btn btn2" onclick="setEstado('${id}','Roupa recolhida');closeModal()">Recolhido</button><button class="btn btn2" onclick="setEstado('${id}','Em lavagem');closeModal()">Iniciar lavagem</button><button class="btn btn2" onclick="setEstado('${id}','Controle de qualidade');closeModal()">Finalizar serviço</button><button class="btn" onclick="setEstado('${id}','Entregue');closeModal()">Concluir</button><button class="btn btn2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Mapa</button></div></div>`;modal.style.display='flex'}
+function renderTeam(){if(currentRole!=='admin'){adminContent.innerHTML='<div class="card">Sem permissão para criar perfis.</div>';return}adminContent.innerHTML=`<div class="card"><h3>Criar perfil</h3><div class="field"><label>Nome</label><input id="stNome"></div><div class="field"><label>Telefone</label><input id="stTel"></div><div class="field"><label>Cargo</label><select id="stRole"><option>Administrador</option><option>Financeiro</option><option>Operador</option><option>Motorista</option><option>Atendimento</option></select></div><button class="btn mt" onclick="saveStaff()">Criar perfil</button></div><div class="card mt"><h3>Perfis criados</h3>${staff.map((s,i)=>`<div class="item"><div class="row"><div><b>${s.nome}</b><p class="small">${s.telefone||''}</p></div><span class="role">${s.role}</span></div><button class="btn dangerBtn mini mt2" onclick="delStaff(${i})">Remover</button></div>`).join('')}</div>`}
+function saveStaff(){staff.push({nome:stNome.value||'Funcionário',role:stRole.value,telefone:stTel.value||''});localStorage.setItem('ef_staff',JSON.stringify(staff));renderTeam()}
+function delStaff(i){staff.splice(i,1);localStorage.setItem('ef_staff',JSON.stringify(staff));renderTeam()}
+function renderMore(){adminContent.innerHTML=`<div class="grid2"><button class="service ${currentRole!=='admin'?'locked':''}" onclick="adminTab('equipe')">👥<br><b>Funcionários</b></button><button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button><button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button><button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button></div>`}
+function openDrivers(){modalTitle.innerText='Plano dos motoristas';let mot=staff.filter(s=>s.role==='Motorista');modalBody.innerHTML=mot.map(m=>`<div class="item"><b>${m.nome}</b><p class="small">${m.telefone||''}</p>${orders.filter(o=>(assignments[o.id]||{}).motorista===m.nome).map(o=>`<span class="tag">EFW-${String(o.id).padStart(4,'0')} • ${o.estado}</span>`).join('')||'<p class="small">Sem tarefas.</p>'}</div>`).join('')||'<p class="small">Sem motoristas.</p>';modal.style.display='flex'}
+function openFunds(){modalTitle.innerText='Requisição de fundos';modalBody.innerHTML=`<div class="card"><div class="field"><label>Produto/necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div><div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div><button class="btn mt" onclick="saveFund()">Submeter</button></div><div id="fundList" class="mt"></div>`;modal.style.display='flex';renderFunds()}
+function saveFund(){funds.push({desc:fundDesc.value,val:fundVal.value,status:'Pendente',data:today(),solicitante:currentUser});localStorage.setItem('ef_funds',JSON.stringify(funds));renderFunds()}
+function renderFunds(){fundList.innerHTML=funds.length?funds.map((f,i)=>`<div class="item"><b>${f.desc}</b><p class="small">${f.val} MT • ${f.data} • ${f.solicitante||''}</p><span class="pill ${f.status==='Autorizado'?'ok':'warn'}">${f.status}</span><button class="btn btn2 mini mt2 ${currentRole!=='admin'?'locked':''}" onclick="funds[${i}].status='Autorizado';localStorage.setItem('ef_funds',JSON.stringify(funds));renderFunds()">Autorizar</button></div>`).join(''):'<p class="small">Sem requisições.</p>'}
+function openCompleted(){modalTitle.innerText='Pedidos concluídos';modalBody.innerHTML=orders.filter(o=>o.estado==='Entregue').map(o=>`<div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.servico} • ${o.valor} MT</p></div>`).join('')||'<p class="small">Sem concluídos.</p>';modal.style.display='flex'}
+function invoice(id,valor){let existing=docs.find(d=>d.pedido==id&&d.tipo==='Recibo');if(!existing){docs.push({ref:'RCB-'+String(id).padStart(4,'0'),pedido:id,tipo:'Recibo',valor:valor||0,estado:'Pago',data:today()});localStorage.setItem('ef_docs',JSON.stringify(docs))}alert('Recibo criado.')}
+function printReport(){window.print()}
+function sendMsg(){if(!chatText.value.trim())return;messages.innerHTML+=`<div class="msg clientMsg">${chatText.value}</div>`;chatText.value=''}
+function callEFresh(){window.location.href='tel:'+PHONE_NUMBER}
+function openWhatsApp(){window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent('Olá EFresh, preciso de apoio.'),'_blank')}
+function openOrderWhatsApp(s,e){window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent('Pedido EFresh: '+s+' | Endereço: '+e),'_blank')}
+</script>
 </body>
 </html>
