@@ -366,6 +366,21 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   }
 </style>
 
+
+<style id="efresh-v11-auth-finance-sync">
+  .auth-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .auth-switch button{border:1px solid var(--l);background:#fff;border-radius:14px;padding:11px;font-weight:900;color:#64748b}
+  .auth-switch button.active{background:#e0f2fe;color:#0369a1;border-color:#38bdf8}
+  .hidden{display:none!important}
+  .pay-proof{
+    border:1px solid #bae6fd;background:#f0f9ff;border-radius:18px;padding:12px;margin-top:9px
+  }
+  .work-action{display:grid;grid-template-columns:1fr;gap:9px;margin-top:12px}
+  .work-action button{text-align:left}
+  .refresh-tip{font-size:11px;color:#64748b;text-align:center;margin:6px 0}
+  .login-note{padding:10px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0;font-size:12px;color:#475569;margin-top:10px;line-height:1.4}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -380,17 +395,27 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
  <div class="logo">EF</div><div class="brand"><span class="blue">EF</span><span class="green">resh</span></div><div class="sub">LAVANDARIA</div>
  <p class="blue mt2"><b>Mais tempo para si.</b></p><p class="green mt2">O futuro da lavandaria chegou.</p>
  <div class="card mt" style="text-align:left">
-  <div class="field"><label>Email / Usuário</label><input id="email" value="efreshlavandaria@gmail.com"></div>
-  <div class="field"><label>Nome</label><input id="nomeCliente" value="Cliente EFresh"></div>
-  <div class="field"><label>Telefone</label><input id="telefoneCliente" value="+258"></div>
-  <div class="field"><label>Entrar como</label><select id="roleLogin"><option value="cliente">Cliente</option><option value="admin">Administrador</option><option value="financeiro">Financeiro</option><option value="operador">Operador</option><option value="motorista">Motorista</option></select></div>
-  <button class="btn mt" onclick="enterByRole()">Entrar</button>
+  <div class="auth-switch">
+    <button id="btnLoginMode" class="active" onclick="setAuthMode('login')">Entrar</button>
+    <button id="btnRegisterMode" onclick="setAuthMode('register')">Criar conta</button>
+  </div>
+  <div class="field"><label>Número de celular</label><input id="loginPhone" placeholder="+25884xxxxxxx"></div>
+  <div class="field"><label>Código / Password</label><input id="loginPass" type="password" placeholder="Digite o código"></div>
+  <div id="registerFields" class="hidden">
+    <div class="grid2">
+      <div class="field"><label>Nome</label><input id="regNome" placeholder="Nome"></div>
+      <div class="field"><label>Apelido</label><input id="regApelido" placeholder="Apelido"></div>
+    </div>
+    <div class="field"><label>Perfil</label><select id="regRole"><option value="cliente">Cliente</option><option value="admin">Administrador</option><option value="financeiro">Financeiro</option><option value="operador">Operador</option><option value="motorista">Motorista</option><option value="atendimento">Atendimento</option></select></div>
+  </div>
+  <button class="btn mt" onclick="authEnter()">Continuar</button>
+  <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.</div>
  </div>
- <p class="tiny mt">V8: cálculos corrigidos, funcionários, motoristas, atribuições e execução por tablet.</p>
+ <p class="tiny mt">V11: login real simples, sincronização cliente/admin, POP, recibos, financeiro e tarefas.</p>
 </section>
 
 <section id="home" class="screen">
- <div class="header"><div><p class="small">Olá,</p><h1 id="hello">Cliente</h1></div><button class="ib" onclick="show('profile')">👤</button></div>
+ <div class="header"><div><p class="small">Olá,</p><h1 id="hello">Cliente</h1></div><button class="ib" onclick="show('profile')">👤</button></div><div class="refresh-tip">Puxe/atualize para sincronizar o estado mais recente.</div>
  <div class="card hero"><span class="pill ok">Premium Delivery Laundry</span><h2 class="mt2">Lavandaria digital com recolha e entrega.</h2><p class="small mt2">Faça pedidos, acompanhe etapas, veja recibos, ligue e fale com a equipa.</p><button class="btn mt" onclick="tab('order')">Solicitar recolha</button></div>
  <div id="activeRequests" class="mt"></div>
  <div class="grid2 mt"><div class="kpi"><p class="small">Pedido atual</p><b id="hStatus">—</b></div><div class="kpi"><p class="small">Estimativa</p><b id="hValor">0 MT</b></div></div>
@@ -453,7 +478,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
 
 <section id="admin" class="screen">
  <div class="header"><div><p class="small">Painel Pro</p><h1 id="panelTitle">Admin EFresh</h1></div><button class="ib" onclick="show('login')">↩</button></div>
- <div id="roleBadge" class="pill darkp mt2">Administrador</div>
+ <div id="roleBadge" class="pill darkp mt2">Administrador</div><div class="refresh-tip">Atualize para ver novos pedidos, POPs e alterações de estado.</div>
  <div class="tabs mt2"><button id="aDash" class="active" onclick="adminTab('dash')">Dash</button><button id="aPedidos" onclick="adminTab('pedidos')">Pedidos <span class="notif" id="badgePedidos">0</span></button><button id="aEquipe" onclick="adminTab('equipe')">Equipe</button><button id="aMais" onclick="adminTab('mais')">Mais <span class="notif" id="badgeFunds">0</span></button></div>
  <div id="adminMsg" class="notice"></div>
  <div class="grid3"><div class="kpi"><p class="small">Serviços</p><b id="kOrders">0</b></div><div class="kpi"><p class="small">Em curso</p><b id="kPend">0</b></div><div class="kpi"><p class="small">Receita</p><b id="kMoney">0</b></div></div>
@@ -709,6 +734,245 @@ function renderBadgesAndProofs(){
   renderProofs();
 }
 document.addEventListener('DOMContentLoaded', renderBadgesAndProofs);
+
+
+/* ===== EFresh V11 - auth, sync, POP approval, workflow ===== */
+let authMode='login';
+let users = JSON.parse(localStorage.getItem('ef_users')||'[]');
+let payments = JSON.parse(localStorage.getItem('ef_payments')||'[]');
+
+function seedUsers(){
+  if(users.length) return;
+  users=[
+    {nome:'Administrador',apelido:'EFresh',telefone:'+258840000000',pass:'1234',role:'admin'},
+    {nome:'Financeiro',apelido:'EFresh',telefone:'+258840000001',pass:'1234',role:'financeiro'},
+    {nome:'Operador',apelido:'1',telefone:'+258840000002',pass:'1234',role:'operador'},
+    {nome:'Motorista',apelido:'1',telefone:'+258840000003',pass:'1234',role:'motorista'}
+  ];
+  localStorage.setItem('ef_users',JSON.stringify(users));
+}
+seedUsers();
+
+function normalizePhone(v){return (v||'').replace(/\s+/g,'').trim()}
+function setAuthMode(mode){
+  authMode=mode;
+  document.getElementById('btnLoginMode')?.classList.toggle('active',mode==='login');
+  document.getElementById('btnRegisterMode')?.classList.toggle('active',mode==='register');
+  document.getElementById('registerFields')?.classList.toggle('hidden',mode!=='register');
+}
+function authEnter(){
+  const tel=normalizePhone(document.getElementById('loginPhone')?.value);
+  const pass=document.getElementById('loginPass')?.value||'';
+  if(!tel || !pass){alert('Preencha número e código.');return}
+  if(authMode==='register'){
+    const nome=(document.getElementById('regNome')?.value||'').trim();
+    const apelido=(document.getElementById('regApelido')?.value||'').trim();
+    const role=document.getElementById('regRole')?.value||'cliente';
+    if(!nome || !apelido){alert('Preencha nome e apelido.');return}
+    if(users.some(u=>normalizePhone(u.telefone)===tel)){alert('Este número já tem conta. Use Entrar.');return}
+    users.push({nome,apelido,telefone:tel,pass,role});
+    localStorage.setItem('ef_users',JSON.stringify(users));
+    alert('Conta criada. Agora pode entrar.');
+    setAuthMode('login');
+    return;
+  }
+  const u=users.find(x=>normalizePhone(x.telefone)===tel && String(x.pass)===String(pass));
+  if(!u){alert('Número ou código incorreto. Crie conta ou verifique os dados.');return}
+  currentUser=(u.nome+' '+(u.apelido||'')).trim();
+  currentRole=u.role;
+  nomeCliente.value=currentUser;
+  telefoneCliente.value=u.telefone;
+  if(u.role==='cliente') enterClient(); else showAdminForRole();
+}
+function enterByRole(){authEnter()}
+
+function setDocStateByPedido(id,state){
+  docs.forEach(d=>{ if(String(d.pedido)===String(id)) d.estado=state; });
+  localStorage.setItem('ef_docs',JSON.stringify(docs));
+}
+function getAllOrders(){
+  let merged=[...(orders||[]),...(localOrders||[])];
+  const seen=new Set();
+  return merged.filter(o=>{let k=String(o.id); if(seen.has(k)) return false; seen.add(k); return true});
+}
+function getCurrentClientOrders(){
+  const tel=normalizePhone(telefoneCliente.value);
+  const name=(nomeCliente.value||'').trim().toLowerCase();
+  return getAllOrders().filter(o=>{
+    return !o.cliente_telefone || normalizePhone(o.cliente_telefone)===tel || (o.cliente_nome||'').toLowerCase()===name || docs.some(d=>String(d.pedido)===String(o.id));
+  });
+}
+function updateClientHome(){
+  const list=getCurrentClientOrders().sort((a,b)=>(String(b.criado_em||'')).localeCompare(String(a.criado_em||'')));
+  if(list.length){
+    const latest=list[0];
+    hStatus.innerText=latest.estado||'Pedido recebido';
+    hValor.innerText=(latest.valor||0)+' MT';
+  }else{
+    hStatus.innerText='—';
+    hValor.innerText='0 MT';
+  }
+  renderActive();
+}
+function enterClient(){
+  hello.innerText=(nomeCliente.value||'Cliente').split(' ')[0];
+  syncProfile();
+  show('home');
+  nav.style.display='grid';
+  loadAdmin().then(()=>updateClientHome()).catch(()=>updateClientHome());
+}
+function renderActive(){
+  const list=getCurrentClientOrders().slice(-4).reverse();
+  activeRequests.innerHTML=list.length?'<div class="card"><h3>Progresso das solicitações</h3>'+list.map(o=>{
+    const idx=Math.max(0,STAGES.indexOf(o.estado||'Pedido recebido'));
+    const pct=Math.round(((idx+1)/STAGES.length)*100);
+    return `<div class="item" onclick="tab('tracking');selectTracking(${o.id})"><div class="row"><b>Pedido EFW-${String(o.id).padStart(4,'0')}</b><span class="pill ${o.estado==='Entregue'?'ok':'warn'}">${o.estado||'Pedido recebido'}</span></div><p class="small">${o.servico||''}</p><div class="progress mt2"><div class="bar" style="width:${pct}%"></div></div></div>`
+  }).join('')+'</div>':'';
+}
+function renderTrackingList(){
+  let list=getCurrentClientOrders();
+  if(!list.length){trackingList.innerHTML='<p class="small">Sem pedidos para acompanhar.</p>';trackingDetail.style.display='none';return}
+  trackingList.innerHTML=list.map(o=>`<button class="btn btn2 mt2" onclick="selectTracking(${o.id})">EFW-${String(o.id).padStart(4,'0')} • ${o.estado||'Pedido recebido'}</button>`).join('');
+}
+function selectTracking(id){
+  currentPedidoId=id;
+  const o=getAllOrders().find(x=>String(x.id)===String(id)) || {};
+  const a=assignments[id]||{};
+  currentStep=Math.max(0,STAGES.indexOf(o.estado||'Pedido recebido'));
+  trackId.innerText='EFW-'+String(id).padStart(4,'0');
+  trackService.innerText=o.servico||'Pedido EFresh';
+  trackStatus.innerText=o.estado||'Pedido recebido';
+  driverLine.innerText='Motorista: '+(a.motorista||'não atribuído');
+  operatorLine.innerText='Operador: '+(a.operador||'não atribuído');
+  trackingDetail.style.display='block';
+  renderSteps();
+}
+async function submitOrder(){
+  submitBtn.innerText='A gravar...';submitBtn.disabled=true;
+  try{
+    let est=calcEstimate();
+    let clienteNome=nomeCliente.value||'Cliente EFresh';
+    let clienteTel=telefoneCliente.value||'';
+    let p={id:Date.now(),cliente_nome:clienteNome,cliente_telefone:clienteTel,servico:est.servicos,quantidade:(pecas.value?pecas.value+' peças ':'')+(kg.value?kg.value+' kg':''),endereco_recolha:address.value||'',horario:(pickupDate.value||'')+' das '+(hIni.value||'')+' às '+(hFim.value||''),observacoes:obs.value||'',estado:'Pedido recebido',valor:String(est.totalGeral),criado_em:new Date().toISOString()};
+    localOrders.push(p);localStorage.setItem('ef_local_orders',JSON.stringify(localOrders));
+    docs.push({ref:'FAT-'+String(p.id).padStart(4,'0'),pedido:p.id,tipo:'Fatura',valor:est.totalGeral,estado:'Pendente',data:today()});
+    localStorage.setItem('ef_docs',JSON.stringify(docs));
+    notifyNewOrder(p.id);addHistory(p.id,'Pedido criado pelo cliente.');
+    msg('orderMsg','Pedido gravado com sucesso ✅');
+    updateClientHome();renderTrackingList();selectTracking(p.id);tab('tracking');
+  }finally{submitBtn.innerText='Confirmar pedido';submitBtn.disabled=false}
+}
+function saveProof(){
+  const ref=(document.getElementById('proofRef')?.value||'').trim();
+  const desc=(document.getElementById('proofName')?.value||'').trim();
+  const file=document.getElementById('proofFile')?.files?.[0];
+  if(!ref){alert('Preencha a referência do pedido.');return}
+  if(!file){alert('Selecione o ficheiro do comprovativo.');return}
+  const pid=ref.replace(/\D/g,'');
+  const proof={id:Date.now(),pedido:pid,ref,name:desc||file.name,fileName:file.name,fileType:file.type||'ficheiro',fileSize:Math.round(file.size/1024)+' KB',data:today(),estado:'Aguardando aprovação',valor:(docs.find(d=>String(d.pedido).endsWith(pid))||{}).valor||0};
+  proofs.push(proof);payments.push(proof);
+  localStorage.setItem('ef_proofs',JSON.stringify(proofs));localStorage.setItem('ef_payments',JSON.stringify(payments));
+  incNotif('docs');incNotif('funds');
+  renderProofs();previewProofFile();
+  alert('Comprovativo carregado. Aguarda aprovação do financeiro/admin.');
+}
+function approvePayment(i){
+  let p=payments[i]; if(!p) return;
+  p.estado='Aprovado';
+  const doc=docs.find(d=>String(d.pedido).endsWith(String(p.pedido)) || d.ref===p.ref);
+  if(doc){doc.estado='Pago';}
+  const reciboExists=docs.some(d=>d.tipo==='Recibo' && (String(d.pedido).endsWith(String(p.pedido)) || d.ref===p.ref));
+  if(!reciboExists && doc){
+    docs.push({ref:'RCB-'+String(doc.pedido).padStart(4,'0'),pedido:doc.pedido,tipo:'Recibo',valor:doc.valor,estado:'Pago',data:today()});
+  }
+  localStorage.setItem('ef_docs',JSON.stringify(docs));
+  localStorage.setItem('ef_payments',JSON.stringify(payments));
+  proofs=proofs.map(x=>x.id===p.id?{...x,estado:'Aprovado'}:x);
+  localStorage.setItem('ef_proofs',JSON.stringify(proofs));
+  alert('Pagamento aprovado e recibo emitido.');
+  openFinancePanel();
+}
+function rejectPayment(i){
+  let p=payments[i]; if(!p) return;
+  p.estado='Recusado';
+  localStorage.setItem('ef_payments',JSON.stringify(payments));
+  alert('Comprovativo recusado.');
+  openFinancePanel();
+}
+function openFinancePanel(){
+  const total=getAllOrders().reduce((a,o)=>a+(parseFloat(o.valor)||0),0);
+  const paid=docs.filter(d=>d.estado==='Pago'&&d.tipo==='Recibo').reduce((a,d)=>a+(parseFloat(d.valor)||0),0);
+  const pending=Math.max(0,total-paid);
+  const fundTotal=funds.reduce((a,f)=>a+(parseFloat(f.val)||0),0);
+  const payHtml=payments.length?payments.map((p,i)=>`<div class="item"><div class="row"><div><b>${p.ref}</b><p class="small">${p.name}</p><p class="tiny">${p.fileName||''} • ${p.fileSize||''}</p></div><span class="pill ${p.estado==='Aprovado'?'ok':p.estado==='Recusado'?'bad':'warn'}">${p.estado}</span></div><div class="grid2 mt2"><button class="btn mini ${['admin','financeiro'].includes(currentRole)?'':'locked'}" onclick="approvePayment(${i})">Aprovar / emitir recibo</button><button class="btn dangerBtn mini ${['admin','financeiro'].includes(currentRole)?'':'locked'}" onclick="rejectPayment(${i})">Recusar</button></div></div>`).join(''):'<p class="small">Sem comprovativos submetidos.</p>';
+  modalTitle.innerText='Painel financeiro EFresh';
+  modalBody.innerHTML=`<div class="finance-grid"><div class="finance-box"><small>Receita estimada</small><b>${total} MT</b></div><div class="finance-box"><small>Recebido</small><b>${paid} MT</b></div><div class="finance-box"><small>Pendente</small><b>${pending} MT</b></div><div class="finance-box"><small>Fundos solicitados</small><b>${fundTotal} MT</b></div></div><div class="card mt"><h3>Comprovativos de pagamento</h3>${payHtml}</div><div class="card mt"><h3>Controlo mensal</h3><div class="grid2"><div class="field"><label>De</label><input type="date" value="${today().slice(0,8)}01"></div><div class="field"><label>Até</label><input type="date" value="${today()}"></div></div><button class="btn mt" onclick="window.print()">Exportar PDF</button></div>`;
+  modal.style.display='flex';
+}
+function renderDocs(){
+  clearNotif('docs');renderProofs();
+  if(!docs.length){clientDocs.innerHTML='<p class="small">Ainda não há documentos.</p>';return}
+  clientDocs.innerHTML=docs.map(d=>`<div class="item"><div class="row"><div><b>${d.ref}</b><p class="small">${d.tipo} • Pedido EFW-${String(d.pedido).padStart(4,'0')}</p></div><span class="pill ${d.estado==='Pago'?'ok':'warn'}">${d.estado}</span></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><button class="btn btn2 mini mt2" onclick="printDoc('${d.ref}')">Ver/Imprimir</button></div>`).join('')
+}
+function renderOrders(){
+  clearNotif('pedidos');
+  let list=filterByRole(getAllOrders());
+  adminContent.innerHTML=list.length?list.map(o=>{
+    let a=assignments[o.id]||{};
+    return `<div class="item"><div class="row"><div><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.servico}</p><p class="small">${o.endereco_recolha||''}</p><span class="tag">Operador: ${a.operador||'-'}</span> <span class="tag">Motorista: ${a.motorista||'-'}</span></div><span class="pill ${o.estado==='Entregue'?'ok':'warn'}">${o.estado||''}</span></div><div class="grid2 mt2"><button class="btn btn2 mini ${currentRole==='admin'?'':'locked'}" onclick="openAssign('${o.id}')">Atribuir</button><button class="btn mini" onclick="openWork('${o.id}')">Executar</button></div></div>`
+  }).join(''):'<div class="card">Sem pedidos nesta conta/função.</div>'
+}
+function openWork(id){
+  let o=getAllOrders().find(x=>String(x.id)===String(id));
+  const idx=Math.max(0,STAGES.indexOf(o?.estado||'Pedido recebido'));
+  const next=STAGES[Math.min(idx+1,STAGES.length-1)];
+  modalTitle.innerText='Executar EFW-'+String(id).padStart(4,'0');
+  modalBody.innerHTML=`<div class="card"><p><b>Estado atual:</b> ${o.estado||'Pedido recebido'}</p><p><b>Próximo passo:</b> ${next}</p><p><b>Serviço:</b> ${o.servico}</p><p><b>Endereço:</b> ${o.endereco_recolha||'-'}</p><p><b>Horário:</b> ${o.horario||'-'}</p><h3 class="mt">Histórico operacional</h3>${renderHistory(id)}<div class="work-action"><button class="btn" onclick="setEstado('${id}','${next}');closeModal()">Avançar para: ${next}</button><button class="btn btn2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Abrir rota no mapa</button><button class="btn btn2" onclick="openWhatsApp()">Contactar cliente/central</button></div></div>`;
+  modal.style.display='flex'
+}
+async function setEstado(id,estado){
+  let lo=localOrders.find(x=>String(x.id)===String(id));
+  if(lo){lo.estado=estado;addHistory(id,'Estado atualizado para: '+estado);localStorage.setItem('ef_local_orders',JSON.stringify(localOrders));loadAdmin();updateClientHome();return}
+  let oo=orders.find(x=>String(x.id)===String(id)); if(oo) oo.estado=estado;
+  addHistory(id,'Estado atualizado para: '+estado);
+  loadAdmin();updateClientHome();
+}
+function openAssign(id){
+  if(currentRole!=='admin'){alert('Apenas administrador atribui trabalhos.');return}
+  let ops=staff.filter(s=>s.role==='Operador'||s.role==='Atendimento'), mots=staff.filter(s=>s.role==='Motorista');
+  modalTitle.innerText='Atribuir Pedido EFW-'+String(id).padStart(4,'0');
+  modalBody.innerHTML=`<div class="card"><div class="field"><label>Operador / lavandaria</label><select id="assignOp">${ops.map(s=>`<option>${s.nome}</option>`).join('')}</select></div><div class="field"><label>Motorista / transportador</label><select id="assignMot">${mots.map(s=>`<option>${s.nome}</option>`).join('')}</select></div><button class="btn mt" onclick="saveAssign('${id}')">Guardar atribuição</button></div>`;
+  modal.style.display='flex'
+}
+function renderTeam(){
+  if(currentRole!=='admin'){adminContent.innerHTML='<div class="card">Sem permissão para criar perfis.</div>';return}
+  adminContent.innerHTML=`<div class="card"><h3>Criar perfil</h3><div class="field"><label>Nome</label><input id="stNome"></div><div class="field"><label>Apelido</label><input id="stApelido"></div><div class="field"><label>Telefone/login</label><input id="stTel"></div><div class="field"><label>Código/password</label><input id="stPass" type="password"></div><div class="field"><label>Cargo</label><select id="stRole"><option>Administrador</option><option>Financeiro</option><option>Operador</option><option>Motorista</option><option>Atendimento</option></select></div><button class="btn mt" onclick="saveStaff()">Criar perfil</button></div><div class="card mt"><h3>Perfis criados</h3>${staff.map((s,i)=>`<div class="item"><div class="row"><div><b>${s.nome}</b><p class="small">${s.telefone||''}</p></div><span class="role">${s.role}</span></div><button class="btn dangerBtn mini mt2" onclick="delStaff(${i})">Remover</button></div>`).join('')}</div>`
+}
+function saveStaff(){
+  let role=stRole.value, nome=stNome.value||'Funcionário', apelido=stApelido.value||'', telefone=stTel.value||'', pass=stPass.value||'1234';
+  staff.push({nome,role,telefone});localStorage.setItem('ef_staff',JSON.stringify(staff));
+  users.push({nome,apelido,telefone,pass,role:role.toLowerCase()});localStorage.setItem('ef_users',JSON.stringify(users));
+  renderTeam()
+}
+function saveFund(){
+  funds.push({desc:fundDesc.value,val:fundVal.value,status:'Pendente',data:today(),solicitante:currentUser,finalidade:fundDesc.value});
+  localStorage.setItem('ef_funds',JSON.stringify(funds));incNotif('funds');renderFunds()
+}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  nav.style.display=['home','order','tracking','docs','chat','profile'].includes(id)?'grid':'none';
+  window.lastScreen=id;
+}
+window.androidBack=function(){
+  if(modal && modal.style.display==='flex'){closeModal();return true}
+  if(['order','tracking','docs','chat','profile'].includes(window.lastScreen)){tab('home');return true}
+  if(window.lastScreen==='admin'){show('login');return true}
+  if(window.lastScreen==='login'){show('landing');return true}
+  return false
+}
+function refreshApp(){loadAdmin().then(()=>{updateClientHome();renderBadges();renderProofs();})}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden) refreshApp()});
 
 </script>
 </body>
