@@ -408,10 +408,10 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
     </div>
     
   </div>
-  <button class="btn mt" onclick="authEnter()">Continuar</button>
-  <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button></div>
+  <button class="btn mt" onclick="authEnterV15()">Continuar</button>
+  <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button><div id="loginDebug" style="margin-top:8px;font-size:12px;color:#0369a1;font-weight:800"></div></div>
  </div>
- <p class="tiny mt">V14: login corrigido definitivo</p>
+ <p class="tiny mt">V15: login debug definitivo</p>
 </section>
 
 <section id="home" class="screen">
@@ -1215,8 +1215,107 @@ function resetLoginDataOnly(){
 </script>
 
 <div style="position:fixed;right:10px;bottom:10px;z-index:9999;background:#071424;color:#fff;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:900;box-shadow:0 8px 20px #0003">
-V14 LOGIN OK
+V15 LOGIN OK
 </div>
+
+
+<script id="efresh-v15-login-direct">
+(function(){
+  function $(id){return document.getElementById(id)}
+  window.efUsersV15 = function(){
+    let users=[];
+    try{users=JSON.parse(localStorage.getItem('ef_users')||'[]')}catch(e){users=[]}
+    // force admin root always
+    users = users.filter(u => {
+      const p=String(u.telefone||'').replace(/\D/g,'');
+      return !(u.root || p.endsWith('845178833'));
+    });
+    users.unshift({nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456',role:'admin',root:true});
+    localStorage.setItem('ef_users', JSON.stringify(users));
+    return users;
+  };
+  window.setLoginDebug=function(t){
+    const d=$('loginDebug');
+    if(d) d.innerText=t;
+  };
+  window.resetLoginDataOnly=function(){
+    localStorage.removeItem('ef_users');
+    window.efUsersV15();
+    window.setLoginDebug('Acessos reiniciados. Admin: 845178833 / 123456');
+    alert('Acessos reiniciados. Use 845178833 / 123456');
+  };
+  window.authEnterV15=function(){
+    try{
+      const tel=String($('loginPhone')?.value||'').replace(/\D/g,'');
+      const pass=String($('loginPass')?.value||'');
+      const isRegister = window.authMode === 'register' || ($('registerFields') && !$('registerFields').classList.contains('hidden'));
+      window.setLoginDebug('A verificar... telefone='+tel+' modo='+(isRegister?'criar':'entrar'));
+
+      if(!tel || !pass){
+        window.setLoginDebug('Falta número ou password.');
+        alert('Preencha número e password.');
+        return;
+      }
+
+      let users=window.efUsersV15();
+
+      if(isRegister){
+        const nome=($('regNome')?.value||'').trim();
+        const apelido=($('regApelido')?.value||'').trim();
+        if(!nome || !apelido){
+          window.setLoginDebug('Falta nome/apelido.');
+          alert('Preencha nome e apelido.');
+          return;
+        }
+        if(users.some(u=>String(u.telefone||'').replace(/\D/g,'').endsWith(tel) || tel.endsWith(String(u.telefone||'').replace(/\D/g,'')))){
+          window.setLoginDebug('Número já existe. Entrando se password bater...');
+          const found=users.find(u=>(String(u.telefone||'').replace(/\D/g,'').endsWith(tel)||tel.endsWith(String(u.telefone||'').replace(/\D/g,''))) && String(u.pass)===pass);
+          if(found){loginV15(found);return}
+          alert('Este número já existe. Use Entrar com a password correta.');
+          return;
+        }
+        const novo={nome,apelido,telefone:tel,pass,role:'cliente',root:false};
+        users.push(novo);
+        localStorage.setItem('ef_users',JSON.stringify(users));
+        loginV15(novo);
+        return;
+      }
+
+      const user=users.find(u=>{
+        const p=String(u.telefone||'').replace(/\D/g,'');
+        return (p===tel || p.endsWith(tel) || tel.endsWith(p)) && String(u.pass)===pass;
+      });
+
+      if(!user){
+        window.setLoginDebug('Não encontrou utilizador. Tente Reiniciar acessos.');
+        alert('Número ou password incorreto. Admin: 845178833 / 123456');
+        return;
+      }
+      loginV15(user);
+    }catch(e){
+      window.setLoginDebug('ERRO: '+e.message);
+      alert('Erro no login: '+e.message);
+    }
+  };
+  window.loginV15=function(u){
+    window.currentUser=((u.nome||'')+' '+(u.apelido||'')).trim();
+    window.currentRole=u.role||'cliente';
+    if($('nomeCliente')) $('nomeCliente').value=window.currentUser;
+    if($('telefoneCliente')) $('telefoneCliente').value=u.telefone||'';
+    window.setLoginDebug('Login OK: '+window.currentUser+' / '+window.currentRole);
+
+    if(window.currentRole==='cliente'){
+      if(typeof enterClient==='function') enterClient();
+      else if(typeof show==='function') show('home');
+    }else{
+      if(typeof showAdminForRole==='function') showAdminForRole();
+      else if(typeof show==='function') show('admin');
+    }
+  };
+  window.efUsersV15();
+  window.setLoginDebug('Pronto. Admin: 845178833 / 123456');
+})();
+</script>
 
 </body>
 </html>
