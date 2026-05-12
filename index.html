@@ -36,10 +36,222 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
 .table{width:100%;border-collapse:collapse;font-size:12px}.table td,.table th{padding:8px;border-bottom:1px solid var(--l);text-align:left}.mapbox{border:1px solid var(--l);border-radius:18px;overflow:hidden;background:#f8fafc}.mapbox iframe{width:100%;height:170px;border:0}.progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--b),var(--g));width:0%}.donut{width:150px;height:150px;border-radius:50%;margin:auto;background:conic-gradient(var(--g) 0 40%,var(--b) 40% 75%,var(--y) 75% 100%);display:flex;align-items:center;justify-content:center}.donut div{background:#fff;width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900}
 .role{font-size:11px;padding:6px 9px;border-radius:99px;background:#e2e8f0;color:#334155;font-weight:900}.locked{opacity:.45;pointer-events:none}.tag{font-size:11px;background:#f1f5f9;border:1px solid var(--l);padding:5px 7px;border-radius:9px;display:inline-block;margin-top:5px}
 </style>
+
+<style id="efresh-v9-cargo-adapted-layer">
+  :root{
+    --efresh-blue:#0284c7;
+    --efresh-green:#10b981;
+    --efresh-navy:#071424;
+    --efresh-soft:#f8fafc;
+    --efresh-line:rgba(2,132,199,.14);
+    --efresh-glow:0 26px 70px rgba(2,132,199,.18);
+    --efresh-glow-green:0 22px 58px rgba(16,185,129,.18);
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(2,132,199,.18), transparent 28%),
+      radial-gradient(circle at 92% 18%, rgba(16,185,129,.15), transparent 30%),
+      linear-gradient(180deg,#ffffff 0%,#f4fbff 55%,#ecfdf5 100%);
+  }
+
+  .screen{animation:f .24s ease both}
+  .card,.kpi,.service,.item,.modalBox{
+    box-shadow:0 22px 60px rgba(15,23,42,.10)!important;
+    border-color:rgba(2,132,199,.12)!important;
+  }
+  .card:hover,.service:hover,.item:hover{
+    transform:translateY(-2px);
+    transition:.18s ease;
+  }
+  .btn{
+    background:linear-gradient(90deg,var(--efresh-blue),var(--efresh-green))!important;
+    box-shadow:0 18px 38px rgba(16,185,129,.24)!important;
+  }
+  .btn2{
+    background:#fff!important;
+    color:var(--efresh-blue)!important;
+    border:1px solid rgba(2,132,199,.18)!important;
+    box-shadow:none!important;
+  }
+
+  #landing{
+    min-height:100vh;
+    padding:0;
+    background:
+      radial-gradient(circle at 8% 6%,rgba(2,132,199,.28),transparent 30%),
+      radial-gradient(circle at 94% 82%,rgba(16,185,129,.22),transparent 34%),
+      linear-gradient(140deg,#071424 0%,#08213d 50%,#064e3b 100%);
+    color:#fff;
+  }
+  .landing-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    padding:18px 20px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);
+  }
+  .landing-logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:1000;
+    font-size:20px;
+  }
+  .landing-mark{
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(135deg,var(--efresh-blue),var(--efresh-green));
+    box-shadow:0 18px 38px rgba(16,185,129,.28);
+  }
+  .landing-hero{
+    padding:34px 22px 24px;
+    text-align:center;
+  }
+  .landing-hero h1{
+    font-size:42px;
+    line-height:.96;
+    letter-spacing:-2.4px;
+    color:#fff;
+  }
+  .landing-hero p{
+    margin:16px auto 0;
+    color:rgba(255,255,255,.78);
+    line-height:1.5;
+    max-width:360px;
+  }
+  .landing-card{
+    margin:22px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:30px;
+    padding:18px;
+    backdrop-filter:blur(18px);
+  }
+  .landing-benefits{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:16px;
+  }
+  .benefit{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:20px;
+    padding:13px;
+    text-align:left;
+    font-size:13px;
+  }
+  .benefit b{display:block;color:#fff;margin-bottom:4px}
+  .benefit span{color:rgba(255,255,255,.72);font-size:12px;line-height:1.35}
+
+  .notif{
+    display:none;
+    min-width:18px;
+    height:18px;
+    border-radius:99px;
+    background:#ef4444;
+    color:white;
+    font-size:10px;
+    font-weight:1000;
+    align-items:center;
+    justify-content:center;
+    padding:0 5px;
+    margin-left:4px;
+    box-shadow:0 8px 18px rgba(239,68,68,.35);
+  }
+  .notif.show{display:inline-flex}
+  .bottom button{position:relative}
+  .bottom .notif{
+    position:absolute;
+    top:3px;
+    right:14px;
+    margin:0;
+  }
+
+  .finance-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .finance-box{
+    border:1px solid var(--l);
+    border-radius:18px;
+    padding:13px;
+    background:linear-gradient(180deg,#fff,#fbfdff);
+  }
+  .finance-box small{color:var(--m);font-weight:800}
+  .finance-box b{display:block;margin-top:5px;font-size:19px}
+
+  .terms-box{
+    line-height:1.55;
+    font-size:14px;
+    color:#334155;
+  }
+  .terms-box h3{margin-top:14px;margin-bottom:6px}
+  .proof-row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px;
+    align-items:center;
+  }
+  .timeline-log{
+    border-left:3px solid var(--efresh-green);
+    padding-left:12px;
+    margin-top:8px;
+  }
+  .timeline-log div{
+    padding:8px 0;
+    border-bottom:1px solid var(--l);
+    font-size:13px;
+    color:#334155;
+  }
+
+  .admin-badge-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:9px;
+  }
+  .dash-mini-chart{
+    height:18px;
+    background:#e2e8f0;
+    border-radius:99px;
+    overflow:hidden;
+    margin-top:8px;
+    display:flex;
+  }
+  .dash-mini-chart span:nth-child(1){background:var(--efresh-green)}
+  .dash-mini-chart span:nth-child(2){background:var(--efresh-blue)}
+  .dash-mini-chart span:nth-child(3){background:var(--y)}
+
+  @media(max-width:430px){
+    .landing-hero h1{font-size:36px}
+    .landing-benefits,.finance-grid{grid-template-columns:1fr}
+  }
+</style>
+
 </head>
 <body>
 <div class="app">
-<section id="login" class="screen active">
+<section id="landing" class="screen active">
+ <div class="landing-top"><div class="landing-logo"><div class="landing-mark">EF</div><span>EFresh</span></div><button class="btn btn2 mini" onclick="show('login')">Entrar</button></div>
+ <div class="landing-hero"><h1>Lavandaria premium com recolha e entrega.</h1><p>Peça recolha, acompanhe a roupa em tempo real, fale com a equipa, veja faturas, recibos e comprovativos no mesmo lugar.</p></div>
+ <div class="landing-card"><button class="btn" onclick="show('login')">Começar agora</button><button class="btn btn2 mt2" onclick="openWhatsApp()">Falar no WhatsApp</button><div class="landing-benefits"><div class="benefit"><b>📍 Tracking</b><span>Etapas da roupa por referência.</span></div><div class="benefit"><b>🧾 Recibos</b><span>Faturas, recibos e comprovativos.</span></div><div class="benefit"><b>🚚 Motorista</b><span>Plano de recolha e entrega.</span></div><div class="benefit"><b>👥 Equipa</b><span>Funcionário executa e conclui.</span></div></div></div>
+ <div class="landing-card terms-box"><h3>Transparência</h3><p>O preço é estimado antes da recolha. O valor final é confirmado após pesagem real da roupa na lavandaria.</p><button class="btn btn2 mt2" onclick="openTerms()">Termos e privacidade</button></div>
+</section>
+
+<section id="login" class="screen">
  <div class="logo">EF</div><div class="brand"><span class="blue">EF</span><span class="green">resh</span></div><div class="sub">LAVANDARIA</div>
  <p class="blue mt2"><b>Mais tempo para si.</b></p><p class="green mt2">O futuro da lavandaria chegou.</p>
  <div class="card mt" style="text-align:left">
@@ -100,6 +312,8 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
 <section id="docs" class="screen">
  <div class="header"><h1>Documentos</h1><button class="ib" onclick="tab('home')">⌂</button></div>
  <div class="card"><h3>Faturas e recibos</h3><p class="small mt2">Consulte valores, estado de pagamento e recibos digitais.</p><div id="clientDocs" class="mt"></div></div>
+ <div class="card mt"><h3>Comprovativos</h3><p class="small mt2">Anexe comprovativo de pagamento ou foto relacionada ao pedido.</p><div class="field"><label>Referência do pedido</label><input id="proofRef" placeholder="Ex: EFW-0001"></div><div class="field"><label>Ficheiro / descrição</label><input id="proofName" placeholder="Ex: comprovativo M-Pesa / foto da roupa"></div><button class="btn mt" onclick="saveProof()">Guardar comprovativo</button><div id="proofList" class="mt"></div></div>
+ <div class="card mt"><h3>Termos e privacidade</h3><p class="small mt2">Dados usados apenas para recolha, entrega, contacto, cobrança e histórico do serviço.</p><button class="btn btn2 mt2" onclick="openTerms()">Ver termos</button></div>
 </section>
 
 <section id="chat" class="screen">
@@ -115,7 +329,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
 <section id="admin" class="screen">
  <div class="header"><div><p class="small">Painel Pro</p><h1 id="panelTitle">Admin EFresh</h1></div><button class="ib" onclick="show('login')">↩</button></div>
  <div id="roleBadge" class="pill darkp mt2">Administrador</div>
- <div class="tabs mt2"><button id="aDash" class="active" onclick="adminTab('dash')">Dash</button><button id="aPedidos" onclick="adminTab('pedidos')">Pedidos</button><button id="aEquipe" onclick="adminTab('equipe')">Equipe</button><button id="aMais" onclick="adminTab('mais')">Mais</button></div>
+ <div class="tabs mt2"><button id="aDash" class="active" onclick="adminTab('dash')">Dash</button><button id="aPedidos" onclick="adminTab('pedidos')">Pedidos <span class="notif" id="badgePedidos">0</span></button><button id="aEquipe" onclick="adminTab('equipe')">Equipe</button><button id="aMais" onclick="adminTab('mais')">Mais <span class="notif" id="badgeFunds">0</span></button></div>
  <div id="adminMsg" class="notice"></div>
  <div class="grid3"><div class="kpi"><p class="small">Serviços</p><b id="kOrders">0</b></div><div class="kpi"><p class="small">Em curso</p><b id="kPend">0</b></div><div class="kpi"><p class="small">Receita</p><b id="kMoney">0</b></div></div>
  <div class="grid2 mt2"><button class="btn btn2 mini" onclick="loadAdmin()">Atualizar</button><button class="btn mini" id="btnFunds" onclick="openFunds()">Req. Fundos</button></div>
@@ -126,8 +340,8 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
  <button id="n-home" class="active" onclick="tab('home')"><span class="ico">⌂</span>Início</button>
  <button id="n-order" onclick="tab('order')"><span class="ico">＋</span>Pedido</button>
  <button id="n-tracking" onclick="tab('tracking')"><span class="ico">◎</span>Estado</button>
- <button id="n-docs" onclick="tab('docs')"><span class="ico">🧾</span>Docs</button>
- <button id="n-chat" onclick="tab('chat')"><span class="ico">💬</span>Chat</button>
+ <button id="n-docs" onclick="tab('docs')"><span class="notif" id="badgeDocs">0</span><span class="ico">🧾</span>Docs</button>
+ <button id="n-chat" onclick="tab('chat')"><span class="notif" id="badgeChat">0</span><span class="ico">💬</span>Chat</button>
 </nav>
 
 <div class="modal" id="modal"><div class="modalBox"><div class="row"><h2 id="modalTitle">Detalhes</h2><button class="ib" onclick="closeModal()">✕</button></div><div id="modalBody" class="mt"></div></div></div>
@@ -181,39 +395,127 @@ function detectLocation(){if(!navigator.geolocation){alert('Localização não s
 function syncProfile(){profileName.value=nomeCliente.value;profilePhone.value=telefoneCliente.value;profileAddress.value=address?.value||''}
 function saveProfile(){nomeCliente.value=profileName.value;telefoneCliente.value=profilePhone.value;address.value=profileAddress.value;updateMap();alert('Perfil guardado')}
 async function submitOrder(){submitBtn.innerText='A gravar...';submitBtn.disabled=true;try{let est=calcEstimate();let cliente=await post('clientes',{nome:nomeCliente.value||'Cliente EFresh',email:email.value||'',telefone:telefoneCliente.value||'',endereco:address.value||''});let pedido={cliente_id:cliente[0].id,servico:est.servicos,quantidade:(pecas.value?pecas.value+' peças ':'')+(kg.value?kg.value+' kg':''),endereco_recolha:address.value||'',horario:(pickupDate.value||'')+' das '+(hIni.value||'')+' às '+(hFim.value||''),observacoes:obs.value||'',estado:'Pedido recebido',valor:String(est.totalGeral)};let p=(await post('pedidos',pedido))[0];afterOrderCreated(p,est)}catch(e){let id=Date.now();let est=calcEstimate();let p={id,servico:est.servicos,quantidade:(pecas.value?pecas.value+' peças ':'')+(kg.value?kg.value+' kg':''),endereco_recolha:address.value||'',horario:(pickupDate.value||'')+' das '+(hIni.value||'')+' às '+(hFim.value||''),observacoes:obs.value||'',estado:'Pedido recebido',valor:String(est.totalGeral),criado_em:new Date().toISOString()};localOrders.push(p);localStorage.setItem('ef_local_orders',JSON.stringify(localOrders));afterOrderCreated(p,est);msg('orderMsg','Pedido gravado localmente. Supabase indisponível ou sem tabela completa.','success')}finally{submitBtn.innerText='Confirmar pedido';submitBtn.disabled=false}}
-function afterOrderCreated(p,est){currentPedidoId=p.id;currentStep=0;trackId.innerText='EFW-'+String(p.id).padStart(4,'0');trackService.innerText=p.servico;trackStatus.innerText=p.estado;hStatus.innerText=p.estado;hValor.innerText=est.totalGeral+' MT';docs.push({ref:'FAT-'+String(p.id).padStart(4,'0'),pedido:p.id,tipo:'Fatura',valor:est.totalGeral,estado:'Pendente',data:today()});localStorage.setItem('ef_docs',JSON.stringify(docs));msg('orderMsg','Pedido gravado com sucesso ✅');renderActive();renderTrackingList();tab('tracking')}
+function afterOrderCreated(p,est){currentPedidoId=p.id;currentStep=0;trackId.innerText='EFW-'+String(p.id).padStart(4,'0');trackService.innerText=p.servico;trackStatus.innerText=p.estado;hStatus.innerText=p.estado;hValor.innerText=est.totalGeral+' MT';docs.push({ref:'FAT-'+String(p.id).padStart(4,'0'),pedido:p.id,tipo:'Fatura',valor:est.totalGeral,estado:'Pendente',data:today()});localStorage.setItem('ef_docs',JSON.stringify(docs));notifyNewOrder(p.id);msg('orderMsg','Pedido gravado com sucesso ✅');sendSystemMessage('Novo pedido criado: EFW-'+String(p.id).padStart(4,'0'));renderActive();renderTrackingList();tab('tracking')}
 function renderActive(){let local=docs.slice(-3).reverse();activeRequests.innerHTML=local.length?'<div class="card"><h3>Progresso das solicitações</h3>'+local.map(d=>{let pct=d.estado==='Pago'?100:25;return `<div class="item"><div class="row"><b>Pedido EFW-${String(d.pedido).padStart(4,'0')}</b><span class="pill warn">${d.estado}</span></div><div class="progress mt2"><div class="bar" style="width:${pct}%"></div></div></div>`}).join('')+'</div>':''}
 function renderTrackingList(){let b=trackingList;if(!docs.length){b.innerHTML='<p class="small">Sem pedidos para acompanhar.</p>';trackingDetail.style.display='none';return}b.innerHTML=docs.map(d=>`<button class="btn btn2 mt2" onclick="selectTracking(${d.pedido})">EFW-${String(d.pedido).padStart(4,'0')} • ${d.estado}</button>`).join('')}
 function selectTracking(id){currentPedidoId=id;let d=docs.find(x=>x.pedido==id);let a=assignments[id]||{};currentStep=d?.estado==='Pago'?8:0;trackId.innerText='EFW-'+String(id).padStart(4,'0');trackService.innerText=d?.tipo||'Pedido EFresh';trackStatus.innerText=d?.estado||'Em curso';driverLine.innerText='Motorista: '+(a.motorista||'não atribuído');operatorLine.innerText='Operador: '+(a.operador||'não atribuído');trackingDetail.style.display='block';renderSteps()}
 function renderSteps(){stepsBox.innerHTML='';STAGES.forEach((s,i)=>stepsBox.innerHTML+=`<div class="step"><div><div class="dot ${i<=currentStep?'done':''}">${i<currentStep?'✓':i+1}</div>${i<STAGES.length-1?`<div class="line ${i<currentStep?'done':''}"></div>`:''}</div><div style="padding-top:5px;font-weight:850">${s}</div></div>`)}
-function renderDocs(){if(!docs.length){clientDocs.innerHTML='<p class="small">Ainda não há documentos.</p>';return}clientDocs.innerHTML=docs.map(d=>`<div class="item"><div class="row"><div><b>${d.ref}</b><p class="small">${d.tipo} • Pedido EFW-${String(d.pedido).padStart(4,'0')}</p></div><span class="pill ${d.estado==='Pago'?'ok':'warn'}">${d.estado}</span></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><button class="btn btn2 mini mt2" onclick="printDoc('${d.ref}')">Ver/Imprimir</button></div>`).join('')}
+function renderDocs(){clearNotif('docs');renderProofs();if(!docs.length){clientDocs.innerHTML='<p class="small">Ainda não há documentos.</p>';return}clientDocs.innerHTML=docs.map(d=>`<div class="item"><div class="row"><div><b>${d.ref}</b><p class="small">${d.tipo} • Pedido EFW-${String(d.pedido).padStart(4,'0')}</p></div><span class="pill ${d.estado==='Pago'?'ok':'warn'}">${d.estado}</span></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><button class="btn btn2 mini mt2" onclick="printDoc('${d.ref}')">Ver/Imprimir</button></div>`).join('')}
 function printDoc(ref){let d=docs.find(x=>x.ref===ref);modalTitle.innerText=d.tipo+' '+d.ref;modalBody.innerHTML=`<div class="card"><h2>EFresh Lavandaria</h2><p class="small">Documento: ${d.ref}</p><p class="small">Data: ${d.data}</p><hr class="mt"><div class="row mt"><span>Pedido</span><b>EFW-${String(d.pedido).padStart(4,'0')}</b></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><div class="row mt2"><span>Estado</span><b>${d.estado}</b></div><button class="btn mt" onclick="window.print()">Imprimir / PDF</button></div>`;modal.style.display='flex'}
 function closeModal(){modal.style.display='none'}
 async function loadAdmin(){adminContent.innerHTML='<div class="card">A carregar...</div>';try{orders=await get('pedidos','?select=*&order=criado_em.desc')}catch(e){orders=[]}try{clients=await get('clientes','?select=*&order=criado_em.desc')}catch(e){clients=[]}try{drivers=await get('motoristas','?select=*&order=criado_em.desc')}catch(e){drivers=[]}orders=[...orders,...localOrders];kOrders.innerText=filterByRole(orders).length;kPend.innerText=filterByRole(orders).filter(o=>o.estado!=='Entregue').length;kMoney.innerText=filterByRole(orders).reduce((a,o)=>a+(parseFloat(o.valor)||0),0)+' MT';msg('adminMsg','Dados carregados ✅');renderAdmin()}
 function filterByRole(list){if(currentRole==='admin'||currentRole==='financeiro')return list;if(currentRole==='operador')return list.filter(o=>(assignments[o.id]||{}).operador===currentUser);if(currentRole==='motorista')return list.filter(o=>(assignments[o.id]||{}).motorista===currentUser);return list}
 function adminTab(t){admin=t;['Dash','Pedidos','Equipe','Mais'].forEach(x=>document.getElementById('a'+x).classList.remove('active'));document.getElementById('a'+(t==='dash'?'Dash':t==='equipe'?'Equipe':t==='mais'?'Mais':'Pedidos')).classList.add('active');renderAdmin()}
 function renderAdmin(){if(admin==='dash')return renderDashboard();if(admin==='pedidos')return renderOrders();if(admin==='equipe')return renderTeam();renderMore()}
-function renderDashboard(){let list=filterByRole(orders),done=list.filter(o=>o.estado==='Entregue').length, pend=list.filter(o=>o.estado==='Pedido recebido').length, curso=list.length-done-pend;adminContent.innerHTML=`<div class="card"><h3>Dashboard</h3><div class="donut mt"><div>${list.length}<br><span class="tiny">serviços</span></div></div><div class="grid3 mt"><div class="kpi"><p class="small">Concluídos</p><b>${done}</b></div><div class="kpi"><p class="small">Em curso</p><b>${curso}</b></div><div class="kpi"><p class="small">Pendentes</p><b>${pend}</b></div></div></div><div class="card mt"><h3>Trabalho do dia</h3>${list.slice(0,5).map(o=>`<div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.estado} • ${o.servico}</p></div>`).join('')||'<p class="small mt2">Sem tarefas atribuídas.</p>'}</div><div class="card mt"><h3>Relatório mensal</h3><div class="grid2"><div class="field"><label>De</label><input type="date" id="rDe" value="${today().slice(0,8)}01"></div><div class="field"><label>Até</label><input type="date" id="rAte" value="${today()}"></div></div><button class="btn mt" onclick="printReport()">Exportar PDF</button></div>`}
-function renderOrders(){let list=filterByRole(orders);adminContent.innerHTML=list.length?list.map(o=>{let a=assignments[o.id]||{};return `<div class="item"><div class="row"><div><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.servico}</p><p class="small">${o.endereco_recolha||''}</p><span class="tag">Operador: ${a.operador||'-'}</span> <span class="tag">Motorista: ${a.motorista||'-'}</span></div><span class="pill ${o.estado==='Entregue'?'ok':'warn'}">${o.estado||''}</span></div><div class="field"><select onchange="setEstado(${o.id},this.value)">${STAGES.map(s=>`<option ${s===o.estado?'selected':''}>${s}</option>`).join('')}</select></div><div class="grid2 mt2"><button class="btn btn2 mini" onclick="openAssign('${o.id}')">Atribuir</button><button class="btn mini" onclick="openWork('${o.id}')">Executar</button></div></div>`}).join(''):'<div class="card">Sem pedidos nesta conta/função.</div>'}
-async function setEstado(id,estado){let lo=localOrders.find(x=>String(x.id)===String(id));if(lo){lo.estado=estado;localStorage.setItem('ef_local_orders',JSON.stringify(localOrders));loadAdmin();return}try{await patch('pedidos',id,{estado});msg('adminMsg','Estado atualizado ✅');loadAdmin()}catch(e){msg('adminMsg','Erro: '+e.message,'error')}}
+function renderDashboard(){let list=filterByRole(orders),done=list.filter(o=>o.estado==='Entregue').length, pend=list.filter(o=>o.estado==='Pedido recebido').length, curso=list.length-done-pend;let total=list.reduce((a,o)=>a+(parseFloat(o.valor)||0),0);let pDone=list.length?Math.round(done/list.length*100):0,pCurso=list.length?Math.round(curso/list.length*100):0,pPend=Math.max(0,100-pDone-pCurso);adminContent.innerHTML=`<div class="card"><h3>Dashboard</h3><div class="donut mt"><div>${list.length}<br><span class="tiny">serviços</span></div></div><div class="dash-mini-chart"><span style="width:${pDone}%"></span><span style="width:${pCurso}%"></span><span style="width:${pPend}%"></span></div><div class="grid3 mt"><div class="kpi"><p class="small">Concluídos</p><b>${done}</b></div><div class="kpi"><p class="small">Em curso</p><b>${curso}</b></div><div class="kpi"><p class="small">Pendentes</p><b>${pend}</b></div></div><div class="admin-badge-row"><span class="pill ok">Concluídos ${pDone}%</span><span class="pill info">Em curso ${pCurso}%</span><span class="pill warn">Pendentes ${pPend}%</span></div></div><div class="card mt"><h3>Trabalho do dia</h3>${list.slice(0,5).map(o=>`<div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.estado} • ${o.servico}</p></div>`).join('')||'<p class="small mt2">Sem tarefas atribuídas.</p>'}</div><div class="card mt"><h3>Resumo financeiro</h3><div class="finance-grid"><div class="finance-box"><small>Receita estimada</small><b>${total} MT</b></div><div class="finance-box"><small>Pedidos</small><b>${list.length}</b></div></div><button class="btn mt" onclick="openFinancePanel()">Abrir financeiro</button></div><div class="card mt"><h3>Relatório mensal</h3><div class="grid2"><div class="field"><label>De</label><input type="date" id="rDe" value="${today().slice(0,8)}01"></div><div class="field"><label>Até</label><input type="date" id="rAte" value="${today()}"></div></div><button class="btn mt" onclick="printReport()">Exportar PDF</button></div>`}
+function renderOrders(){clearNotif('pedidos');let list=filterByRole(orders);adminContent.innerHTML=list.length?list.map(o=>{let a=assignments[o.id]||{};return `<div class="item"><div class="row"><div><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.servico}</p><p class="small">${o.endereco_recolha||''}</p><span class="tag">Operador: ${a.operador||'-'}</span> <span class="tag">Motorista: ${a.motorista||'-'}</span></div><span class="pill ${o.estado==='Entregue'?'ok':'warn'}">${o.estado||''}</span></div><div class="field"><select onchange="setEstado(${o.id},this.value)">${STAGES.map(s=>`<option ${s===o.estado?'selected':''}>${s}</option>`).join('')}</select></div><div class="grid2 mt2"><button class="btn btn2 mini" onclick="openAssign('${o.id}')">Atribuir</button><button class="btn mini" onclick="openWork('${o.id}')">Executar</button></div></div>`}).join(''):'<div class="card">Sem pedidos nesta conta/função.</div>'}
+async function setEstado(id,estado){let lo=localOrders.find(x=>String(x.id)===String(id));if(lo){lo.estado=estado;addHistory(id,'Estado atualizado para: '+estado);localStorage.setItem('ef_local_orders',JSON.stringify(localOrders));loadAdmin();return}try{await patch('pedidos',id,{estado});addHistory(id,'Estado atualizado para: '+estado);msg('adminMsg','Estado atualizado ✅');loadAdmin()}catch(e){msg('adminMsg','Erro: '+e.message,'error')}}
 function openAssign(id){if(currentRole!=='admin'){alert('Apenas administrador atribui trabalhos.');return}let ops=staff.filter(s=>s.role==='Operador'||s.role==='Administrador'), mots=staff.filter(s=>s.role==='Motorista');modalTitle.innerText='Atribuir Pedido EFW-'+String(id).padStart(4,'0');modalBody.innerHTML=`<div class="card"><div class="field"><label>Operador / lavandaria</label><select id="assignOp">${ops.map(s=>`<option>${s.nome}</option>`).join('')}</select></div><div class="field"><label>Motorista / transportador</label><select id="assignMot">${mots.map(s=>`<option>${s.nome}</option>`).join('')}</select></div><button class="btn mt" onclick="saveAssign('${id}')">Guardar atribuição</button></div>`;modal.style.display='flex'}
-function saveAssign(id){assignments[id]={operador:assignOp.value,motorista:assignMot.value};localStorage.setItem('ef_assignments',JSON.stringify(assignments));closeModal();loadAdmin()}
-function openWork(id){let o=orders.find(x=>String(x.id)===String(id));modalTitle.innerText='Executar EFW-'+String(id).padStart(4,'0');modalBody.innerHTML=`<div class="card"><p><b>Serviço:</b> ${o.servico}</p><p><b>Endereço:</b> ${o.endereco_recolha||'-'}</p><p><b>Horário:</b> ${o.horario||'-'}</p><p><b>Estado:</b> ${o.estado||'-'}</p><div class="grid2 mt"><button class="btn btn2" onclick="setEstado('${id}','Motorista a caminho');closeModal()">Iniciar rota</button><button class="btn btn2" onclick="setEstado('${id}','Roupa recolhida');closeModal()">Recolhido</button><button class="btn btn2" onclick="setEstado('${id}','Em lavagem');closeModal()">Iniciar lavagem</button><button class="btn btn2" onclick="setEstado('${id}','Controle de qualidade');closeModal()">Finalizar serviço</button><button class="btn" onclick="setEstado('${id}','Entregue');closeModal()">Concluir</button><button class="btn btn2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Mapa</button></div></div>`;modal.style.display='flex'}
+function saveAssign(id){assignments[id]={operador:assignOp.value,motorista:assignMot.value};addHistory(id,'Pedido atribuído ao operador '+assignOp.value+' e motorista '+assignMot.value+'.');localStorage.setItem('ef_assignments',JSON.stringify(assignments));closeModal();loadAdmin()}
+function openWork(id){let o=orders.find(x=>String(x.id)===String(id));modalTitle.innerText='Executar EFW-'+String(id).padStart(4,'0');modalBody.innerHTML=`<div class="card"><p><b>Serviço:</b> ${o.servico}</p><p><b>Endereço:</b> ${o.endereco_recolha||'-'}</p><p><b>Horário:</b> ${o.horario||'-'}</p><p><b>Estado:</b> ${o.estado||'-'}</p><h3 class="mt">Histórico operacional</h3>${renderHistory(id)}<div class="grid2 mt"><button class="btn btn2" onclick="setEstado('${id}','Motorista a caminho');closeModal()">Iniciar rota</button><button class="btn btn2" onclick="setEstado('${id}','Roupa recolhida');closeModal()">Recolhido</button><button class="btn btn2" onclick="setEstado('${id}','Em lavagem');closeModal()">Iniciar lavagem</button><button class="btn btn2" onclick="setEstado('${id}','Controle de qualidade');closeModal()">Finalizar serviço</button><button class="btn" onclick="setEstado('${id}','Entregue');closeModal()">Concluir</button><button class="btn btn2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Mapa</button></div></div>`;modal.style.display='flex'}
 function renderTeam(){if(currentRole!=='admin'){adminContent.innerHTML='<div class="card">Sem permissão para criar perfis.</div>';return}adminContent.innerHTML=`<div class="card"><h3>Criar perfil</h3><div class="field"><label>Nome</label><input id="stNome"></div><div class="field"><label>Telefone</label><input id="stTel"></div><div class="field"><label>Cargo</label><select id="stRole"><option>Administrador</option><option>Financeiro</option><option>Operador</option><option>Motorista</option><option>Atendimento</option></select></div><button class="btn mt" onclick="saveStaff()">Criar perfil</button></div><div class="card mt"><h3>Perfis criados</h3>${staff.map((s,i)=>`<div class="item"><div class="row"><div><b>${s.nome}</b><p class="small">${s.telefone||''}</p></div><span class="role">${s.role}</span></div><button class="btn dangerBtn mini mt2" onclick="delStaff(${i})">Remover</button></div>`).join('')}</div>`}
 function saveStaff(){staff.push({nome:stNome.value||'Funcionário',role:stRole.value,telefone:stTel.value||''});localStorage.setItem('ef_staff',JSON.stringify(staff));renderTeam()}
 function delStaff(i){staff.splice(i,1);localStorage.setItem('ef_staff',JSON.stringify(staff));renderTeam()}
-function renderMore(){adminContent.innerHTML=`<div class="grid2"><button class="service ${currentRole!=='admin'?'locked':''}" onclick="adminTab('equipe')">👥<br><b>Funcionários</b></button><button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button><button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button><button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button></div>`}
+function renderMore(){adminContent.innerHTML=`<div class="grid2"><button class="service ${currentRole!=='admin'?'locked':''}" onclick="adminTab('equipe')">👥<br><b>Funcionários</b></button><button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button><button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button><button class="service" onclick="openFinancePanel()">📊<br><b>Financeiro</b></button><button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button></div>`}
 function openDrivers(){modalTitle.innerText='Plano dos motoristas';let mot=staff.filter(s=>s.role==='Motorista');modalBody.innerHTML=mot.map(m=>`<div class="item"><b>${m.nome}</b><p class="small">${m.telefone||''}</p>${orders.filter(o=>(assignments[o.id]||{}).motorista===m.nome).map(o=>`<span class="tag">EFW-${String(o.id).padStart(4,'0')} • ${o.estado}</span>`).join('')||'<p class="small">Sem tarefas.</p>'}</div>`).join('')||'<p class="small">Sem motoristas.</p>';modal.style.display='flex'}
 function openFunds(){modalTitle.innerText='Requisição de fundos';modalBody.innerHTML=`<div class="card"><div class="field"><label>Produto/necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div><div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div><button class="btn mt" onclick="saveFund()">Submeter</button></div><div id="fundList" class="mt"></div>`;modal.style.display='flex';renderFunds()}
-function saveFund(){funds.push({desc:fundDesc.value,val:fundVal.value,status:'Pendente',data:today(),solicitante:currentUser});localStorage.setItem('ef_funds',JSON.stringify(funds));renderFunds()}
+function saveFund(){funds.push({desc:fundDesc.value,val:fundVal.value,status:'Pendente',data:today(),solicitante:currentUser});localStorage.setItem('ef_funds',JSON.stringify(funds));incNotif('funds');renderFunds()}
 function renderFunds(){fundList.innerHTML=funds.length?funds.map((f,i)=>`<div class="item"><b>${f.desc}</b><p class="small">${f.val} MT • ${f.data} • ${f.solicitante||''}</p><span class="pill ${f.status==='Autorizado'?'ok':'warn'}">${f.status}</span><button class="btn btn2 mini mt2 ${currentRole!=='admin'?'locked':''}" onclick="funds[${i}].status='Autorizado';localStorage.setItem('ef_funds',JSON.stringify(funds));renderFunds()">Autorizar</button></div>`).join(''):'<p class="small">Sem requisições.</p>'}
 function openCompleted(){modalTitle.innerText='Pedidos concluídos';modalBody.innerHTML=orders.filter(o=>o.estado==='Entregue').map(o=>`<div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${o.servico} • ${o.valor} MT</p></div>`).join('')||'<p class="small">Sem concluídos.</p>';modal.style.display='flex'}
 function invoice(id,valor){let existing=docs.find(d=>d.pedido==id&&d.tipo==='Recibo');if(!existing){docs.push({ref:'RCB-'+String(id).padStart(4,'0'),pedido:id,tipo:'Recibo',valor:valor||0,estado:'Pago',data:today()});localStorage.setItem('ef_docs',JSON.stringify(docs))}alert('Recibo criado.')}
 function printReport(){window.print()}
-function sendMsg(){if(!chatText.value.trim())return;messages.innerHTML+=`<div class="msg clientMsg">${chatText.value}</div>`;chatText.value=''}
+function sendMsg(){if(!chatText.value.trim())return;messages.innerHTML+=`<div class="msg clientMsg">${chatText.value}</div>`;incNotif('chat');chatText.value=''}
 function callEFresh(){window.location.href='tel:'+PHONE_NUMBER}
 function openWhatsApp(){window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent('Olá EFresh, preciso de apoio.'),'_blank')}
 function openOrderWhatsApp(s,e){window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent('Pedido EFresh: '+s+' | Endereço: '+e),'_blank')}
+
+/* ===== EFresh V9 - EF Cargo Clear features adapted safely ===== */
+let efNotifications = JSON.parse(localStorage.getItem('ef_notifications')||'{"pedidos":0,"docs":0,"chat":0,"funds":0}');
+let proofs = JSON.parse(localStorage.getItem('ef_proofs')||'[]');
+let historyLog = JSON.parse(localStorage.getItem('ef_history')||'{}');
+
+function saveLocal(key,val){localStorage.setItem(key, JSON.stringify(val))}
+function incNotif(key){efNotifications[key]=(efNotifications[key]||0)+1;saveLocal('ef_notifications',efNotifications);renderBadges()}
+function clearNotif(key){efNotifications[key]=0;saveLocal('ef_notifications',efNotifications);renderBadges()}
+function renderBadges(){
+  const pairs=[['badgePedidos','pedidos'],['badgeDocs','docs'],['badgeChat','chat'],['badgeFunds','funds']];
+  pairs.forEach(([id,key])=>{
+    const el=document.getElementById(id); if(!el) return;
+    const n=efNotifications[key]||0;
+    el.textContent=n;
+    el.classList.toggle('show', n>0);
+  });
+}
+function addHistory(id,text){
+  if(!historyLog[id]) historyLog[id]=[];
+  historyLog[id].push({text,at:new Date().toLocaleString(),user:currentUser||'Sistema'});
+  saveLocal('ef_history',historyLog);
+}
+function renderHistory(id){
+  const arr=historyLog[id]||[];
+  return arr.length ? `<div class="timeline-log">${arr.map(h=>`<div><b>${h.at}</b><br>${h.text}<br><span class="tiny">${h.user}</span></div>`).join('')}</div>` : '<p class="small">Sem histórico ainda.</p>';
+}
+function saveProof(){
+  const ref=(document.getElementById('proofRef')?.value||'').trim();
+  const name=(document.getElementById('proofName')?.value||'').trim();
+  if(!ref || !name){alert('Preencha a referência e o comprovativo.');return}
+  proofs.push({ref,name,data:today(),estado:'Recebido'});
+  saveLocal('ef_proofs',proofs);
+  incNotif('docs');
+  renderProofs();
+  alert('Comprovativo guardado.');
+}
+function renderProofs(){
+  const el=document.getElementById('proofList'); if(!el) return;
+  el.innerHTML = proofs.length ? proofs.slice().reverse().map(p=>`<div class="item"><div class="proof-row"><div><b>${p.ref}</b><p class="small">${p.name}</p><span class="pill ok">${p.estado}</span></div><span class="tiny">${p.data}</span></div></div>`).join('') : '<p class="small">Sem comprovativos.</p>';
+}
+function openTerms(){
+  modalTitle.innerText='Termos de uso e privacidade EFresh';
+  modalBody.innerHTML=`<div class="terms-box">
+    <h3>1. Uso dos dados</h3>
+    <p>A EFresh usa nome, telefone, endereço, localização aproximada, histórico de pedidos, pagamentos e mensagens apenas para executar recolha, lavagem, engomadoria, entrega, suporte e faturação.</p>
+    <h3>2. Preço estimado</h3>
+    <p>O valor apresentado no pedido é estimativo. O valor final pode ser corrigido após pesagem real, confirmação das peças e avaliação do tipo de roupa.</p>
+    <h3>3. Recolha e entrega</h3>
+    <p>O endereço informado pode ser aberto no Google Maps para facilitar o trabalho da equipa e do motorista.</p>
+    <h3>4. Comprovativos</h3>
+    <p>Comprovativos de pagamento e entrega ficam associados ao histórico do cliente e do pedido.</p>
+    <h3>5. Responsabilidades internas</h3>
+    <p>Administrador, financeiro, operador e motorista têm permissões diferentes conforme a função.</p>
+  </div>`;
+  modal.style.display='flex';
+}
+function openFinancePanel(){
+  const total=orders.reduce((a,o)=>a+(parseFloat(o.valor)||0),0);
+  const paid=docs.filter(d=>d.estado==='Pago').reduce((a,d)=>a+(parseFloat(d.valor)||0),0);
+  const pending=Math.max(0,total-paid);
+  const fundTotal=funds.reduce((a,f)=>a+(parseFloat(f.val)||0),0);
+  modalTitle.innerText='Painel financeiro EFresh';
+  modalBody.innerHTML=`<div class="finance-grid">
+    <div class="finance-box"><small>Receita estimada</small><b>${total} MT</b></div>
+    <div class="finance-box"><small>Recebido</small><b>${paid} MT</b></div>
+    <div class="finance-box"><small>Pendente</small><b>${pending} MT</b></div>
+    <div class="finance-box"><small>Fundos solicitados</small><b>${fundTotal} MT</b></div>
+  </div>
+  <div class="card mt"><h3>Controlo mensal</h3><div class="grid2"><div class="field"><label>De</label><input type="date" value="${today().slice(0,8)}01"></div><div class="field"><label>Até</label><input type="date" value="${today()}"></div></div><button class="btn mt" onclick="window.print()">Exportar PDF</button></div>
+  <div class="card mt"><h3>Nota</h3><p class="small">Este painel segue a lógica da EF Cargo: resumo interno, valores pendentes, recibos e requisições.</p></div>`;
+  modal.style.display='flex';
+}
+function sendSystemMessage(text){
+  messages.innerHTML+=`<div class="msg adminMsg">${text}</div>`;
+  incNotif('chat');
+}
+function notifyNewOrder(id){
+  incNotif('pedidos');
+  incNotif('docs');
+  addHistory(id,'Pedido criado pelo cliente.');
+}
+function renderBadgesAndProofs(){
+  renderBadges();
+  renderProofs();
+}
+document.addEventListener('DOMContentLoaded', renderBadgesAndProofs);
+
 </script>
 </body>
 </html>
