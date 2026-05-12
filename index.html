@@ -2710,9 +2710,311 @@ V21 LOGIN OK
 
   document.addEventListener('DOMContentLoaded',function(){
     ensurePanelV24();
-    var badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent='V24 FUNÇÕES OK';
-    if(typeof setLoginDebug==='function') setLoginDebug('V24 FUNÇÕES OK');
+    var badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent='V25 SYNC OK';
+    if(typeof setLoginDebug==='function') setLoginDebug('V25 SYNC OK');
   });
+})();
+</script>
+
+
+
+<style id="efresh-v25-cloud-sync-fix">
+  .app-version-badge{z-index:80!important}
+  .cloud-warn{background:#fff7ed!important;color:#9a3412!important;border:1px solid #fed7aa!important}
+</style>
+<script id="efresh-v25-cloud-sync-fix">
+(function(){
+  const V25='V25 SYNC OK';
+  const API=window.SUPABASE_REST_URL||'https://ijzrogjjpdhgxntsjdmg.supabase.co/rest/v1';
+  const KEY=window.SUPABASE_KEY||'sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg';
+  let cloudOK=false, cloudChecked=false;
+
+  function el(id){return document.getElementById(id)}
+  function digits(v){return String(v||'').replace(/\D/g,'')}
+  function read(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}}
+  function write(k,v){localStorage.setItem(k,JSON.stringify(v))}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+  function today(){return new Date().toISOString().slice(0,10)}
+  function head(prefer){let h={apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'}; if(prefer) h.Prefer=prefer; return h}
+  async function sget(t,q=''){let r=await fetch(API+'/'+t+q,{headers:head()}); if(!r.ok) throw new Error(await r.text()); return await r.json()}
+  async function spost(t,b){let r=await fetch(API+'/'+t,{method:'POST',headers:head('return=representation'),body:JSON.stringify(b)}); if(!r.ok) throw new Error(await r.text()); return await r.json()}
+  async function spatch(t,id,b){let r=await fetch(API+'/'+t+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:head('return=representation'),body:JSON.stringify(b)}); if(!r.ok) throw new Error(await r.text()); return await r.json()}
+  function currentPhone(){return digits(window.currentClientPhone || el('telefoneCliente')?.value || el('loginPhone')?.value || '')}
+  function currentName(){return window.currentUser || el('nomeCliente')?.value || 'Cliente EFresh'}
+  function money(v){return (parseFloat(v)||0).toLocaleString('pt-MZ')+' MT'}
+  function baseObs(o){return String(o||'').replace(/\n?__EFRESH_META__=[\s\S]*$/,'').trim()}
+  function metaOf(o){let s=String(o?.observacoes||''); let m=s.match(/__EFRESH_META__=([^\n]+)/); if(!m) return {}; try{return JSON.parse(decodeURIComponent(m[1]))}catch(e){return {}}}
+  function obsWithMeta(obs,meta){return (baseObs(obs)+(baseObs(obs)?'\n\n':'')+'__EFRESH_META__='+encodeURIComponent(JSON.stringify(meta))).trim()}
+
+  async function ensureCliente(nome,telefone,endereco){
+    telefone=digits(telefone);
+    let found=[];
+    if(telefone){ try{found=await sget('clientes','?select=*&telefone=ilike.*'+encodeURIComponent(telefone.slice(-8))+'*&limit=1')}catch(e){} }
+    if(found && found[0]) return found[0];
+    let c=(await spost('clientes',{nome:nome||'Cliente EFresh',telefone:telefone||'',email:'',endereco:endereco||''}))[0];
+    return c;
+  }
+
+  async function syncLocalOrdersToCloud(){
+    let local=read('ef_local_orders');
+    if(!local.length) return;
+    let remaining=[];
+    let docs=read('ef_docs');
+    for(const o of local){
+      try{
+        if(o.cloud_id){continue}
+        let c=await ensureCliente(o.cliente_nome||currentName(),o.cliente_telefone||currentPhone(),o.endereco_recolha||'');
+        let payload={
+          cliente_id:c.id,
+          servico:o.servico||'Serviço EFresh',
+          quantidade:o.quantidade||'',
+          endereco_recolha:o.endereco_recolha||'',
+          horario:o.horario||'',
+          observacoes:obsWithMeta(o.observacoes||'',{old_local_id:o.id,cliente_nome:o.cliente_nome||currentName(),cliente_telefone:digits(o.cliente_telefone||currentPhone())}),
+          estado:o.estado||'Pedido recebido',
+          valor:String(o.valor||0)
+        };
+        let saved=(await spost('pedidos',payload))[0];
+        docs.forEach(d=>{ if(String(d.pedido)===String(o.id)){ d.pedido=saved.id; d.ref=(d.tipo==='Recibo'?'RCB-':'FAT-')+String(saved.id).padStart(4,'0'); d.cliente_telefone=digits(o.cliente_telefone||currentPhone()); }});
+      }catch(e){ remaining.push(o); }
+    }
+    write('ef_local_orders',remaining); window.localOrders=remaining;
+    write('ef_docs',docs); window.docs=docs;
+  }
+
+  function annotateOrders(pedidos,clientes){
+    const cmap={}; (clientes||[]).forEach(c=>{cmap[String(c.id)]=c});
+    const nextAssign=Object.assign({}, window.assignments||{});
+    let out=(pedidos||[]).map(o=>{
+      const c=cmap[String(o.cliente_id)]||{};
+      const meta=metaOf(o);
+      if(meta.assign) nextAssign[o.id]=meta.assign;
+      return Object.assign({},o,{
+        cliente_nome: meta.cliente_nome || c.nome || o.cliente_nome || '',
+        cliente_telefone: digits(meta.cliente_telefone || c.telefone || o.cliente_telefone || '')
+      });
+    });
+    window.assignments=nextAssign; try{localStorage.setItem('ef_assignments',JSON.stringify(nextAssign))}catch(e){}
+    return out;
+  }
+
+  function ensureDocsForOrders(){
+    let ds=read('ef_docs');
+    const byPedidoTipo=new Set(ds.map(d=>String(d.pedido)+'|'+String(d.tipo)));
+    (window.orders||[]).forEach(o=>{
+      const k=String(o.id)+'|Fatura';
+      if(!byPedidoTipo.has(k)){
+        ds.push({ref:'FAT-'+String(o.id).padStart(4,'0'),pedido:o.id,tipo:'Fatura',valor:o.valor||0,estado:o.estado==='Entregue'?'Pendente':'Pendente',data:(o.criado_em||today()).slice(0,10),cliente_telefone:o.cliente_telefone||''});
+      }
+    });
+    write('ef_docs',ds); window.docs=ds;
+  }
+
+  window.getAllOrders=function(){
+    const base=cloudOK ? (window.orders||[]) : [].concat(window.orders||[], read('ef_local_orders'));
+    const seen=new Set();
+    return base.filter(o=>{let k=String(o.id); if(seen.has(k)) return false; seen.add(k); return true});
+  };
+
+  window.loadAdmin=async function(){
+    if(el('adminContent')) el('adminContent').innerHTML='<div class="card">A sincronizar com a nuvem...</div>';
+    try{
+      await syncLocalOrdersToCloud();
+      const clientes=await sget('clientes','?select=*&order=criado_em.desc');
+      const pedidos=await sget('pedidos','?select=*&order=criado_em.desc');
+      window.clients=clientes||[];
+      window.orders=annotateOrders(pedidos||[],clientes||[]);
+      window.localOrders=read('ef_local_orders');
+      cloudOK=true; cloudChecked=true;
+      ensureDocsForOrders();
+      if(typeof msg==='function') msg('adminMsg','Dados sincronizados na nuvem ✅');
+    }catch(e){
+      cloudOK=false; cloudChecked=true;
+      try{window.orders=[]; window.localOrders=read('ef_local_orders')}catch(_){ }
+      if(typeof msg==='function') msg('adminMsg','Sem sincronização na nuvem. A mostrar dados deste aparelho.','error');
+    }
+    const list=(typeof filterByRole==='function'?filterByRole(window.getAllOrders()):window.getAllOrders());
+    if(el('kOrders')) el('kOrders').innerText=list.length;
+    if(el('kPend')) el('kPend').innerText=list.filter(o=>!['Entregue','Concluído','Concluido'].includes(o.estado)).length;
+    if(el('kMoney')) el('kMoney').innerText=list.reduce((a,o)=>a+(parseFloat(o.valor)||0),0)+' MT';
+    if(typeof renderAdmin==='function') renderAdmin();
+    if(typeof renderBadges==='function') renderBadges();
+  };
+
+  window.getCurrentClientOrders=function(){
+    const phone=currentPhone();
+    const all=window.getAllOrders();
+    if(!phone) return [];
+    return all.filter(o=>{
+      const op=digits(o.cliente_telefone || o.telefone || '');
+      return op && (op===phone || op.endsWith(phone) || phone.endsWith(op));
+    });
+  };
+
+  window.submitOrder=async function(){
+    const btn=el('submitBtn'); if(btn){btn.innerText='A gravar...';btn.disabled=true;}
+    const est=(typeof calcEstimate==='function')?calcEstimate():{servicos:'Serviço EFresh',totalGeral:0};
+    const phone=currentPhone(), nome=currentName();
+    const localPayload={id:Date.now(),cliente_nome:nome,cliente_telefone:phone,servico:est.servicos,quantidade:(el('pecas')?.value?el('pecas').value+' peças ':'')+(el('kg')?.value?el('kg').value+' kg':''),endereco_recolha:el('address')?.value||'',horario:(el('pickupDate')?.value||'')+' das '+(el('hIni')?.value||'')+' às '+(el('hFim')?.value||''),observacoes:el('obs')?.value||'',estado:'Pedido recebido',valor:String(est.totalGeral||0),criado_em:new Date().toISOString()};
+    try{
+      const c=await ensureCliente(nome,phone,localPayload.endereco_recolha);
+      const saved=(await spost('pedidos',{cliente_id:c.id,servico:localPayload.servico,quantidade:localPayload.quantidade,endereco_recolha:localPayload.endereco_recolha,horario:localPayload.horario,observacoes:obsWithMeta(localPayload.observacoes,{cliente_nome:nome,cliente_telefone:phone}),estado:'Pedido recebido',valor:String(est.totalGeral||0)}))[0];
+      localPayload.id=saved.id; cloudOK=true;
+      let ds=read('ef_docs'); ds.push({ref:'FAT-'+String(saved.id).padStart(4,'0'),pedido:saved.id,tipo:'Fatura',valor:est.totalGeral||0,estado:'Pendente',data:today(),cliente_telefone:phone}); write('ef_docs',ds); window.docs=ds;
+      if(typeof addHistory==='function') addHistory(saved.id,'Pedido criado e gravado na nuvem.');
+      if(typeof msg==='function') msg('orderMsg','Pedido gravado e sincronizado ✅');
+      await window.loadAdmin();
+      if(typeof updateClientHome==='function') updateClientHome();
+      if(typeof renderTrackingList==='function') renderTrackingList();
+      if(typeof selectTracking==='function') selectTracking(saved.id);
+      if(typeof tab==='function') tab('tracking');
+    }catch(e){
+      let lo=read('ef_local_orders'); lo.push(localPayload); write('ef_local_orders',lo); window.localOrders=lo;
+      let ds=read('ef_docs'); ds.push({ref:'FAT-'+String(localPayload.id).padStart(4,'0'),pedido:localPayload.id,tipo:'Fatura',valor:est.totalGeral||0,estado:'Pendente',data:today(),cliente_telefone:phone}); write('ef_docs',ds); window.docs=ds;
+      if(typeof msg==='function') msg('orderMsg','Pedido guardado só neste aparelho. Assim que houver nuvem, será sincronizado.','error');
+      if(typeof updateClientHome==='function') updateClientHome();
+      if(typeof renderTrackingList==='function') renderTrackingList();
+      if(typeof selectTracking==='function') selectTracking(localPayload.id);
+      if(typeof tab==='function') tab('tracking');
+    }finally{if(btn){btn.innerText='Confirmar pedido';btn.disabled=false;}}
+  };
+
+  window.setEstado=async function(id,estado){
+    let changed=false;
+    let oo=(window.orders||[]).find(o=>String(o.id)===String(id)); if(oo){oo.estado=estado; changed=true;}
+    let lo=read('ef_local_orders'); lo.forEach(o=>{if(String(o.id)===String(id)){o.estado=estado; changed=true;}}); write('ef_local_orders',lo); window.localOrders=lo;
+    try{ await spatch('pedidos',id,{estado}); cloudOK=true; }catch(e){}
+    if(typeof addHistory==='function') addHistory(id,'Estado atualizado para: '+estado);
+    if(typeof loadAdmin==='function') await loadAdmin();
+    if(typeof updateClientHome==='function') updateClientHome();
+  };
+
+  window.saveAssign=function(id){
+    const op=el('assignOp')?.value||'';
+    const mot=el('assignMot')?.value||'';
+    window.assignments=window.assignments||{};
+    window.assignments[id]={operador:op,motorista:mot};
+    try{localStorage.setItem('ef_assignments',JSON.stringify(window.assignments))}catch(e){}
+    let o=(window.orders||[]).find(x=>String(x.id)===String(id));
+    if(o){
+      const meta=Object.assign({},metaOf(o),{assign:{operador:op,motorista:mot},cliente_nome:o.cliente_nome||'',cliente_telefone:o.cliente_telefone||''});
+      const newObs=obsWithMeta(o.observacoes||'',meta);
+      o.observacoes=newObs;
+      spatch('pedidos',id,{observacoes:newObs}).catch(()=>{});
+    }
+    if(typeof addHistory==='function') addHistory(id,'Pedido atribuído ao operador '+op+' e motorista '+mot+'.');
+    if(typeof closeModal==='function') closeModal();
+    if(typeof loadAdmin==='function') loadAdmin();
+  };
+
+  const oldRenderDashboard=window.renderDashboard;
+  window.renderDashboard=function(){
+    if(typeof oldRenderDashboard==='function') oldRenderDashboard();
+    if(cloudChecked && !cloudOK && el('adminContent')){
+      el('adminContent').insertAdjacentHTML('afterbegin','<div class="notice error" style="display:block">Atenção: estes dados são locais deste aparelho. Para dois telemóveis mostrarem igual, a gravação na nuvem precisa estar ativa.</div>');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded',function(){
+    const badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent=V25;
+    if(typeof setLoginDebug==='function') setLoginDebug(V25+' - dados principais sincronizados na nuvem.');
+  });
+})();
+</script>
+
+
+
+<style id="efresh-v26-delete-options">
+  .delete-zone{border:1px solid #fecaca!important;background:#fff7f7!important;border-radius:20px!important;padding:13px!important;margin-top:10px!important}
+  .delete-zone h3{color:#991b1b!important}
+</style>
+
+<script id="efresh-v26-delete-options">
+(function(){
+  const V26='V26 APAGAR OK';
+  function el(id){return document.getElementById(id)}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+  function digits(s){return String(s||'').replace(/\D/g,'')}
+  function read(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}}
+  function write(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  function allOrders(){try{return (typeof getAllOrders==='function')?getAllOrders():[].concat(window.orders||[],window.localOrders||[])}catch(e){return [].concat(window.orders||[],window.localOrders||[])}}
+  function apiHeaders(prefer){let h={apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'}; if(prefer) h.Prefer=prefer; return h}
+  async function cloudDelete(table,query){
+    const r=await fetch(SUPABASE_REST_URL+'/'+table+query,{method:'DELETE',headers:apiHeaders('return=minimal')});
+    if(!r.ok) throw new Error(await r.text());
+    return true;
+  }
+  function cleanOrderLocal(id){
+    id=String(id);
+    window.orders=(window.orders||[]).filter(o=>String(o.id)!==id);
+    window.localOrders=read('ef_local_orders').filter(o=>String(o.id)!==id); write('ef_local_orders',window.localOrders);
+    window.docs=read('ef_docs').filter(d=>String(d.pedido)!==id); write('ef_docs',window.docs);
+    let ps=read('ef_payments').filter(p=>String(p.pedido)!==id && !(p.ref||'').includes(id)); write('ef_payments',ps);
+    let pr=read('ef_proofs').filter(p=>String(p.pedido)!==id && !(p.ref||'').includes(id)); write('ef_proofs',pr);
+    try{let a=JSON.parse(localStorage.getItem('ef_assignments')||'{}'); delete a[id]; localStorage.setItem('ef_assignments',JSON.stringify(a)); window.assignments=a;}catch(e){}
+    try{let h=JSON.parse(localStorage.getItem('ef_history')||'{}'); delete h[id]; localStorage.setItem('ef_history',JSON.stringify(h)); window.historyLog=h;}catch(e){}
+  }
+  window.deleteOrderV26=async function(id){
+    if(currentRole!=='admin'){alert('Apenas administrador pode apagar pedidos.');return;}
+    if(!confirm('Apagar definitivamente o pedido EFW-'+String(id).padStart(4,'0')+'?')) return;
+    let cloudMsg='';
+    try{await cloudDelete('pedidos','?id=eq.'+encodeURIComponent(id)); cloudMsg='Pedido apagado na nuvem.';}catch(e){cloudMsg='Pedido removido deste aparelho. Na nuvem pode não ter apagado: '+(e.message||'erro');}
+    cleanOrderLocal(id);
+    if(typeof closeModal==='function') closeModal();
+    if(typeof loadAdmin==='function') await loadAdmin(); else if(typeof renderAdmin==='function') renderAdmin();
+    if(typeof updateClientHome==='function') updateClientHome();
+    alert(cloudMsg);
+  };
+  function ordersForClient(c){
+    const cid=String(c.id||''); const ph=digits(c.telefone||c.cliente_telefone||'');
+    return allOrders().filter(o=>String(o.cliente_id||'')===cid || (ph && digits(o.cliente_telefone||o.telefone||'') && (digits(o.cliente_telefone||o.telefone||'').endsWith(ph)||ph.endsWith(digits(o.cliente_telefone||o.telefone||'')))));
+  }
+  window.openClientOrdersV26=function(cid,phone){
+    let c=(window.clients||[]).find(x=>String(x.id)===String(cid))||{id:cid,telefone:phone,nome:'Cliente'};
+    const list=ordersForClient(c);
+    const body=list.length?list.map(o=>'<div class="item"><div class="row"><div><b>EFW-'+String(o.id).padStart(4,'0')+'</b><p class="small">'+esc(o.servico||'')+'</p><p class="small">'+esc(o.estado||'')+' • '+esc(o.valor||0)+' MT</p></div></div><div class="grid2 mt2"><button class="btn btn2 mini" onclick="openWork(\''+esc(o.id)+'\')">Executar</button><button class="btn dangerBtn mini" onclick="deleteOrderV26(\''+esc(o.id)+'\')">Apagar pedido</button></div></div>').join(''):'<p class="small">Sem pedidos ligados a este cliente.</p>';
+    if(typeof openNormalPanelV24==='function') openNormalPanelV24('Pedidos do cliente','<div class="card"><h3>'+esc(c.nome||'Cliente')+'</h3><p class="small">'+esc(c.telefone||phone||'')+'</p>'+body+'</div>','admin');
+  };
+  window.deleteClientV26=async function(cid,phone){
+    if(currentRole!=='admin'){alert('Apenas administrador pode apagar clientes.');return;}
+    let c=(window.clients||[]).find(x=>String(x.id)===String(cid))||{id:cid,telefone:phone,nome:'Cliente'};
+    const list=ordersForClient(c);
+    if(!confirm('Apagar o cliente '+(c.nome||'Cliente')+' e todos os seus pedidos ('+list.length+')?')) return;
+    if(!confirm('Confirme novamente: esta ação remove cliente, pedidos, faturas, recibos, comprovativos e histórico ligados a ele.')) return;
+    let cloudErrors=[];
+    for(const o of list){
+      try{await cloudDelete('pedidos','?id=eq.'+encodeURIComponent(o.id));}catch(e){cloudErrors.push('pedido '+o.id)}
+      cleanOrderLocal(o.id);
+    }
+    if(cid && !String(cid).startsWith('local-')){try{await cloudDelete('clientes','?id=eq.'+encodeURIComponent(cid));}catch(e){cloudErrors.push('cliente')}}
+    window.clients=(window.clients||[]).filter(x=>String(x.id)!==String(cid));
+    if(typeof closeModal==='function') closeModal();
+    if(typeof loadAdmin==='function') await loadAdmin(); else if(typeof renderAdmin==='function') renderAdmin();
+    alert(cloudErrors.length?'Removido localmente. Alguns itens podem não ter apagado na nuvem: '+cloudErrors.join(', '):'Cliente e pedidos apagados.');
+  };
+  window.openClientsPanelV26=function(){
+    if(currentRole!=='admin'){alert('Apenas administrador pode gerir clientes.');return;}
+    let cs=(window.clients||[]).slice();
+    const seen=new Set(cs.map(c=>digits(c.telefone||'')));
+    allOrders().forEach(o=>{let ph=digits(o.cliente_telefone||o.telefone||''); if(ph && !seen.has(ph)){seen.add(ph); cs.push({id:'local-'+ph,nome:o.cliente_nome||'Cliente',telefone:ph});}});
+    const html=cs.length?cs.map(c=>{let list=ordersForClient(c);return '<div class="item"><div class="row"><div><b>'+esc(c.nome||'Cliente')+'</b><p class="small">'+esc(c.telefone||'')+'</p><p class="tiny">'+list.length+' pedido(s)</p></div><span class="pill darkp">Cliente</span></div><div class="grid2 mt2"><button class="btn btn2 mini" onclick="openClientOrdersV26(\''+esc(c.id)+'\',\''+esc(c.telefone||'')+'\')">Ver pedidos</button><button class="btn dangerBtn mini" onclick="deleteClientV26(\''+esc(c.id)+'\',\''+esc(c.telefone||'')+'\')">Apagar cliente</button></div></div>'}).join(''):'<p class="small">Sem clientes carregados. Clique Atualizar primeiro.</p>';
+    if(typeof openNormalPanelV24==='function') openNormalPanelV24('Clientes','<div class="card"><h3>Gestão de clientes</h3><p class="small mt2">Aqui pode ver os pedidos ligados ao cliente ou apagar o cliente com todos os dados associados.</p>'+html+'</div>','admin');
+  };
+  window.renderOrders=function(){
+    if(typeof clearNotif==='function') clearNotif('pedidos');
+    let list=(typeof filterByRole==='function'?filterByRole(allOrders()):allOrders());
+    const box=el('adminContent'); if(!box) return;
+    box.innerHTML=list.length?list.map(o=>{let a=(window.assignments||{})[o.id]||{};return '<div class="item"><div class="row"><div><b>EFW-'+String(o.id).padStart(4,'0')+'</b><p class="small">'+esc(o.servico||'')+'</p><p class="small">'+esc(o.endereco_recolha||'')+'</p><span class="tag">Operador: '+esc(a.operador||'-')+'</span> <span class="tag">Motorista: '+esc(a.motorista||'-')+'</span></div><span class="pill '+(o.estado==='Entregue'?'ok':'warn')+'">'+esc(o.estado||'')+'</span></div><div class="grid2 mt2"><button class="btn btn2 mini '+(currentRole==='admin'?'':'locked')+'" onclick="openAssign(\''+esc(o.id)+'\')">Atribuir</button><button class="btn mini" onclick="openWork(\''+esc(o.id)+'\')">Executar</button></div><div class="delete-zone"><h3>Zona de eliminação</h3><p class="small">Remove este pedido, fatura, recibo, comprovativos e histórico ligado ao pedido.</p><button class="btn dangerBtn mini '+(currentRole==='admin'?'':'locked')+'" onclick="deleteOrderV26(\''+esc(o.id)+'\')">Apagar pedido</button></div></div>'}).join(''):'<div class="card">Sem pedidos nesta conta/função.</div>';
+  };
+  window.renderMore=function(){
+    const box=el('adminContent'); if(!box) return;
+    box.innerHTML='<div class="grid2"><button class="service '+(currentRole!=='admin'?'locked':'')+'" onclick="adminTab(\'equipe\')">👥<br><b>Funcionários</b></button><button class="service '+(currentRole!=='admin'?'locked':'')+'" onclick="openClientsPanelV26()">🧍<br><b>Clientes</b></button><button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button><button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button><button class="service" onclick="openFinancePanel()">📊<br><b>Financeiro</b></button><button class="service '+(currentRole!=='admin'?'locked':'')+'" onclick="openAdminSettings()">🔐<br><b>Admin</b></button><button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button></div>';
+  };
+  const oldLoadAdmin=window.loadAdmin;
+  if(typeof oldLoadAdmin==='function'){
+    window.loadAdmin=async function(){await oldLoadAdmin(); const badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent=V26;};
+  }
+  document.addEventListener('DOMContentLoaded',function(){const badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent=V26; if(typeof setLoginDebug==='function') setLoginDebug(V26+' - opções de apagar clientes e pedidos adicionadas.');});
 })();
 </script>
 
