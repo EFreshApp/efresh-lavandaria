@@ -620,7 +620,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   <button class="btn mt" onclick="authEnterV17()">Continuar</button>
   <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button><div id="loginDebug" style="margin-top:8px;font-size:12px;color:#0369a1;font-weight:800"></div></div>
  </div>
- <p class="tiny mt">V22: abertura normal corrigida</p>
+ <p class="tiny mt">V21: modal definitivo corrigido</p>
 </section>
 
 <section id="home" class="screen">
@@ -2522,318 +2522,136 @@ V21 LOGIN OK
 
 
 
-<!-- =========================================================
-     EFRESH V22 - CORREÇÃO DEFINITIVA DE ABERTURA NORMAL
-     Mantém o HTML antigo, apenas isola e corrige os painéis.
-     ========================================================= -->
-<style id="efresh-v22-modal-normal-fix">
-  html.efresh-modal-lock,
-  body.efresh-modal-lock{
-    overflow:hidden!important;
-    height:100%!important;
-  }
-
-  #modal,
-  #modal .modalBox,
-  .modalBox{
-    display:none!important;
-  }
-
-  #efModalV21{
-    position:fixed!important;
-    inset:0!important;
-    width:100vw!important;
-    height:100vh!important;
-    z-index:2147483647!important;
-    background:rgba(15,23,42,.62)!important;
-    display:none;
-    align-items:flex-start!important;
-    justify-content:center!important;
-    padding:14px 10px 90px!important;
-    box-sizing:border-box!important;
-    overflow-y:auto!important;
-    overscroll-behavior:contain!important;
-    -webkit-overflow-scrolling:touch!important;
-  }
-
-  #efModalPanelV21{
-    position:relative!important;
-    z-index:2147483647!important;
-    width:min(720px,calc(100vw - 20px))!important;
-    max-width:720px!important;
-    max-height:none!important;
-    min-height:auto!important;
-    margin:max(8px,env(safe-area-inset-top)) auto 110px!important;
-    background:#fff!important;
-    border-radius:30px!important;
-    box-shadow:0 35px 100px rgba(0,0,0,.35)!important;
-    padding:0!important;
-    overflow:hidden!important;
-    box-sizing:border-box!important;
-    color:#0f172a!important;
-  }
-
-  #efModalHeadV21{
-    position:sticky!important;
-    top:0!important;
-    z-index:5!important;
-    display:flex!important;
-    align-items:flex-start!important;
-    justify-content:space-between!important;
-    gap:14px!important;
-    background:#fff!important;
-    padding:26px 24px 16px!important;
-    border-bottom:1px solid #eef2f7!important;
-  }
-
-  #efModalTitleV21{
-    display:block!important;
-    font-size:34px!important;
-    line-height:1.02!important;
-    letter-spacing:-1.5px!important;
-    font-weight:1000!important;
-    margin:0!important;
-    padding:0!important;
-    color:#0f172a!important;
-    max-width:calc(100% - 64px)!important;
-  }
-
-  #efModalCloseV21{
-    flex:0 0 auto!important;
-    width:52px!important;
-    height:52px!important;
-    border-radius:20px!important;
-    border:1px solid #e2e8f0!important;
-    background:#fff!important;
-    color:#0f172a!important;
-    font-size:32px!important;
-    line-height:1!important;
-    font-weight:500!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    box-shadow:0 10px 30px rgba(15,23,42,.08)!important;
-  }
-
-  #efModalBodyV21{
-    display:block!important;
-    background:#fff!important;
-    padding:18px 18px 34px!important;
-    color:#0f172a!important;
-    min-height:120px!important;
-    overflow:visible!important;
-  }
-
-  #efModalBodyV21 .card,
-  #efModalBodyV21 .item,
-  #efModalBodyV21 .kpi,
-  #efModalBodyV21 .service,
-  #efModalBodyV21 .finance-box{
-    background:#fff!important;
-    color:#0f172a!important;
-  }
-
-  #efModalBodyV21 .grid2{
-    display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:10px!important;
-  }
-
-  @media(max-width:430px){
-    #efModalV21{
-      padding:10px 8px 84px!important;
-    }
-    #efModalPanelV21{
-      width:calc(100vw - 16px)!important;
-      border-radius:28px!important;
-      margin:max(6px,env(safe-area-inset-top)) auto 100px!important;
-    }
-    #efModalHeadV21{
-      padding:24px 20px 14px!important;
-    }
-    #efModalTitleV21{
-      font-size:30px!important;
-      line-height:1.06!important;
-      max-width:calc(100% - 62px)!important;
-    }
-    #efModalBodyV21{
-      padding:16px 16px 32px!important;
-    }
-    #efModalBodyV21 .grid2{
-      grid-template-columns:1fr 1fr!important;
-    }
-  }
+<style id="efresh-v23-normal-open-fix">
+  /* V23: abre painéis como página normal, sem modal sobreposto */
+  .app{overflow:visible!important;}
+  #efNormalPanel.screen{display:none;padding:20px 20px 110px;background:#f8fafc;min-height:100vh;}
+  #efNormalPanel.screen.active{display:block!important;animation:f .2s ease;}
+  #efNormalPanel .normal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+  #efNormalPanelTitle{font-size:34px;line-height:1.05;letter-spacing:-1.5px;font-weight:1000;color:#0f172a;margin:0;}
+  #efNormalPanel .back-btn{width:52px;height:52px;border-radius:18px;border:1px solid #e2e8f0;background:#fff;font-size:16px;font-weight:900;color:#0284c7;box-shadow:0 10px 28px rgba(15,23,42,.08);}
+  #efNormalPanelBody .card,#efNormalPanelBody .item{background:#fff!important;color:#0f172a!important;}
+  #efNormalPanelBody .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:430px){#efNormalPanelTitle{font-size:30px;}#efNormalPanel.screen{padding:18px 18px 110px;}#efNormalPanelBody .grid2{grid-template-columns:1fr 1fr;}}
+  #efModalV21,#modal{display:none!important;}
 </style>
 
-<script id="efresh-v22-modal-normal-fix-js">
+<script id="efresh-v23-normal-open-fix-js">
 (function(){
   function el(id){return document.getElementById(id)}
   function read(key,fallback){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback||[]))}catch(e){return fallback||[]}}
   function write(key,val){localStorage.setItem(key,JSON.stringify(val))}
   function esc(s){return String(s??'').replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
-  function today(){return new Date().toISOString().slice(0,10)}
   function money(n){return (Number(n)||0).toLocaleString('pt-MZ')+' MT'}
+  function today(){return new Date().toISOString().slice(0,10)}
+  let lastScreen='admin';
 
-  function ensureV22Modal(){
-    let m=el('efModalV21');
-    if(!m){
-      m=document.createElement('div');
-      m.id='efModalV21';
-      document.body.appendChild(m);
+  function ensureNormalPanel(){
+    let p=el('efNormalPanel');
+    if(!p){
+      p=document.createElement('section');
+      p.id='efNormalPanel';
+      p.className='screen';
+      p.innerHTML='<div class="normal-head"><h1 id="efNormalPanelTitle">EFresh</h1><button class="back-btn" type="button" onclick="closeModal()">Voltar</button></div><div id="efNormalPanelBody"></div>';
+      const app=document.querySelector('.app')||document.body;
+      const nav=el('nav');
+      if(nav && nav.parentNode===app) app.insertBefore(p,nav); else app.appendChild(p);
     }
-    m.innerHTML=`
-      <div id="efModalPanelV21" role="dialog" aria-modal="true">
-        <div id="efModalHeadV21">
-          <h2 id="efModalTitleV21">EFresh</h2>
-          <button id="efModalCloseV21" type="button" aria-label="Fechar" onclick="closeModal()">×</button>
-        </div>
-        <div id="efModalBodyV21"></div>
-      </div>`;
-    m.onclick=function(ev){ if(ev.target===m) window.closeModal(); };
-    return m;
+    return p;
   }
 
-  window.openModalV21=function(title,html){
-    const m=ensureV22Modal();
-    el('efModalTitleV21').textContent=title||'EFresh';
-    el('efModalBodyV21').innerHTML=html||'';
-    document.documentElement.classList.add('efresh-modal-lock');
-    document.body.classList.add('efresh-modal-lock','ef-modal-open');
-    m.style.display='flex';
-    m.scrollTop=0;
-    setTimeout(function(){m.scrollTop=0},30);
+  window.openNormalPanelV23=function(title,html,back){
+    const active=document.querySelector('.screen.active');
+    if(active && active.id!=='efNormalPanel') lastScreen=active.id;
+    if(back) lastScreen=back;
+    const p=ensureNormalPanel();
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    el('efNormalPanelTitle').innerText=title||'EFresh';
+    el('efNormalPanelBody').innerHTML=html||'';
+    p.classList.add('active');
+    if(el('nav')) el('nav').style.display='none';
+    const m=el('efModalV21'); if(m) m.style.display='none';
+    const old=el('modal'); if(old) old.style.display='none';
+    document.body.classList.remove('ef-modal-open','modal-open','efresh-modal-lock');
+    document.documentElement.classList.remove('efresh-modal-lock');
+    window.scrollTo(0,0);
   };
 
   window.closeModal=function(){
-    const m=el('efModalV21');
-    if(m) m.style.display='none';
+    const m=el('efModalV21'); if(m) m.style.display='none';
+    const old=el('modal'); if(old) old.style.display='none';
+    const p=el('efNormalPanel'); if(p) p.classList.remove('active');
+    document.body.classList.remove('ef-modal-open','modal-open','efresh-modal-lock');
     document.documentElement.classList.remove('efresh-modal-lock');
-    document.body.classList.remove('efresh-modal-lock','ef-modal-open','modal-open');
+    if(typeof window.show==='function'){
+      window.show(lastScreen || 'admin');
+      if((lastScreen||'admin')==='admin' && el('nav')) el('nav').style.display='none';
+    }else{
+      const s=el(lastScreen||'admin'); if(s) s.classList.add('active');
+    }
+    window.scrollTo(0,0);
   };
 
   window.openFunds=function(){
-    const funds=read('ef_funds',[]);
-    window.openModalV21('Requisição de fundos',`
-      <div class="card">
-        <h3>Solicitar fundos</h3>
-        <p class="small mt2">Preencha a necessidade e o valor. A requisição fica gravada no histórico interno.</p>
-        <div class="field"><label>Solicitante</label><input id="fundWho" value="${esc(window.currentUser||'Administrador')}"></div>
-        <div class="field"><label>Produto / necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div>
-        <div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div>
-        <div class="field"><label>Observações</label><textarea id="fundObs" placeholder="Detalhes da necessidade"></textarea></div>
-        <button class="btn mt" onclick="saveFundV22()">Submeter requisição</button>
-      </div>
-      <div class="card mt">
-        <h3>Requisições existentes</h3>
-        <div id="fundListV22">${funds.length?'':'<p class="small mt2">Sem requisições.</p>'}</div>
-      </div>`);
-    renderFundListV22();
-  };
-
-  window.saveFundV22=function(){
-    const desc=(el('fundDesc')?.value||'').trim();
-    const val=(el('fundVal')?.value||'').trim();
-    if(!desc || !val){alert('Preencha a necessidade e o valor.');return}
-    const funds=read('ef_funds',[]);
-    funds.push({id:Date.now(),desc,val,obs:el('fundObs')?.value||'',status:'Pendente',data:today(),solicitante:el('fundWho')?.value||window.currentUser||'Administrador'});
-    write('ef_funds',funds);
-    window.funds=funds;
-    if(typeof window.incNotif==='function') window.incNotif('funds');
-    renderFundListV22();
-    if(el('fundDesc')) el('fundDesc').value='';
-    if(el('fundVal')) el('fundVal').value='';
-    if(el('fundObs')) el('fundObs').value='';
-  };
-
-  window.renderFundListV22=function(){
-    const box=el('fundListV22'); if(!box) return;
     const funds=read('ef_funds',[]).slice().reverse();
-    box.innerHTML=funds.length?funds.map(function(f,i){return `
-      <div class="item">
-        <div class="row">
-          <div>
-            <b>${esc(f.desc||f.finalidade||'Requisição')}</b>
-            <p class="small">${esc(f.val||0)} MT • ${esc(f.data||'')} • ${esc(f.solicitante||'')}</p>
-            ${f.obs?`<p class="tiny">${esc(f.obs)}</p>`:''}
-          </div>
-          <span class="pill ${f.status==='Autorizado'?'ok':'warn'}">${esc(f.status||'Pendente')}</span>
-        </div>
-        ${((window.currentRole||'admin')==='admin')?`<button class="btn btn2 mini mt2" onclick="authorizeFundV22(${funds.length-1-i})">Autorizar</button>`:''}
-      </div>`}).join(''):'<p class="small mt2">Sem requisições.</p>';
+    const list=funds.length?funds.map(function(f){return '<div class="item"><div class="row"><div><b>'+esc(f.desc||f.finalidade||'Requisição')+'</b><p class="small">'+esc(f.val||0)+' MT • '+esc(f.data||'')+' • '+esc(f.solicitante||'')+'</p>'+(f.obs?'<p class="tiny">'+esc(f.obs)+'</p>':'')+'</div><span class="pill '+(f.status==='Autorizado'?'ok':'warn')+'">'+esc(f.status||'Pendente')+'</span></div></div>'}).join(''):'<p class="small mt2">Sem requisições.</p>';
+    openNormalPanelV23('Requisição de fundos', '<div class="card"><h3>Solicitar fundos</h3><div class="field"><label>Solicitante</label><input id="fundWho" value="'+esc(window.currentUser||'Administrador')+'"></div><div class="field"><label>Produto / necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div><div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div><div class="field"><label>Observações</label><textarea id="fundObs" placeholder="Detalhes"></textarea></div><button class="btn mt" onclick="saveFundNormalV23()">Submeter</button></div><div class="card mt"><h3>Histórico</h3>'+list+'</div>','admin');
   };
 
-  window.authorizeFundV22=function(originalIndex){
+  window.saveFundNormalV23=function(){
+    const desc=(el('fundDesc')?.value||'').trim(), val=(el('fundVal')?.value||'').trim();
+    if(!desc||!val){alert('Preencha a necessidade e o valor.');return}
     const funds=read('ef_funds',[]);
-    if(funds[originalIndex]) funds[originalIndex].status='Autorizado';
-    write('ef_funds',funds);
-    window.funds=funds;
-    renderFundListV22();
-  };
-
-  window.openFinancePanel=function(){
-    const allOrders=[].concat(window.localOrders||[],window.orders||[]);
-    const docs=read('ef_docs',[]);
-    const payments=read('ef_payments',[]);
-    const funds=read('ef_funds',[]);
-    const total=allOrders.reduce((a,o)=>a+(parseFloat(o.valor)||0),0);
-    const paid=docs.filter(d=>d.estado==='Pago'||d.tipo==='Recibo').reduce((a,d)=>a+(parseFloat(d.valor)||0),0);
-    const pending=Math.max(0,total-paid);
-    const fundTotal=funds.reduce((a,f)=>a+(parseFloat(f.val)||0),0);
-    const docHtml=docs.length?docs.slice().reverse().map(d=>`<div class="item"><div class="row"><div><b>${esc(d.ref||'Documento')}</b><p class="small">Pedido EFW-${String(d.pedido||0).padStart(4,'0')}</p></div><span class="pill ${d.estado==='Pago'?'ok':'warn'}">${esc(d.estado||'Pendente')}</span></div><div class="row mt2"><span>Valor</span><b>${money(d.valor)}</b></div></div>`).join(''):'<p class="small">Sem faturas/recibos.</p>';
-    const payHtml=payments.length?payments.slice().reverse().map(p=>`<div class="item"><b>${esc(p.ref||'Comprovativo')}</b><p class="small">${esc(p.name||p.fileName||'')}</p></div>`).join(''):'<p class="small">Sem comprovativos.</p>';
-    window.openModalV21('Painel financeiro EFresh',`
-      <div class="finance-grid">
-        <div class="finance-box"><small>Receita estimada</small><b>${money(total)}</b></div>
-        <div class="finance-box"><small>Recebido</small><b>${money(paid)}</b></div>
-        <div class="finance-box"><small>Pendente</small><b>${money(pending)}</b></div>
-        <div class="finance-box"><small>Fundos solicitados</small><b>${money(fundTotal)}</b></div>
-      </div>
-      <div class="card mt"><h3>Faturas e recibos</h3>${docHtml}</div>
-      <div class="card mt"><h3>Comprovativos</h3>${payHtml}</div>
-      <div class="card mt"><h3>Relatório</h3><button class="btn mt" onclick="window.print()">Exportar PDF</button></div>`);
+    funds.push({id:Date.now(),desc:desc,val:val,obs:el('fundObs')?.value||'',status:'Pendente',data:today(),solicitante:el('fundWho')?.value||window.currentUser||'Administrador'});
+    write('ef_funds',funds); window.funds=funds; openFunds();
   };
 
   window.openDrivers=function(){
-    const allOrders=[].concat(window.localOrders||[],window.orders||[]);
-    const body=allOrders.length?allOrders.map(o=>`
-      <div class="item">
-        <div class="row"><div><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${esc(o.estado||'')}</p></div><span class="pill info">Rota</span></div>
-        <p class="small mt2">${esc(o.endereco_recolha||'-')}</p>
-        <p class="tiny">${esc(o.horario||'')}</p>
-        <button class="btn btn2 mini mt2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Abrir rota</button>
-      </div>`).join(''):'<p class="small">Sem rotas para motorista.</p>';
-    window.openModalV21('Motoristas',`<div class="card"><h3>Plano dos motoristas</h3>${body}</div>`);
+    const staff=read('ef_staff',window.staff||[]);
+    const orders=[].concat(window.localOrders||[],window.orders||[]);
+    const mots=staff.filter(s=>s.role==='Motorista');
+    let html='';
+    if(mots.length){
+      html=mots.map(m=>{
+        const tasks=orders.filter(o=>(window.assignments?.[o.id]||{}).motorista===m.nome);
+        return '<div class="item"><b>'+esc(m.nome)+'</b><p class="small">'+esc(m.telefone||'')+'</p>'+(tasks.length?tasks.map(o=>'<span class="tag">EFW-'+String(o.id).padStart(4,'0')+' • '+esc(o.estado||'')+'</span>').join(''):'<p class="small">Sem tarefas.</p>')+'</div>'
+      }).join('');
+    }else{
+      html='<p class="small">Sem motoristas cadastrados.</p>';
+    }
+    const rotas=orders.length?orders.map(o=>'<div class="item"><b>EFW-'+String(o.id).padStart(4,'0')+'</b><p class="small">'+esc(o.endereco_recolha||'-')+'</p><p class="tiny">'+esc(o.horario||'')+'</p><button class="btn btn2 mini mt2" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.endereco_recolha||'Maputo')+'\',\'_blank\')">Abrir rota</button></div>').join(''):'<p class="small">Sem rotas.</p>';
+    openNormalPanelV23('Motoristas','<div class="card"><h3>Plano dos motoristas</h3>'+html+'</div><div class="card mt"><h3>Rotas / pedidos</h3>'+rotas+'</div>','admin');
   };
   window.openMotoristas=window.openDrivers;
 
+  window.openFinancePanel=function(){
+    const orders=[].concat(window.localOrders||[],window.orders||[]);
+    const docs=read('ef_docs',window.docs||[]);
+    const funds=read('ef_funds',[]);
+    const total=orders.reduce((a,o)=>a+(parseFloat(o.valor)||0),0);
+    const paid=docs.filter(d=>d.estado==='Pago'||d.tipo==='Recibo').reduce((a,d)=>a+(parseFloat(d.valor)||0),0);
+    const pending=Math.max(0,total-paid);
+    const fundTotal=funds.reduce((a,f)=>a+(parseFloat(f.val)||0),0);
+    const docHtml=docs.length?docs.slice().reverse().map(d=>'<div class="item"><div class="row"><div><b>'+esc(d.ref||'Documento')+'</b><p class="small">Pedido EFW-'+String(d.pedido||0).padStart(4,'0')+'</p></div><span class="pill '+(d.estado==='Pago'?'ok':'warn')+'">'+esc(d.estado||'Pendente')+'</span></div><div class="row mt2"><span>Valor</span><b>'+money(d.valor)+'</b></div></div>').join(''):'<p class="small">Sem faturas/recibos.</p>';
+    openNormalPanelV23('Painel financeiro EFresh','<div class="finance-grid"><div class="finance-box"><small>Receita estimada</small><b>'+money(total)+'</b></div><div class="finance-box"><small>Recebido</small><b>'+money(paid)+'</b></div><div class="finance-box"><small>Pendente</small><b>'+money(pending)+'</b></div><div class="finance-box"><small>Fundos solicitados</small><b>'+money(fundTotal)+'</b></div></div><div class="card mt"><h3>Faturas e recibos</h3>'+docHtml+'</div><div class="card mt"><h3>Relatório</h3><button class="btn mt" onclick="window.print()">Exportar PDF</button></div>','admin');
+  };
+
   window.openCompleted=function(){
     const done=[].concat(window.localOrders||[],window.orders||[]).filter(o=>['entregue','concluído','concluido'].some(s=>(o.estado||'').toLowerCase().includes(s)));
-    const body=done.length?done.map(o=>`<div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${esc(o.servico||'')}</p><p class="small">${money(o.valor)}</p></div>`).join(''):'<p class="small">Sem pedidos concluídos.</p>';
-    window.openModalV21('Concluídos',`<div class="card">${body}</div>`);
+    const body=done.length?done.map(o=>'<div class="item"><b>EFW-'+String(o.id).padStart(4,'0')+'</b><p class="small">'+esc(o.servico||'')+'</p><p class="small">'+money(o.valor)+'</p></div>').join(''):'<p class="small">Sem pedidos concluídos.</p>';
+    openNormalPanelV23('Concluídos','<div class="card">'+body+'</div>','admin');
   };
 
   window.openAdminSettings=function(){
     const users=read('ef_users',[]);
     const root=users.find(u=>u.root)||{nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456'};
-    window.openModalV21('Admin',`
-      <div class="card">
-        <h3>Administrador principal</h3>
-        <div class="field"><label>Nome</label><input id="rootNome" value="${esc(root.nome||'Edmilson')}"></div>
-        <div class="field"><label>Apelido</label><input id="rootApelido" value="${esc(root.apelido||'Fumo')}"></div>
-        <div class="field"><label>Número</label><input id="rootTelefone" value="${esc(root.telefone||'845178833')}"></div>
-        <div class="field"><label>Password</label><input id="rootPass" type="password" value="${esc(root.pass||'123456')}"></div>
-        <button class="btn mt" onclick="saveRootAdmin&&saveRootAdmin()">Guardar</button>
-      </div>`);
+    openNormalPanelV23('Admin','<div class="card"><h3>Administrador principal</h3><div class="field"><label>Nome</label><input id="rootNome" value="'+esc(root.nome||'Edmilson')+'"></div><div class="field"><label>Apelido</label><input id="rootApelido" value="'+esc(root.apelido||'Fumo')+'"></div><div class="field"><label>Número</label><input id="rootTelefone" value="'+esc(root.telefone||'845178833')+'"></div><div class="field"><label>Password</label><input id="rootPass" type="password" value="'+esc(root.pass||'123456')+'"></div><button class="btn mt" onclick="saveRootAdmin&&saveRootAdmin()">Guardar</button></div>','admin');
   };
 
   window.openTerms=function(){
-    window.openModalV21('Termos de uso e privacidade',`
-      <div class="card terms-box">
-        <h3>EFresh Lavandaria</h3>
-        <p>Os dados do cliente são usados para recolha, entrega, contacto, cobrança, documentos e histórico do serviço.</p>
-        <p>O valor final pode ser ajustado após pesagem real e confirmação operacional.</p>
-        <button class="btn mt" onclick="closeModal()">Entendi</button>
-      </div>`);
+    const active=document.querySelector('.screen.active');
+    const back=(active&&active.id)||'landing';
+    openNormalPanelV23('Termos de uso e privacidade','<div class="card terms-box"><h3>EFresh Lavandaria</h3><p>Os dados do cliente são usados apenas para recolha, entrega, contacto, cobrança, documentos e histórico do serviço.</p><p>O valor final pode ser ajustado após pesagem real e confirmação operacional.</p><p>Cada cliente deve ver apenas os seus próprios pedidos, documentos e comprovativos.</p><button class="btn mt" onclick="closeModal()">Entendi</button></div>',back);
   };
 
   window.openAssign=function(id){
@@ -2841,50 +2659,28 @@ V21 LOGIN OK
     const staff=read('ef_staff',window.staff||[]);
     const ops=staff.filter(s=>['Operador','Administrador','Atendimento'].includes(s.role));
     const mots=staff.filter(s=>s.role==='Motorista');
-    window.openModalV21('Atribuir Pedido EFW-'+String(id).padStart(4,'0'),`
-      <div class="card">
-        <div class="field"><label>Operador / lavandaria</label><select id="assignOp">${ops.map(s=>`<option>${esc(s.nome)}</option>`).join('')}</select></div>
-        <div class="field"><label>Motorista / transportador</label><select id="assignMot">${mots.map(s=>`<option>${esc(s.nome)}</option>`).join('')}</select></div>
-        <button class="btn mt" onclick="saveAssign('${id}')">Guardar atribuição</button>
-      </div>`);
+    openNormalPanelV23('Atribuir Pedido EFW-'+String(id).padStart(4,'0'),'<div class="card"><div class="field"><label>Operador / lavandaria</label><select id="assignOp">'+ops.map(s=>'<option>'+esc(s.nome)+'</option>').join('')+'</select></div><div class="field"><label>Motorista / transportador</label><select id="assignMot">'+mots.map(s=>'<option>'+esc(s.nome)+'</option>').join('')+'</select></div><button class="btn mt" onclick="saveAssign(\''+id+'\')">Guardar atribuição</button></div>','admin');
   };
 
   window.openWork=function(id){
-    const allOrders=[].concat(window.localOrders||[],window.orders||[]);
-    const o=allOrders.find(x=>String(x.id)===String(id))||{};
+    const orders=[].concat(window.localOrders||[],window.orders||[]);
+    const o=orders.find(x=>String(x.id)===String(id))||{};
     const stages=window.STAGES||['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue'];
     const current=o.estado||'Pedido recebido';
     const idx=Math.max(0,stages.indexOf(current));
     const next=stages[Math.min(idx+1,stages.length-1)];
-    window.openModalV21('Executar EFW-'+String(id).padStart(4,'0'),`
-      <div class="card">
-        <p><b>Serviço:</b> ${esc(o.servico||'-')}</p>
-        <p><b>Endereço:</b> ${esc(o.endereco_recolha||'-')}</p>
-        <p><b>Horário:</b> ${esc(o.horario||'-')}</p>
-        <p><b>Estado atual:</b> ${esc(current)}</p>
-        <div class="grid2 mt">
-          <button class="btn" onclick="setEstado('${id}','${esc(next)}');closeModal()">Avançar para ${esc(next)}</button>
-          <button class="btn btn2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Mapa</button>
-        </div>
-      </div>`);
+    openNormalPanelV23('Executar EFW-'+String(id).padStart(4,'0'),'<div class="card"><p><b>Serviço:</b> '+esc(o.servico||'-')+'</p><p><b>Endereço:</b> '+esc(o.endereco_recolha||'-')+'</p><p><b>Horário:</b> '+esc(o.horario||'-')+'</p><p><b>Estado atual:</b> '+esc(current)+'</p><div class="grid2 mt"><button class="btn" onclick="setEstado(\''+id+'\',\''+esc(next)+'\');closeModal()">Avançar</button><button class="btn btn2" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.endereco_recolha||'Maputo')+'\',\'_blank\')">Mapa</button></div></div>','admin');
   };
 
   window.renderMore=function(){
     const box=el('adminContent'); if(!box) return;
-    box.innerHTML=`
-      <div class="grid2">
-        <button class="service ${window.currentRole!=='admin'?'locked':''}" onclick="adminTab('equipe')">👥<br><b>Funcionários</b></button>
-        <button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button>
-        <button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button>
-        <button class="service" onclick="openFinancePanel()">📊<br><b>Financeiro</b></button>
-        <button class="service" onclick="openAdminSettings()">🔐<br><b>Admin</b></button>
-        <button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button>
-      </div>`;
+    box.innerHTML='<div class="grid2"><button class="service '+(window.currentRole!=='admin'?'locked':'')+'" onclick="adminTab(\'equipe\')">👥<br><b>Funcionários</b></button><button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button><button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button><button class="service" onclick="openFinancePanel()">📊<br><b>Financeiro</b></button><button class="service" onclick="openAdminSettings()">🔐<br><b>Admin</b></button><button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button></div>';
   };
 
-  document.addEventListener('keydown',function(e){if(e.key==='Escape') window.closeModal();});
-  ensureV22Modal();
-  if(typeof window.setLoginDebug==='function') window.setLoginDebug('V22 LOGIN OK');
+  window.setTimeout(function(){
+    const badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent='V23 NORMAL OK';
+    if(typeof window.setLoginDebug==='function') window.setLoginDebug('V23 NORMAL OK');
+  },200);
 })();
 </script>
 
