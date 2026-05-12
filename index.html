@@ -3496,5 +3496,415 @@ V21 LOGIN OK
 })();
 </script>
 
+
+<!-- ============================================================
+     EFRESH V29 - SUPABASE BASE + LOGIN SEM COLUNA ACTIVO
+     Corrige: V27 a aparecer, admin cair como cliente, erro activo em clientes.
+     ============================================================ -->
+<style id="efresh-v29-final-fix">
+  .app-version-badge{z-index:2147483647!important}
+</style>
+<script id="efresh-v29-supabase-login-no-activo">
+(function(){
+  const V29='V29 SUPABASE BASE OK';
+  const API=(typeof SUPABASE_REST_URL!=='undefined'?SUPABASE_REST_URL:'https://ijzrogjjpdhgxntsjdmg.supabase.co/rest/v1');
+  const KEY=(typeof SUPABASE_KEY!=='undefined'?SUPABASE_KEY:'sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg');
+
+  function el(id){return document.getElementById(id)}
+  function digits(v){return String(v||'').replace(/\D/g,'')}
+  function normPhone(v){
+    let d=digits(v);
+    if(!d) return '';
+    if(d.length===9) return '+258'+d;
+    if(d.length===12 && d.startsWith('258')) return '+'+d;
+    if(String(v||'').trim().startsWith('+')) return String(v).trim();
+    return d;
+  }
+  function cleanPhone(v){return digits(normPhone(v))}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+  function roleNorm(r){
+    r=String(r||'cliente').toLowerCase();
+    if(r.includes('admin')) return 'admin';
+    if(r.includes('financ')) return 'financeiro';
+    if(r.includes('motor')) return 'motorista';
+    if(r.includes('oper')||r.includes('lavand')) return 'operador';
+    if(r.includes('atend')) return 'atendimento';
+    return 'cliente';
+  }
+  function badge(){
+    const b=document.querySelector('.app-version-badge');
+    if(b) b.textContent=V29;
+    const t=document.querySelector('#login .tiny');
+    if(t) t.textContent=V29+' - Supabase como base principal';
+    if(typeof setLoginDebug==='function') setLoginDebug(V29+' pronto. Sem coluna activo.');
+  }
+  function H(prefer){
+    let h={apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'};
+    if(prefer) h.Prefer=prefer;
+    return h;
+  }
+  async function sGet(t,q=''){
+    const r=await fetch(API+'/'+t+q,{headers:H()});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  }
+  async function sPost(t,b){
+    const r=await fetch(API+'/'+t,{method:'POST',headers:H('return=representation'),body:JSON.stringify(b)});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  }
+  async function sPatch(t,id,b){
+    const r=await fetch(API+'/'+t+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:H('return=representation'),body:JSON.stringify(b)});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  }
+  async function sRpc(fn,b){
+    const r=await fetch(API+'/rpc/'+fn,{method:'POST',headers:H(),body:JSON.stringify(b||{})});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  }
+  async function postClienteRobusto(payload){
+    let body=Object.assign({},payload);
+    delete body.activo; // importante: esta coluna não existe na tua tabela antiga
+    for(let i=0;i<6;i++){
+      try{return await sPost('clientes',body)}
+      catch(e){
+        const msg=String(e.message||'');
+        const m=msg.match(/Could not find the '([^']+)' column/i);
+        if(m && body.hasOwnProperty(m[1])){ delete body[m[1]]; continue; }
+        if(msg.includes('schema cache')) throw e;
+        throw e;
+      }
+    }
+    return await sPost('clientes',{nome:payload.nome||'Cliente EFresh',telefone:payload.telefone||''});
+  }
+  function setSession(u,role,type){
+    const session={id:u.id||0,nome:u.nome||'Cliente EFresh',apelido:u.apelido||'',telefone:u.telefone||'',role:role||'cliente',type:type||'cliente'};
+    localStorage.setItem('ef_session',JSON.stringify(session));
+    window.currentUser=(session.nome+' '+(session.apelido||'')).trim();
+    window.currentRole=session.role;
+    window.currentClientId=session.id;
+    window.currentClientPhone=cleanPhone(session.telefone);
+    const n=el('nomeCliente'); if(n) n.value=window.currentUser;
+    const t=el('telefoneCliente'); if(t) t.value=session.telefone||'';
+    return session;
+  }
+  function openAdmin(u,role){
+    role=roleNorm(role||u.role||u.cargo||'admin');
+    setSession(u,role,'funcionario');
+    if(typeof show==='function') show('admin');
+    const nav=el('nav'); if(nav) nav.style.display='none';
+    if(el('panelTitle')) el('panelTitle').innerText=role==='motorista'?'Painel Motorista':role==='operador'?'Painel Operador':role==='financeiro'?'Painel Financeiro':'Admin EFresh';
+    if(el('roleBadge')) el('roleBadge').innerText=(role==='admin'?'Administrador':role).toUpperCase();
+    if(typeof applyRolePermissions==='function') applyRolePermissions();
+    if(typeof loadAdmin==='function') loadAdmin();
+    badge();
+  }
+  function openClient(u){
+    setSession(u,'cliente','cliente');
+    if(el('hello')) el('hello').innerText=(u.nome||'Cliente').split(' ')[0];
+    if(typeof show==='function') show('home');
+    const nav=el('nav'); if(nav) nav.style.display='grid';
+    if(typeof loadClientDataV29==='function') loadClientDataV29();
+    badge();
+  }
+  async function allRows(t){ try{return await sGet(t,'?select=*')}catch(e){return []} }
+  function samePhone(a,b){a=cleanPhone(a);b=cleanPhone(b);return a && b && (a===b || a.endsWith(b) || b.endsWith(a));}
+  function passOK(row,pass){
+    const p=String(pass||'');
+    if(row.senha!==undefined && row.senha!==null && String(row.senha)!=='') return String(row.senha)===p;
+    if(row.pass!==undefined && row.pass!==null && String(row.pass)!=='') return String(row.pass)===p;
+    if(row.password!==undefined && row.password!==null && String(row.password)!=='') return String(row.password)===p;
+    return true;
+  }
+
+  window.authEnterV17=async function(){
+    const phoneRaw=(el('loginPhone')?.value||'').trim();
+    const phone=normPhone(phoneRaw);
+    const pass=String(el('loginPass')?.value||'');
+    const isRegister=window.authMode==='register' || (el('registerFields') && !el('registerFields').classList.contains('hidden'));
+    if(!phone || !pass){alert('Preencha número e código.');return;}
+
+    try{
+      badge();
+
+      // ADMIN DE EMERGÊNCIA — sempre abre painel interno.
+      const d=cleanPhone(phone);
+      if(!isRegister && (d.endsWith('845178833') || d.endsWith('840000000')) && pass==='123456'){
+        return openAdmin({id:0,nome:'Administrador',telefone:phone,role:'admin',cargo:'Administrador'},'admin');
+      }
+
+      const funcionarios=await allRows('funcionarios');
+      const funcionario=funcionarios.find(f=>samePhone(f.telefone,phone) && passOK(f,pass));
+
+      if(!isRegister && funcionario){
+        return openAdmin(funcionario,roleNorm(funcionario.role||funcionario.cargo||'admin'));
+      }
+
+      const clientes=await allRows('clientes');
+      const cliente=clientes.find(c=>samePhone(c.telefone,phone));
+
+      if(isRegister){
+        const nome=(el('regNome')?.value||'').trim();
+        const apelido=(el('regApelido')?.value||'').trim();
+        if(!nome || !apelido){alert('Preencha nome e apelido.');return;}
+        if(cliente){
+          if(passOK(cliente,pass)) return openClient(cliente);
+          alert('Este número já existe. Use Entrar com o código correto.');
+          if(typeof setAuthMode==='function') setAuthMode('login');
+          return;
+        }
+        const novo=(await postClienteRobusto({nome,apelido,telefone:phone,senha:pass,email:'',endereco:''}))[0];
+        return openClient(novo);
+      }
+
+      if(cliente && passOK(cliente,pass)){
+        return openClient(cliente);
+      }
+
+      alert('Número ou código incorreto.');
+    }catch(e){
+      alert('Erro no login Supabase V29: '+(e.message||e));
+    }
+  };
+
+  window.authEnter=window.authEnterV17;
+  window.authEnterV15=window.authEnterV17;
+
+  window.resetLoginDataOnly=function(){
+    localStorage.removeItem('ef_session');
+    localStorage.removeItem('ef_users');
+    localStorage.removeItem('ef_local_orders');
+    localStorage.removeItem('ef_docs');
+    localStorage.removeItem('ef_assignments');
+    badge();
+    alert('Acessos locais reiniciados. Use admin 845178833 / 123456 ou crie cliente novamente.');
+  };
+
+  window.showAdminForRole=function(){
+    return openAdmin({id:window.currentUserId||0,nome:window.currentUser||'Administrador',telefone:el('telefoneCliente')?.value||'',role:window.currentRole||'admin'},window.currentRole||'admin');
+  };
+
+  window.loadAdmin=async function(){
+    if(el('adminContent')) el('adminContent').innerHTML='<div class="card">A carregar dados do Supabase...</div>';
+    try{
+      window.orders=await sGet('pedidos','?select=*&order=criado_em.desc');
+      window.clients=await sGet('clientes','?select=*&order=criado_em.desc');
+      window.drivers=await sGet('motoristas','?select=*&order=criado_em.desc');
+      window.staff=await sGet('funcionarios','?select=*&order=criado_em.desc');
+
+      const list=(typeof filterByRole==='function')?filterByRole(window.orders):window.orders;
+      if(el('kOrders')) el('kOrders').innerText=list.length;
+      if(el('kPend')) el('kPend').innerText=list.filter(o=>!['Entregue','Concluído','Concluido'].includes(o.estado)).length;
+      if(el('kMoney')) el('kMoney').innerText=list.reduce((a,o)=>a+(parseFloat(o.valor)||0),0)+' MT';
+      if(typeof msg==='function') msg('adminMsg','Dados carregados do Supabase ✅');
+      if(typeof renderAdmin==='function') renderAdmin();
+      badge();
+    }catch(e){
+      if(typeof msg==='function') msg('adminMsg','Erro Supabase: '+e.message,'error');
+      if(el('adminContent')) el('adminContent').innerHTML='<div class="card">Erro ao carregar Supabase.<br><span class="small">'+esc(e.message)+'</span></div>';
+    }
+  };
+
+  const oldFilter=window.filterByRole;
+  window.filterByRole=function(list){
+    const role=roleNorm(window.currentRole||'admin');
+    if(role==='admin'||role==='financeiro') return list||[];
+    if(role==='operador') return (list||[]).filter(o=>String(o.operador_nome||'')===String(window.currentUser||'') || String(o.operador_id||'')===String(window.currentUserId||''));
+    if(role==='motorista') return (list||[]).filter(o=>String(o.motorista_nome||'')===String(window.currentUser||'') || String(o.motorista_id||'')===String(window.currentUserId||''));
+    return typeof oldFilter==='function'?oldFilter(list):(list||[]);
+  };
+
+  window.saveStaff=async function(){
+    if(roleNorm(window.currentRole)!=='admin'){alert('Apenas administrador cria perfis.');return}
+    const nome=(el('stNome')?.value||'Funcionário').trim();
+    const telefone=normPhone(el('stTel')?.value||'');
+    const role=roleNorm(el('stRole')?.value||'operador');
+    if(!telefone){alert('Informe telefone.');return}
+    try{
+      await sPost('funcionarios',{nome,telefone,email:'',senha:'123456',cargo:role,role});
+      await loadAdmin();
+      if(typeof adminTab==='function') adminTab('equipe');
+      alert('Perfil criado. Código padrão: 123456');
+    }catch(e){alert('Erro ao criar funcionário: '+e.message)}
+  };
+
+  window.openAssign=function(id){
+    if(roleNorm(window.currentRole)!=='admin'){alert('Apenas administrador atribui trabalhos.');return}
+    const ops=(window.staff||[]).filter(s=>['admin','operador'].includes(roleNorm(s.role||s.cargo)));
+    const mots=(window.drivers||[]);
+    if(el('modalTitle')) el('modalTitle').innerText='Atribuir Pedido EFW-'+String(id).padStart(4,'0');
+    if(el('modalBody')) el('modalBody').innerHTML='<div class="card"><div class="field"><label>Operador / lavandaria</label><select id="assignOp">'+ops.map(s=>'<option value="'+esc(s.id)+'" data-nome="'+esc(s.nome)+'">'+esc(s.nome)+'</option>').join('')+'</select></div><div class="field"><label>Motorista / transportador</label><select id="assignMot">'+mots.map(s=>'<option value="'+esc(s.id)+'" data-nome="'+esc(s.nome)+'">'+esc(s.nome)+'</option>').join('')+'</select></div><button class="btn mt" onclick="saveAssign(\''+esc(id)+'\')">Guardar atribuição</button></div>';
+    if(el('modal')) el('modal').style.display='flex';
+  };
+
+  window.saveAssign=async function(id){
+    const opSel=el('assignOp'), motSel=el('assignMot');
+    const opNome=opSel?.selectedOptions?.[0]?.dataset?.nome||'';
+    const motNome=motSel?.selectedOptions?.[0]?.dataset?.nome||'';
+    try{
+      await sPatch('pedidos',id,{operador_id:opSel?.value||null,operador_nome:opNome,motorista_id:motSel?.value||null,motorista_nome:motNome});
+      if(typeof closeModal==='function') closeModal();
+      await loadAdmin();
+    }catch(e){alert('Erro ao atribuir: '+e.message)}
+  };
+
+  window.setEstado=async function(id,estado){
+    try{
+      await sPatch('pedidos',id,{estado});
+      await loadAdmin();
+      if(typeof loadClientDataV29==='function') loadClientDataV29();
+    }catch(e){alert('Erro ao atualizar estado: '+e.message)}
+  };
+
+  window.renderOrders=function(){
+    if(typeof clearNotif==='function') clearNotif('pedidos');
+    const list=filterByRole(window.orders||[]);
+    if(!el('adminContent')) return;
+    el('adminContent').innerHTML=list.length?list.map(o=>{
+      return '<div class="item"><div class="row"><div><b>'+(o.numero||('EFW-'+String(o.id).padStart(4,'0')))+'</b><p class="small">'+esc(o.servico||'')+'</p><p class="small">'+esc(o.endereco_recolha||'')+'</p><span class="tag">Operador: '+esc(o.operador_nome||'-')+'</span> <span class="tag">Motorista: '+esc(o.motorista_nome||'-')+'</span></div><span class="pill '+(o.estado==='Entregue'?'ok':'warn')+'">'+esc(o.estado||'')+'</span></div><div class="field"><select onchange="setEstado(\''+esc(o.id)+'\',this.value)">'+(window.STAGES||['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue']).map(s=>'<option '+(s===o.estado?'selected':'')+'>'+esc(s)+'</option>').join('')+'</select></div><div class="grid2 mt2"><button class="btn btn2 mini" onclick="openAssign(\''+esc(o.id)+'\')">Atribuir</button><button class="btn mini" onclick="openWork(\''+esc(o.id)+'\')">Executar</button></div><button class="btn dangerBtn mini mt2" onclick="deleteOrderV29(\''+esc(o.id)+'\')">Apagar pedido</button></div>';
+    }).join(''):'<div class="card">Sem pedidos nesta conta/função.</div>';
+  };
+
+  window.deleteOrderV29=async function(id){
+    if(!confirm('Apagar este pedido e dados ligados?')) return;
+    try{
+      await sRpc('apagar_pedido_completo',{p_pedido_id:Number(id)});
+    }catch(e){
+      try{await fetch(API+'/pedidos?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:H()})}catch(_){}
+    }
+    await loadAdmin();
+  };
+
+  window.openWork=async function(id){
+    const o=(window.orders||[]).find(x=>String(x.id)===String(id))||{};
+    let hist=[];
+    try{hist=await sGet('historico_pedidos','?select=*&pedido_id=eq.'+encodeURIComponent(id)+'&order=criado_em.desc')}catch(e){}
+    if(el('modalTitle')) el('modalTitle').innerText='Executar '+(o.numero||('EFW-'+String(id).padStart(4,'0')));
+    if(el('modalBody')) el('modalBody').innerHTML='<div class="card"><p><b>Serviço:</b> '+esc(o.servico||'-')+'</p><p><b>Endereço:</b> '+esc(o.endereco_recolha||'-')+'</p><p><b>Horário:</b> '+esc(o.horario||'-')+'</p><p><b>Estado:</b> '+esc(o.estado||'-')+'</p><h3 class="mt">Histórico operacional</h3><div class="timeline-log">'+(hist.length?hist.map(h=>'<div><b>'+esc(h.evento||'Evento')+'</b><br><span class="small">'+esc(h.estado_anterior||'')+' → '+esc(h.estado_novo||'')+'<br>'+esc(h.criado_em||'')+'</span></div>').join(''):'<div>Sem histórico ainda.</div>')+'</div><div class="grid2 mt"><button class="btn btn2" onclick="setEstado(\''+esc(id)+'\',\'Motorista a caminho\');closeModal()">Iniciar rota</button><button class="btn btn2" onclick="setEstado(\''+esc(id)+'\',\'Roupa recolhida\');closeModal()">Recolhido</button><button class="btn btn2" onclick="setEstado(\''+esc(id)+'\',\'Em lavagem\');closeModal()">Iniciar lavagem</button><button class="btn btn2" onclick="setEstado(\''+esc(id)+'\',\'Controle de qualidade\');closeModal()">Finalizar serviço</button><button class="btn" onclick="setEstado(\''+esc(id)+'\',\'Entregue\');closeModal()">Concluir</button><button class="btn btn2" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.endereco_recolha||'Maputo')+'\',\'_blank\')">Mapa</button></div></div>';
+    if(el('modal')) el('modal').style.display='flex';
+  };
+
+  window.submitOrder=async function(){
+    const btn=el('submitBtn'); if(btn){btn.innerText='A gravar no Supabase...';btn.disabled=true}
+    try{
+      const est=(typeof calcEstimate==='function')?calcEstimate():{servicos:'Serviço EFresh',totalGeral:0,kgAuto:0,transporte:0};
+      let c=window.currentClientId?{id:window.currentClientId,nome:window.currentUser,telefone:el('telefoneCliente')?.value||el('loginPhone')?.value||''}:null;
+      if(!c || !c.id){
+        const nome=el('nomeCliente')?.value||window.currentUser||'Cliente EFresh';
+        const telefone=normPhone(el('telefoneCliente')?.value||el('loginPhone')?.value||'');
+        const found=(await allRows('clientes')).find(x=>samePhone(x.telefone,telefone));
+        c=found||(await postClienteRobusto({nome,telefone,senha:el('loginPass')?.value||'123456',endereco:el('address')?.value||''}))[0];
+      }
+      const pedido={
+        cliente_id:c.id,
+        cliente_nome:c.nome||window.currentUser||'Cliente EFresh',
+        cliente_telefone:c.telefone||el('telefoneCliente')?.value||'',
+        servico:est.servicos,
+        quantidade:(el('pecas')?.value?el('pecas').value+' peças ':'')+(el('kg')?.value?el('kg').value+' kg':''),
+        kg_estimado:Number(el('kg')?.value||0),
+        pecas:Number(el('pecas')?.value||0),
+        endereco_recolha:el('address')?.value||'',
+        horario:(el('pickupDate')?.value||'')+' das '+(el('hIni')?.value||'')+' às '+(el('hFim')?.value||''),
+        data_recolha:el('pickupDate')?.value||null,
+        hora_inicio:el('hIni')?.value||null,
+        hora_fim:el('hFim')?.value||null,
+        observacoes:el('obs')?.value||'',
+        estado:'Pedido recebido',
+        valor:Number(est.totalGeral||0),
+        transporte:Number(est.transporte||0)
+      };
+      const p=(await sPost('pedidos',pedido))[0];
+      if(typeof msg==='function') msg('orderMsg','Pedido gravado no Supabase ✅');
+      currentPedidoId=p.id;
+      await loadClientDataV29();
+      if(typeof tab==='function') tab('tracking');
+      if(typeof selectTracking==='function') selectTracking(p.id);
+    }catch(e){
+      if(typeof msg==='function') msg('orderMsg','Erro Supabase: '+e.message,'error');
+      alert('Erro ao gravar pedido: '+e.message);
+    }finally{if(btn){btn.innerText='Confirmar pedido';btn.disabled=false}}
+  };
+
+  window.loadClientDataV29=async function(){
+    try{
+      let pid=window.currentClientId;
+      if(!pid){
+        const phone=el('telefoneCliente')?.value||el('loginPhone')?.value||'';
+        const c=(await allRows('clientes')).find(x=>samePhone(x.telefone,phone));
+        if(c){pid=c.id; window.currentClientId=c.id}
+      }
+      window.orders=pid?await sGet('pedidos','?select=*&cliente_id=eq.'+encodeURIComponent(pid)+'&order=criado_em.desc'):[];
+      window.docs=[];
+      if(pid){
+        const fs=await sGet('faturas','?select=*&cliente_id=eq.'+encodeURIComponent(pid)+'&order=criado_em.desc').catch(()=>[]);
+        const rs=await sGet('recibos','?select=*&cliente_id=eq.'+encodeURIComponent(pid)+'&order=criado_em.desc').catch(()=>[]);
+        window.docs=[...fs.map(f=>({ref:f.numero||('FAT-'+String(f.id).padStart(5,'0')),pedido:f.pedido_id,tipo:'Fatura',valor:f.total||f.valor||0,estado:f.estado||'Pendente',data:f.data_emissao||String(f.criado_em||'').slice(0,10)})),
+                     ...rs.map(r=>({ref:r.numero||('RCB-'+String(r.id).padStart(5,'0')),pedido:r.pedido_id,tipo:'Recibo',valor:r.valor||0,estado:'Pago',data:r.data_pagamento||String(r.criado_em||'').slice(0,10)}))];
+      }
+      if(typeof renderActive==='function') renderActive();
+      if(typeof renderTrackingList==='function') renderTrackingList();
+      if(typeof renderDocs==='function') renderDocs();
+    }catch(e){}
+  };
+
+  window.renderActive=function(){
+    const box=el('activeRequests'); if(!box) return;
+    const list=(window.orders||[]).slice(0,3);
+    box.innerHTML=list.length?'<div class="card"><h3>Progresso das solicitações</h3>'+list.map(o=>{
+      const pct=o.estado==='Entregue'?100:25;
+      return '<div class="item"><div class="row"><b>'+(o.numero||('EFW-'+String(o.id).padStart(4,'0')))+'</b><span class="pill warn">'+esc(o.estado||'')+'</span></div><div class="progress mt2"><div class="bar" style="width:'+pct+'%"></div></div></div>';
+    }).join('')+'</div>':'';
+  };
+
+  window.renderTrackingList=function(){
+    const b=el('trackingList'); if(!b) return;
+    const list=window.orders||[];
+    if(!list.length){b.innerHTML='<p class="small">Sem pedidos para acompanhar.</p>'; if(el('trackingDetail')) el('trackingDetail').style.display='none'; return;}
+    b.innerHTML=list.map(o=>'<button class="btn btn2 mt2" onclick="selectTracking(\''+esc(o.id)+'\')">'+esc(o.numero||('EFW-'+String(o.id).padStart(4,'0')))+' • '+esc(o.estado||'')+'</button>').join('');
+  };
+
+  window.selectTracking=function(id){
+    const o=(window.orders||[]).find(x=>String(x.id)===String(id))||{};
+    if(el('trackId')) el('trackId').innerText=o.numero||('EFW-'+String(id).padStart(4,'0'));
+    if(el('trackService')) el('trackService').innerText=o.servico||'Pedido EFresh';
+    if(el('trackStatus')) el('trackStatus').innerText=o.estado||'Em curso';
+    if(el('driverLine')) el('driverLine').innerText='Motorista: '+(o.motorista_nome||'não atribuído');
+    if(el('operatorLine')) el('operatorLine').innerText='Operador: '+(o.operador_nome||'não atribuído');
+    if(el('trackingDetail')) el('trackingDetail').style.display='block';
+    const idx=(window.STAGES||[]).indexOf(o.estado);
+    window.currentStep=idx>=0?idx:0;
+    if(typeof renderSteps==='function') renderSteps();
+  };
+
+  window.renderDocs=function(){
+    if(typeof clearNotif==='function') clearNotif('docs');
+    if(typeof renderProofs==='function') renderProofs();
+    const box=el('clientDocs'); if(!box) return;
+    const ds=window.docs||[];
+    box.innerHTML=ds.length?ds.map(d=>'<div class="item"><div class="row"><div><b>'+esc(d.ref)+'</b><p class="small">'+esc(d.tipo)+' • Pedido '+esc(String(d.pedido||''))+'</p></div><span class="pill '+(d.estado==='Pago'?'ok':'warn')+'">'+esc(d.estado||'')+'</span></div><div class="row mt2"><span>Valor</span><b>'+Number(d.valor||0).toLocaleString('pt-MZ')+' MT</b></div><button class="btn btn2 mini mt2" onclick="printDoc(\''+esc(d.ref)+'\')">Ver/Imprimir</button></div>').join(''):'<p class="small">Ainda não há documentos.</p>';
+  };
+
+  const oldTab=window.tab;
+  window.tab=function(id){
+    if(typeof oldTab==='function') oldTab(id);
+    if(id==='docs'||id==='tracking'||id==='home') loadClientDataV29();
+    badge();
+  };
+
+  function boot(){
+    badge();
+    let s=null; try{s=JSON.parse(localStorage.getItem('ef_session')||'null')}catch(e){}
+    if(s){
+      if(s.type==='funcionario') setTimeout(()=>openAdmin(s,s.role||'admin'),100);
+      else if(s.type==='cliente') setTimeout(()=>openClient(s),100);
+    }
+  }
+  document.addEventListener('DOMContentLoaded',boot);
+  setTimeout(boot,400);
+  setTimeout(badge,1200);
+})();
+</script>
+
 </body>
 </html>
