@@ -2522,165 +2522,197 @@ V21 LOGIN OK
 
 
 
-<style id="efresh-v23-normal-open-fix">
-  /* V23: abre painéis como página normal, sem modal sobreposto */
-  .app{overflow:visible!important;}
-  #efNormalPanel.screen{display:none;padding:20px 20px 110px;background:#f8fafc;min-height:100vh;}
-  #efNormalPanel.screen.active{display:block!important;animation:f .2s ease;}
-  #efNormalPanel .normal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
-  #efNormalPanelTitle{font-size:34px;line-height:1.05;letter-spacing:-1.5px;font-weight:1000;color:#0f172a;margin:0;}
-  #efNormalPanel .back-btn{width:52px;height:52px;border-radius:18px;border:1px solid #e2e8f0;background:#fff;font-size:16px;font-weight:900;color:#0284c7;box-shadow:0 10px 28px rgba(15,23,42,.08);}
-  #efNormalPanelBody .card,#efNormalPanelBody .item{background:#fff!important;color:#0f172a!important;}
-  #efNormalPanelBody .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  @media(max-width:430px){#efNormalPanelTitle{font-size:30px;}#efNormalPanel.screen{padding:18px 18px 110px;}#efNormalPanelBody .grid2{grid-template-columns:1fr 1fr;}}
-  #efModalV21,#modal{display:none!important;}
+<style id="efresh-v24-restore-functions-normal-panel">
+  #efPanelV24{
+    min-height:100vh!important;
+    padding:20px!important;
+    padding-bottom:96px!important;
+    background:linear-gradient(180deg,#ffffff 0%,#f8fafc 52%,#ecfdf5 100%)!important;
+  }
+  #efPanelV24 .v24Top{
+    position:sticky!important;
+    top:0!important;
+    z-index:10!important;
+    background:rgba(255,255,255,.96)!important;
+    backdrop-filter:blur(14px)!important;
+    border-bottom:1px solid #e2e8f0!important;
+    margin:-20px -20px 16px!important;
+    padding:18px 20px 14px!important;
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+  }
+  #efPanelTitleV24{
+    font-size:30px!important;
+    line-height:1.08!important;
+    letter-spacing:-1.2px!important;
+    color:#0f172a!important;
+    margin:0!important;
+  }
+  #efPanelBackV24{
+    width:48px!important;
+    height:48px!important;
+    min-width:48px!important;
+    border-radius:18px!important;
+    border:1px solid #e2e8f0!important;
+    background:#fff!important;
+    color:#0f172a!important;
+    font-size:23px!important;
+    font-weight:1000!important;
+  }
+  #efPanelBodyV24{display:block!important;color:#0f172a!important;padding-bottom:50px!important}
+  #efPanelBodyV24 .card,#efPanelBodyV24 .item{background:#fff!important}
+  #modal,#efModalV21{display:none!important}
+  body.ef-modal-open,body.modal-open{overflow:auto!important}
+  .app-version-badge{z-index:80!important}
 </style>
 
-<script id="efresh-v23-normal-open-fix-js">
+<script id="efresh-v24-restore-functions-normal-panel">
 (function(){
-  function el(id){return document.getElementById(id)}
-  function read(key,fallback){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback||[]))}catch(e){return fallback||[]}}
-  function write(key,val){localStorage.setItem(key,JSON.stringify(val))}
+  function byId(id){return document.getElementById(id)}
   function esc(s){return String(s??'').replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
-  function money(n){return (Number(n)||0).toLocaleString('pt-MZ')+' MT'}
-  function today(){return new Date().toISOString().slice(0,10)}
-  let lastScreen='admin';
-
-  function ensureNormalPanel(){
-    let p=el('efNormalPanel');
+  function todayV24(){return (typeof today==='function')?today():new Date().toISOString().slice(0,10)}
+  function readV24(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}}
+  function writeV24(k,v){localStorage.setItem(k,JSON.stringify(v))}
+  function allOrdersV24(){
+    try{ if(typeof getAllOrders==='function') return getAllOrders(); }catch(e){}
+    return [].concat(typeof orders!=='undefined'?orders:[], typeof localOrders!=='undefined'?localOrders:[]);
+  }
+  function moneyV24(v){return (parseFloat(v)||0).toLocaleString('pt-MZ')+' MT'}
+  function ensurePanelV24(){
+    var app=document.querySelector('.app')||document.body;
+    var p=byId('efPanelV24');
     if(!p){
       p=document.createElement('section');
-      p.id='efNormalPanel';
+      p.id='efPanelV24';
       p.className='screen';
-      p.innerHTML='<div class="normal-head"><h1 id="efNormalPanelTitle">EFresh</h1><button class="back-btn" type="button" onclick="closeModal()">Voltar</button></div><div id="efNormalPanelBody"></div>';
-      const app=document.querySelector('.app')||document.body;
-      const nav=el('nav');
-      if(nav && nav.parentNode===app) app.insertBefore(p,nav); else app.appendChild(p);
+      p.innerHTML='<div class="v24Top"><h1 id="efPanelTitleV24">EFresh</h1><button id="efPanelBackV24" onclick="closeModal()">‹</button></div><div id="efPanelBodyV24"></div>';
+      app.appendChild(p);
     }
     return p;
   }
-
-  window.openNormalPanelV23=function(title,html,back){
-    const active=document.querySelector('.screen.active');
-    if(active && active.id!=='efNormalPanel') lastScreen=active.id;
-    if(back) lastScreen=back;
-    const p=ensureNormalPanel();
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    el('efNormalPanelTitle').innerText=title||'EFresh';
-    el('efNormalPanelBody').innerHTML=html||'';
-    p.classList.add('active');
-    if(el('nav')) el('nav').style.display='none';
-    const m=el('efModalV21'); if(m) m.style.display='none';
-    const old=el('modal'); if(old) old.style.display='none';
-    document.body.classList.remove('ef-modal-open','modal-open','efresh-modal-lock');
-    document.documentElement.classList.remove('efresh-modal-lock');
+  window.openNormalPanelV24=function(title,html,back){
+    ensurePanelV24();
+    byId('efPanelTitleV24').innerText=title||'EFresh';
+    byId('efPanelBodyV24').innerHTML=html||'';
+    window.__efV24Back=back||'admin';
+    if(typeof show==='function') show('efPanelV24');
+    else {
+      document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+      byId('efPanelV24').classList.add('active');
+    }
+    var nav=byId('nav'); if(nav) nav.style.display='none';
     window.scrollTo(0,0);
   };
-
   window.closeModal=function(){
-    const m=el('efModalV21'); if(m) m.style.display='none';
-    const old=el('modal'); if(old) old.style.display='none';
-    const p=el('efNormalPanel'); if(p) p.classList.remove('active');
-    document.body.classList.remove('ef-modal-open','modal-open','efresh-modal-lock');
-    document.documentElement.classList.remove('efresh-modal-lock');
-    if(typeof window.show==='function'){
-      window.show(lastScreen || 'admin');
-      if((lastScreen||'admin')==='admin' && el('nav')) el('nav').style.display='none';
-    }else{
-      const s=el(lastScreen||'admin'); if(s) s.classList.add('active');
+    var p=byId('efPanelV24');
+    if(p && p.classList.contains('active')){
+      if(typeof show==='function') show(window.__efV24Back||'admin');
+      else p.classList.remove('active');
+      try{ if(window.__efV24Back==='admin' && typeof renderAdmin==='function') renderAdmin(); }catch(e){}
     }
-    window.scrollTo(0,0);
+    var m=byId('efModalV21'); if(m) m.style.display='none';
+    var old=byId('modal'); if(old) old.style.display='none';
+    document.body.classList.remove('ef-modal-open','modal-open');
+  };
+
+  window.openTerms=function(){
+    openNormalPanelV24('Termos de uso e privacidade EFresh', '<div class="card terms-box">'+
+      '<h3>1. Uso dos dados</h3><p>A EFresh usa nome, telefone, endereço, localização aproximada, histórico de pedidos, pagamentos e mensagens apenas para executar recolha, lavagem, engomadoria, entrega, suporte e faturação.</p>'+
+      '<h3>2. Preço estimado</h3><p>O valor apresentado no pedido é estimativo. O valor final pode ser corrigido após pesagem real, confirmação das peças e avaliação do tipo de roupa.</p>'+
+      '<h3>3. Recolha e entrega</h3><p>O endereço informado pode ser aberto no Google Maps para facilitar o trabalho da equipa e do motorista.</p>'+
+      '<h3>4. Comprovativos</h3><p>Comprovativos de pagamento, entrega e documentos ficam associados ao histórico do cliente e do pedido.</p>'+
+      '<h3>5. Faturas e recibos</h3><p>As faturas são emitidas com base na estimativa ou confirmação final. O recibo é emitido depois da confirmação do pagamento.</p>'+
+      '<h3>6. Responsabilidades internas</h3><p>Administrador, financeiro, operador e motorista têm permissões diferentes conforme a função.</p>'+
+      '<button class="btn mt" onclick="closeModal()">Entendi</button></div>', (document.querySelector('#docs.active')?'docs':'admin'));
   };
 
   window.openFunds=function(){
-    const funds=read('ef_funds',[]).slice().reverse();
-    const list=funds.length?funds.map(function(f){return '<div class="item"><div class="row"><div><b>'+esc(f.desc||f.finalidade||'Requisição')+'</b><p class="small">'+esc(f.val||0)+' MT • '+esc(f.data||'')+' • '+esc(f.solicitante||'')+'</p>'+(f.obs?'<p class="tiny">'+esc(f.obs)+'</p>':'')+'</div><span class="pill '+(f.status==='Autorizado'?'ok':'warn')+'">'+esc(f.status||'Pendente')+'</span></div></div>'}).join(''):'<p class="small mt2">Sem requisições.</p>';
-    openNormalPanelV23('Requisição de fundos', '<div class="card"><h3>Solicitar fundos</h3><div class="field"><label>Solicitante</label><input id="fundWho" value="'+esc(window.currentUser||'Administrador')+'"></div><div class="field"><label>Produto / necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div><div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div><div class="field"><label>Observações</label><textarea id="fundObs" placeholder="Detalhes"></textarea></div><button class="btn mt" onclick="saveFundNormalV23()">Submeter</button></div><div class="card mt"><h3>Histórico</h3>'+list+'</div>','admin');
+    var fs=readV24('ef_funds'); if(typeof funds!=='undefined') funds=fs;
+    var list=fs.length?fs.slice().reverse().map(function(f){return '<div class="item"><div class="row"><div><b>'+esc(f.desc||f.finalidade||'Requisição')+'</b><p class="small">'+esc(f.solicitante||f.who||currentUser||'')+' • '+esc(f.data||'')+'</p><p class="tiny">'+esc(f.obs||'')+'</p></div><span class="pill '+((f.status||'Pendente')==='Aprovado'?'ok':'warn')+'">'+esc(f.status||'Pendente')+'</span></div><div class="row mt2"><span>Valor</span><b>'+moneyV24(f.val||f.valor||0)+'</b></div></div>'}).join(''):'<p class="small">Sem requisições.</p>';
+    openNormalPanelV24('Requisição de fundos','<div class="card"><h3>Solicitar fundos</h3><div class="field"><label>Solicitante</label><input id="fundWho" value="'+esc(currentUser||'Administrador')+'"></div><div class="field"><label>Produto / necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div><div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div><div class="field"><label>Observações</label><textarea id="fundObs" placeholder="Detalhes da necessidade"></textarea></div><button class="btn mt" onclick="saveFundV24()">Submeter</button></div><div class="card mt"><h3>Histórico</h3>'+list+'</div>','admin');
   };
-
-  window.saveFundNormalV23=function(){
-    const desc=(el('fundDesc')?.value||'').trim(), val=(el('fundVal')?.value||'').trim();
-    if(!desc||!val){alert('Preencha a necessidade e o valor.');return}
-    const funds=read('ef_funds',[]);
-    funds.push({id:Date.now(),desc:desc,val:val,obs:el('fundObs')?.value||'',status:'Pendente',data:today(),solicitante:el('fundWho')?.value||window.currentUser||'Administrador'});
-    write('ef_funds',funds); window.funds=funds; openFunds();
+  window.saveFundV24=function(){
+    var f={id:Date.now(),solicitante:(byId('fundWho')||{}).value||currentUser||'',desc:(byId('fundDesc')||{}).value||'',val:(byId('fundVal')||{}).value||0,obs:(byId('fundObs')||{}).value||'',status:'Pendente',data:todayV24()};
+    if(!f.desc || !f.val){alert('Preencha a necessidade e o valor.');return}
+    var fs=readV24('ef_funds'); fs.push(f); writeV24('ef_funds',fs); if(typeof funds!=='undefined') funds=fs; alert('Requisição guardada.'); openFunds();
   };
 
   window.openDrivers=function(){
-    const staff=read('ef_staff',window.staff||[]);
-    const orders=[].concat(window.localOrders||[],window.orders||[]);
-    const mots=staff.filter(s=>s.role==='Motorista');
-    let html='';
-    if(mots.length){
-      html=mots.map(m=>{
-        const tasks=orders.filter(o=>(window.assignments?.[o.id]||{}).motorista===m.nome);
-        return '<div class="item"><b>'+esc(m.nome)+'</b><p class="small">'+esc(m.telefone||'')+'</p>'+(tasks.length?tasks.map(o=>'<span class="tag">EFW-'+String(o.id).padStart(4,'0')+' • '+esc(o.estado||'')+'</span>').join(''):'<p class="small">Sem tarefas.</p>')+'</div>'
-      }).join('');
-    }else{
-      html='<p class="small">Sem motoristas cadastrados.</p>';
-    }
-    const rotas=orders.length?orders.map(o=>'<div class="item"><b>EFW-'+String(o.id).padStart(4,'0')+'</b><p class="small">'+esc(o.endereco_recolha||'-')+'</p><p class="tiny">'+esc(o.horario||'')+'</p><button class="btn btn2 mini mt2" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.endereco_recolha||'Maputo')+'\',\'_blank\')">Abrir rota</button></div>').join(''):'<p class="small">Sem rotas.</p>';
-    openNormalPanelV23('Motoristas','<div class="card"><h3>Plano dos motoristas</h3>'+html+'</div><div class="card mt"><h3>Rotas / pedidos</h3>'+rotas+'</div>','admin');
+    var list=allOrdersV24();
+    var st=(typeof staff!=='undefined'?staff:readV24('ef_staff')).filter(function(s){return String(s.role||'').toLowerCase().includes('motorista')});
+    var blocks=st.length?st.map(function(m){
+      var jobs=list.filter(function(o){return ((typeof assignments!=='undefined'?assignments:{})[o.id]||{}).motorista===m.nome});
+      return '<div class="item"><b>'+esc(m.nome)+'</b><p class="small">'+esc(m.telefone||'')+'</p>'+(jobs.length?jobs.map(function(o){return '<span class="tag">EFW-'+String(o.id).padStart(4,'0')+' • '+esc(o.estado||'')+'</span>'}).join(''):'<p class="small">Sem tarefas atribuídas.</p>')+'</div>';
+    }).join(''):'<p class="small">Sem motoristas cadastrados.</p>';
+    var routes=list.length?list.map(function(o){return '<div class="item"><b>EFW-'+String(o.id).padStart(4,'0')+'</b><p class="small">'+esc(o.endereco_recolha||'-')+'</p><p class="small">'+esc(o.horario||'')+'</p><button class="btn btn2 mini mt2" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.endereco_recolha||'Maputo')+'\',\'_blank\')">Abrir rota</button></div>'}).join(''):'<p class="small">Sem rotas.</p>';
+    openNormalPanelV24('Motoristas','<div class="card"><h3>Plano dos motoristas</h3>'+blocks+'</div><div class="card mt"><h3>Rotas / pedidos</h3>'+routes+'</div>','admin');
   };
   window.openMotoristas=window.openDrivers;
 
   window.openFinancePanel=function(){
-    const orders=[].concat(window.localOrders||[],window.orders||[]);
-    const docs=read('ef_docs',window.docs||[]);
-    const funds=read('ef_funds',[]);
-    const total=orders.reduce((a,o)=>a+(parseFloat(o.valor)||0),0);
-    const paid=docs.filter(d=>d.estado==='Pago'||d.tipo==='Recibo').reduce((a,d)=>a+(parseFloat(d.valor)||0),0);
-    const pending=Math.max(0,total-paid);
-    const fundTotal=funds.reduce((a,f)=>a+(parseFloat(f.val)||0),0);
-    const docHtml=docs.length?docs.slice().reverse().map(d=>'<div class="item"><div class="row"><div><b>'+esc(d.ref||'Documento')+'</b><p class="small">Pedido EFW-'+String(d.pedido||0).padStart(4,'0')+'</p></div><span class="pill '+(d.estado==='Pago'?'ok':'warn')+'">'+esc(d.estado||'Pendente')+'</span></div><div class="row mt2"><span>Valor</span><b>'+money(d.valor)+'</b></div></div>').join(''):'<p class="small">Sem faturas/recibos.</p>';
-    openNormalPanelV23('Painel financeiro EFresh','<div class="finance-grid"><div class="finance-box"><small>Receita estimada</small><b>'+money(total)+'</b></div><div class="finance-box"><small>Recebido</small><b>'+money(paid)+'</b></div><div class="finance-box"><small>Pendente</small><b>'+money(pending)+'</b></div><div class="finance-box"><small>Fundos solicitados</small><b>'+money(fundTotal)+'</b></div></div><div class="card mt"><h3>Faturas e recibos</h3>'+docHtml+'</div><div class="card mt"><h3>Relatório</h3><button class="btn mt" onclick="window.print()">Exportar PDF</button></div>','admin');
+    var list=allOrdersV24(), ds=(typeof docs!=='undefined'?docs:readV24('ef_docs')), ps=readV24('ef_payments'), fs=readV24('ef_funds');
+    var total=list.reduce(function(a,o){return a+(parseFloat(o.valor)||0)},0);
+    var paid=ds.filter(function(d){return d.estado==='Pago' || d.tipo==='Recibo'}).reduce(function(a,d){return a+(parseFloat(d.valor)||0)},0);
+    var pending=Math.max(0,total-paid), fundTotal=fs.reduce(function(a,f){return a+(parseFloat(f.val||f.valor)||0)},0);
+    var payHtml=ps.length?ps.map(function(p,i){return '<div class="item"><div class="row"><div><b>'+esc(p.ref||'Comprovativo')+'</b><p class="small">'+esc(p.name||p.fileName||'')+'</p><p class="tiny">'+esc(p.fileName||'')+' • '+esc(p.fileSize||'')+'</p></div><span class="pill '+(p.estado==='Aprovado'?'ok':p.estado==='Recusado'?'bad':'warn')+'">'+esc(p.estado||'Aguardando aprovação')+'</span></div><div class="grid2 mt2"><button class="btn mini '+(['admin','financeiro'].includes(currentRole)?'':'locked')+'" onclick="approvePaymentV24('+i+')">Aprovar / emitir recibo</button><button class="btn dangerBtn mini '+(['admin','financeiro'].includes(currentRole)?'':'locked')+'" onclick="rejectPaymentV24('+i+')">Recusar</button></div></div>'}).join(''):'<p class="small">Sem comprovativos submetidos.</p>';
+    var docHtml=ds.length?ds.map(function(d){return '<div class="item"><div class="row"><div><b>'+esc(d.ref)+'</b><p class="small">'+esc(d.tipo)+' • Pedido EFW-'+String(d.pedido).padStart(4,'0')+'</p></div><span class="pill '+(d.estado==='Pago'?'ok':'warn')+'">'+esc(d.estado)+'</span></div><button class="btn btn2 mini mt2" onclick="printDoc(\''+esc(d.ref)+'\')">Ver / Imprimir</button></div>'}).join(''):'<p class="small">Sem faturas.</p>';
+    openNormalPanelV24('Painel financeiro EFresh','<div class="finance-grid"><div class="finance-box"><small>Receita estimada</small><b>'+moneyV24(total)+'</b></div><div class="finance-box"><small>Recebido</small><b>'+moneyV24(paid)+'</b></div><div class="finance-box"><small>Pendente</small><b>'+moneyV24(pending)+'</b></div><div class="finance-box"><small>Fundos solicitados</small><b>'+moneyV24(fundTotal)+'</b></div></div><div class="card mt"><h3>Comprovativos de pagamento</h3>'+payHtml+'</div><div class="card mt"><h3>Faturas e recibos</h3>'+docHtml+'</div><div class="card mt"><h3>Controlo mensal</h3><div class="grid2"><div class="field"><label>De</label><input type="date" value="'+todayV24().slice(0,8)+'01"></div><div class="field"><label>Até</label><input type="date" value="'+todayV24()+'"></div></div><button class="btn mt" onclick="window.print()">Exportar PDF</button></div>','admin');
   };
+  window.approvePaymentV24=function(i){
+    var ps=readV24('ef_payments'), p=ps[i]; if(!p) return; p.estado='Aprovado';
+    var ds=(typeof docs!=='undefined'?docs:readV24('ef_docs'));
+    var doc=ds.find(function(d){return String(d.pedido).endsWith(String(p.pedido)) || d.ref===p.ref});
+    if(doc) doc.estado='Pago';
+    if(doc && !ds.some(function(d){return d.tipo==='Recibo' && String(d.pedido)===String(doc.pedido)})) ds.push({ref:'RCB-'+String(doc.pedido).padStart(4,'0'),pedido:doc.pedido,tipo:'Recibo',valor:doc.valor,estado:'Pago',data:todayV24()});
+    writeV24('ef_docs',ds); writeV24('ef_payments',ps); if(typeof docs!=='undefined') docs=ds; alert('Pagamento aprovado e recibo emitido.'); openFinancePanel();
+  };
+  window.rejectPaymentV24=function(i){var ps=readV24('ef_payments'); if(ps[i]) ps[i].estado='Recusado'; writeV24('ef_payments',ps); alert('Comprovativo recusado.'); openFinancePanel();};
 
   window.openCompleted=function(){
-    const done=[].concat(window.localOrders||[],window.orders||[]).filter(o=>['entregue','concluído','concluido'].some(s=>(o.estado||'').toLowerCase().includes(s)));
-    const body=done.length?done.map(o=>'<div class="item"><b>EFW-'+String(o.id).padStart(4,'0')+'</b><p class="small">'+esc(o.servico||'')+'</p><p class="small">'+money(o.valor)+'</p></div>').join(''):'<p class="small">Sem pedidos concluídos.</p>';
-    openNormalPanelV23('Concluídos','<div class="card">'+body+'</div>','admin');
+    var done=allOrdersV24().filter(function(o){var s=String(o.estado||'').toLowerCase(); return s.includes('entregue')||s.includes('conclu')});
+    var body=done.length?done.map(function(o){return '<div class="item"><b>EFW-'+String(o.id).padStart(4,'0')+'</b><p class="small">'+esc(o.servico||'')+' • '+moneyV24(o.valor||0)+'</p><button class="btn btn2 mini mt2" onclick="openWork(\''+o.id+'\')">Ver execução</button></div>'}).join(''):'<p class="small">Sem pedidos concluídos.</p>';
+    openNormalPanelV24('Concluídos','<div class="card">'+body+'</div>','admin');
   };
 
   window.openAdminSettings=function(){
-    const users=read('ef_users',[]);
-    const root=users.find(u=>u.root)||{nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456'};
-    openNormalPanelV23('Admin','<div class="card"><h3>Administrador principal</h3><div class="field"><label>Nome</label><input id="rootNome" value="'+esc(root.nome||'Edmilson')+'"></div><div class="field"><label>Apelido</label><input id="rootApelido" value="'+esc(root.apelido||'Fumo')+'"></div><div class="field"><label>Número</label><input id="rootTelefone" value="'+esc(root.telefone||'845178833')+'"></div><div class="field"><label>Password</label><input id="rootPass" type="password" value="'+esc(root.pass||'123456')+'"></div><button class="btn mt" onclick="saveRootAdmin&&saveRootAdmin()">Guardar</button></div>','admin');
-  };
-
-  window.openTerms=function(){
-    const active=document.querySelector('.screen.active');
-    const back=(active&&active.id)||'landing';
-    openNormalPanelV23('Termos de uso e privacidade','<div class="card terms-box"><h3>EFresh Lavandaria</h3><p>Os dados do cliente são usados apenas para recolha, entrega, contacto, cobrança, documentos e histórico do serviço.</p><p>O valor final pode ser ajustado após pesagem real e confirmação operacional.</p><p>Cada cliente deve ver apenas os seus próprios pedidos, documentos e comprovativos.</p><button class="btn mt" onclick="closeModal()">Entendi</button></div>',back);
+    if(currentRole!=='admin'){alert('Apenas administrador pode alterar estes dados.');return}
+    try{ if(typeof ensureRootAdmin==='function') ensureRootAdmin(); }catch(e){}
+    var us=readV24('ef_users'); var root=us.find(function(u){return u.root}) || us.find(function(u){return String(u.telefone).replace(/\D/g,'').endsWith('845178833')}) || {nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456'};
+    openNormalPanelV24('Admin','<div class="card"><h3>Administrador principal</h3><p class="small">Este é o perfil ROOT da EFresh. Não aparece no registo público e não pode ser criado por clientes.</p><div class="field"><label>Nome</label><input id="rootNome" value="'+esc(root.nome||'Edmilson')+'"></div><div class="field"><label>Apelido</label><input id="rootApelido" value="'+esc(root.apelido||'Fumo')+'"></div><div class="field"><label>Número de administrador</label><input id="rootTelefone" value="'+esc(root.telefone||'845178833')+'"></div><div class="field"><label>Password</label><input id="rootPass" type="password" value="'+esc(root.pass||'123456')+'"></div><button class="btn mt" onclick="saveRootAdmin&&saveRootAdmin()">Guardar alterações</button></div>','admin');
   };
 
   window.openAssign=function(id){
-    if((window.currentRole||'admin')!=='admin'){alert('Apenas administrador atribui trabalhos.');return}
-    const staff=read('ef_staff',window.staff||[]);
-    const ops=staff.filter(s=>['Operador','Administrador','Atendimento'].includes(s.role));
-    const mots=staff.filter(s=>s.role==='Motorista');
-    openNormalPanelV23('Atribuir Pedido EFW-'+String(id).padStart(4,'0'),'<div class="card"><div class="field"><label>Operador / lavandaria</label><select id="assignOp">'+ops.map(s=>'<option>'+esc(s.nome)+'</option>').join('')+'</select></div><div class="field"><label>Motorista / transportador</label><select id="assignMot">'+mots.map(s=>'<option>'+esc(s.nome)+'</option>').join('')+'</select></div><button class="btn mt" onclick="saveAssign(\''+id+'\')">Guardar atribuição</button></div>','admin');
+    if(currentRole!=='admin'){alert('Apenas administrador atribui trabalhos.');return}
+    var st=(typeof staff!=='undefined'?staff:readV24('ef_staff'));
+    var ops=st.filter(function(s){return ['Operador','Atendimento','Administrador'].includes(s.role)}), mots=st.filter(function(s){return s.role==='Motorista'});
+    openNormalPanelV24('Atribuir Pedido EFW-'+String(id).padStart(4,'0'),'<div class="card"><div class="field"><label>Operador / lavandaria</label><select id="assignOp">'+ops.map(function(s){return '<option>'+esc(s.nome)+'</option>'}).join('')+'</select></div><div class="field"><label>Motorista / transportador</label><select id="assignMot">'+mots.map(function(s){return '<option>'+esc(s.nome)+'</option>'}).join('')+'</select></div><button class="btn mt" onclick="saveAssign(\''+id+'\')">Guardar atribuição</button></div>','admin');
   };
 
   window.openWork=function(id){
-    const orders=[].concat(window.localOrders||[],window.orders||[]);
-    const o=orders.find(x=>String(x.id)===String(id))||{};
-    const stages=window.STAGES||['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue'];
-    const current=o.estado||'Pedido recebido';
-    const idx=Math.max(0,stages.indexOf(current));
-    const next=stages[Math.min(idx+1,stages.length-1)];
-    openNormalPanelV23('Executar EFW-'+String(id).padStart(4,'0'),'<div class="card"><p><b>Serviço:</b> '+esc(o.servico||'-')+'</p><p><b>Endereço:</b> '+esc(o.endereco_recolha||'-')+'</p><p><b>Horário:</b> '+esc(o.horario||'-')+'</p><p><b>Estado atual:</b> '+esc(current)+'</p><div class="grid2 mt"><button class="btn" onclick="setEstado(\''+id+'\',\''+esc(next)+'\');closeModal()">Avançar</button><button class="btn btn2" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.endereco_recolha||'Maputo')+'\',\'_blank\')">Mapa</button></div></div>','admin');
+    var o=allOrdersV24().find(function(x){return String(x.id)===String(id)})||{};
+    var ST=(typeof STAGES!=='undefined'?STAGES:['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue']);
+    var idx=Math.max(0,ST.indexOf(o.estado||'Pedido recebido')), next=ST[Math.min(idx+1,ST.length-1)];
+    var buttons=ST.map(function(s){return '<button class="btn btn2" onclick="setEstado(\''+id+'\',\''+esc(s)+'\');closeModal()">'+esc(s)+'</button>'}).join('');
+    var hist=''; try{hist=(typeof renderHistory==='function')?renderHistory(id):''}catch(e){}
+    openNormalPanelV24('Executar EFW-'+String(id).padStart(4,'0'),'<div class="card"><p><b>Serviço:</b> '+esc(o.servico||'-')+'</p><p><b>Endereço:</b> '+esc(o.endereco_recolha||'-')+'</p><p><b>Horário:</b> '+esc(o.horario||'-')+'</p><p><b>Estado atual:</b> '+esc(o.estado||'Pedido recebido')+'</p><p><b>Próximo passo:</b> '+esc(next)+'</p><h3 class="mt">Histórico operacional</h3>'+hist+'<div class="work-action"><button class="btn" onclick="setEstado(\''+id+'\',\''+esc(next)+'\');closeModal()">Avançar para: '+esc(next)+'</button><button class="btn btn2" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.endereco_recolha||'Maputo')+'\',\'_blank\')">Abrir rota no mapa</button><button class="btn btn2" onclick="openWhatsApp&&openWhatsApp()">Contactar central</button></div><h3 class="mt">Alterar manualmente</h3><div class="grid2 mt2">'+buttons+'</div></div>','admin');
   };
 
-  window.renderMore=function(){
-    const box=el('adminContent'); if(!box) return;
-    box.innerHTML='<div class="grid2"><button class="service '+(window.currentRole!=='admin'?'locked':'')+'" onclick="adminTab(\'equipe\')">👥<br><b>Funcionários</b></button><button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button><button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button><button class="service" onclick="openFinancePanel()">📊<br><b>Financeiro</b></button><button class="service" onclick="openAdminSettings()">🔐<br><b>Admin</b></button><button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button></div>';
+  window.printDoc=function(ref){
+    var ds=(typeof docs!=='undefined'?docs:readV24('ef_docs')), d=ds.find(function(x){return x.ref===ref}); if(!d){alert('Documento não encontrado.');return}
+    var p=allOrdersV24().find(function(o){return String(o.id)===String(d.pedido)})||{};
+    var clientName=(byId('nomeCliente')||{}).value||'Cliente EFresh', clientPhone=(byId('telefoneCliente')||{}).value||'+258', address=(p.endereco_recolha||((byId('profileAddress')||{}).value)||'Endereço do cliente');
+    var valor=parseFloat(d.valor||0), iva=0, subtotal=valor;
+    var html='<div class="ef-invoice-premium"><div class="ef-invoice-head"><div class="row"><div><h2><span>EF</span>resh Lavandaria</h2><p>Mais tempo para si. O futuro da lavandaria chegou.</p><span class="ef-invoice-badge">'+esc(d.tipo||'FATURA')+' DIGITAL</span></div><div class="ef-qr"></div></div></div><div class="ef-invoice-body"><div class="ef-invoice-row"><div class="ef-invoice-box"><small>Emitido a</small><b>'+esc(clientName)+'</b><br><span class="small">'+esc(clientPhone)+'</span><br><span class="small">'+esc(address)+'</span></div><div class="ef-invoice-box"><small>Documento</small><b>'+esc(d.ref)+'</b><br><span class="small">Data: '+esc(d.data||todayV24())+'</span><br><span class="small">Recibo: '+(d.tipo==='Recibo'?esc(d.ref):'A emitir após pagamento')+'</span></div></div><table class="ef-invoice-table"><thead><tr><th>Descrição</th><th>Qtd/Peso</th><th>Valor</th></tr></thead><tbody><tr><td>'+esc(p.servico||'Serviço de lavandaria')+'</td><td>'+esc(p.quantidade||'A confirmar')+'</td><td>'+moneyV24(subtotal)+'</td></tr><tr><td>Transporte / recolha e entrega</td><td>Incluído na estimativa</td><td>Incluído</td></tr></tbody></table><div class="ef-invoice-total"><div class="row"><span>Subtotal</span><b>'+moneyV24(subtotal)+'</b></div><div class="row"><span>IVA</span><b>'+moneyV24(iva)+'</b></div><div class="row"><span>Total</span><b class="grand">'+moneyV24(valor)+'</b></div><div class="row"><span>Estado</span><b>'+esc(d.estado||'Pendente')+'</b></div></div></div><div class="ef-invoice-foot"><b>Nota:</b> Documento emitido electronicamente pela EFresh Lavandaria. O valor da lavagem pode ser ajustado após pesagem real, conforme informado ao cliente. Para validação interna, use a referência '+esc(d.ref)+'.<br><br><button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button></div></div>';
+    openNormalPanelV24((d.tipo||'Documento')+' '+d.ref,html,(document.querySelector('#docs.active')?'docs':'admin'));
   };
 
-  window.setTimeout(function(){
-    const badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent='V23 NORMAL OK';
-    if(typeof window.setLoginDebug==='function') window.setLoginDebug('V23 NORMAL OK');
-  },200);
+  document.addEventListener('DOMContentLoaded',function(){
+    ensurePanelV24();
+    var badge=document.querySelector('.app-version-badge'); if(badge) badge.textContent='V24 FUNÇÕES OK';
+    if(typeof setLoginDebug==='function') setLoginDebug('V24 FUNÇÕES OK');
+  });
 })();
 </script>
 
