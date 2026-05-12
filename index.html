@@ -406,7 +406,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
       <div class="field"><label>Nome</label><input id="regNome" placeholder="Nome"></div>
       <div class="field"><label>Apelido</label><input id="regApelido" placeholder="Apelido"></div>
     </div>
-    <div class="field"><label>Perfil</label><select id="regRole"><option value="cliente">Cliente</option><option value="admin">Administrador</option><option value="financeiro">Financeiro</option><option value="operador">Operador</option><option value="motorista">Motorista</option><option value="atendimento">Atendimento</option></select></div>
+    
   </div>
   <button class="btn mt" onclick="authEnter()">Continuar</button>
   <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.</div>
@@ -617,7 +617,7 @@ function openWork(id){let o=orders.find(x=>String(x.id)===String(id));modalTitle
 function renderTeam(){if(currentRole!=='admin'){adminContent.innerHTML='<div class="card">Sem permissão para criar perfis.</div>';return}adminContent.innerHTML=`<div class="card"><h3>Criar perfil</h3><div class="field"><label>Nome</label><input id="stNome"></div><div class="field"><label>Telefone</label><input id="stTel"></div><div class="field"><label>Cargo</label><select id="stRole"><option>Administrador</option><option>Financeiro</option><option>Operador</option><option>Motorista</option><option>Atendimento</option></select></div><button class="btn mt" onclick="saveStaff()">Criar perfil</button></div><div class="card mt"><h3>Perfis criados</h3>${staff.map((s,i)=>`<div class="item"><div class="row"><div><b>${s.nome}</b><p class="small">${s.telefone||''}</p></div><span class="role">${s.role}</span></div><button class="btn dangerBtn mini mt2" onclick="delStaff(${i})">Remover</button></div>`).join('')}</div>`}
 function saveStaff(){staff.push({nome:stNome.value||'Funcionário',role:stRole.value,telefone:stTel.value||''});localStorage.setItem('ef_staff',JSON.stringify(staff));renderTeam()}
 function delStaff(i){staff.splice(i,1);localStorage.setItem('ef_staff',JSON.stringify(staff));renderTeam()}
-function renderMore(){adminContent.innerHTML=`<div class="grid2"><button class="service ${currentRole!=='admin'?'locked':''}" onclick="adminTab('equipe')">👥<br><b>Funcionários</b></button><button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button><button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button><button class="service" onclick="openFinancePanel()">📊<br><b>Financeiro</b></button><button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button></div>`}
+function renderMore(){adminContent.innerHTML=`<div class="grid2"><button class="service ${currentRole!=='admin'?'locked':''}" onclick="adminTab('equipe')">👥<br><b>Funcionários</b></button><button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button><button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button><button class="service" onclick="openFinancePanel()">📊<br><b>Financeiro</b></button><button class="service ${currentRole!=='admin'?'locked':''}" onclick="openAdminSettings()">🔐<br><b>Admin</b></button><button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button></div>`}
 function openDrivers(){modalTitle.innerText='Plano dos motoristas';let mot=staff.filter(s=>s.role==='Motorista');modalBody.innerHTML=mot.map(m=>`<div class="item"><b>${m.nome}</b><p class="small">${m.telefone||''}</p>${orders.filter(o=>(assignments[o.id]||{}).motorista===m.nome).map(o=>`<span class="tag">EFW-${String(o.id).padStart(4,'0')} • ${o.estado}</span>`).join('')||'<p class="small">Sem tarefas.</p>'}</div>`).join('')||'<p class="small">Sem motoristas.</p>';modal.style.display='flex'}
 function openFunds(){modalTitle.innerText='Requisição de fundos';modalBody.innerHTML=`<div class="card"><div class="field"><label>Produto/necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div><div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div><button class="btn mt" onclick="saveFund()">Submeter</button></div><div id="fundList" class="mt"></div>`;modal.style.display='flex';renderFunds()}
 function saveFund(){funds.push({desc:fundDesc.value,val:fundVal.value,status:'Pendente',data:today(),solicitante:currentUser});localStorage.setItem('ef_funds',JSON.stringify(funds));incNotif('funds');renderFunds()}
@@ -973,6 +973,99 @@ window.androidBack=function(){
 }
 function refreshApp(){loadAdmin().then(()=>{updateClientHome();renderBadges();renderProofs();})}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden) refreshApp()});
+
+
+/* ===== EFresh V12 - Admin root fix + public registration only for clients ===== */
+function normalizePhone(v){return (v||'').replace(/\D+/g,'').trim()}
+function samePhone(a,b){
+  let x=normalizePhone(a), y=normalizePhone(b);
+  return x===y || x.endsWith(y) || y.endsWith(x);
+}
+function ensureRootAdmin(){
+  users = JSON.parse(localStorage.getItem('ef_users')||'[]');
+  let root = users.find(u=>samePhone(u.telefone,'845178833') || samePhone(u.telefone,'258845178833'));
+  if(root){
+    root.nome='Edmilson';
+    root.apelido='Fumo';
+    root.telefone='845178833';
+    root.pass=root.pass || '123456';
+    root.role='admin';
+    root.root=true;
+  }else{
+    users.push({nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456',role:'admin',root:true});
+  }
+  localStorage.setItem('ef_users',JSON.stringify(users));
+}
+ensureRootAdmin();
+
+function authEnter(){
+  const tel=normalizePhone(document.getElementById('loginPhone')?.value);
+  const pass=document.getElementById('loginPass')?.value||'';
+  if(!tel || !pass){alert('Preencha número e código.');return}
+
+  if(authMode==='register'){
+    const nome=(document.getElementById('regNome')?.value||'').trim();
+    const apelido=(document.getElementById('regApelido')?.value||'').trim();
+    if(!nome || !apelido){alert('Preencha nome e apelido.');return}
+    if(users.some(u=>samePhone(u.telefone,tel))){alert('Este número já tem conta. Use Entrar.');return}
+    users.push({nome,apelido,telefone:tel,pass,role:'cliente'});
+    localStorage.setItem('ef_users',JSON.stringify(users));
+    alert('Conta de cliente criada. Agora pode entrar.');
+    setAuthMode('login');
+    return;
+  }
+
+  ensureRootAdmin();
+  const u=users.find(x=>samePhone(x.telefone,tel) && String(x.pass)===String(pass));
+  if(!u){alert('Número ou código incorreto.');return}
+
+  currentUser=(u.nome+' '+(u.apelido||'')).trim();
+  currentRole=u.role || 'cliente';
+  nomeCliente.value=currentUser;
+  telefoneCliente.value=u.telefone;
+
+  if(currentRole==='cliente') enterClient();
+  else showAdminForRole();
+}
+
+function openAdminSettings(){
+  if(currentRole!=='admin'){alert('Apenas administrador pode alterar estes dados.');return}
+  ensureRootAdmin();
+  const root=users.find(u=>u.root) || users.find(u=>samePhone(u.telefone,'845178833')) || {};
+  modalTitle.innerText='Administrador principal';
+  modalBody.innerHTML=`<div class="card">
+    <p class="small">Este é o perfil ROOT da EFresh. Não aparece no registo público e não pode ser criado por clientes.</p>
+    <div class="field"><label>Nome</label><input id="rootNome" value="${root.nome||'Edmilson'}"></div>
+    <div class="field"><label>Apelido</label><input id="rootApelido" value="${root.apelido||'Fumo'}"></div>
+    <div class="field"><label>Número de administrador</label><input id="rootTelefone" value="${root.telefone||'845178833'}"></div>
+    <div class="field"><label>Password</label><input id="rootPass" type="password" value="${root.pass||'123456'}"></div>
+    <button class="btn mt" onclick="saveRootAdmin()">Guardar alterações</button>
+  </div>`;
+  modal.style.display='flex';
+}
+
+function saveRootAdmin(){
+  const nome=document.getElementById('rootNome').value.trim()||'Edmilson';
+  const apelido=document.getElementById('rootApelido').value.trim()||'Fumo';
+  const telefone=document.getElementById('rootTelefone').value.trim()||'845178833';
+  const pass=document.getElementById('rootPass').value||'123456';
+  users=users.filter(u=>!u.root && !samePhone(u.telefone,'845178833') && !samePhone(u.telefone,telefone));
+  users.push({nome,apelido,telefone,pass,role:'admin',root:true});
+  localStorage.setItem('ef_users',JSON.stringify(users));
+  alert('Administrador principal atualizado.');
+  closeModal();
+}
+
+function saveStaff(){
+  let role=stRole.value, nome=stNome.value||'Funcionário', apelido=stApelido.value||'', telefone=stTel.value||'', pass=stPass.value||'1234';
+  if(!telefone){alert('Informe o telefone/login do colaborador.');return}
+  if(users.some(u=>samePhone(u.telefone,telefone))){alert('Este telefone já existe. Use outro ou remova o perfil antigo.');return}
+  staff.push({nome,role,telefone});
+  localStorage.setItem('ef_staff',JSON.stringify(staff));
+  users.push({nome,apelido,telefone,pass,role:role.toLowerCase()});
+  localStorage.setItem('ef_users',JSON.stringify(users));
+  renderTeam();
+}
 
 </script>
 </body>
