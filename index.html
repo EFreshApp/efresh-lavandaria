@@ -620,7 +620,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   <button class="btn mt" onclick="authEnterV17()">Continuar</button>
   <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button><div id="loginDebug" style="margin-top:8px;font-size:12px;color:#0369a1;font-weight:800"></div></div>
  </div>
- <p class="tiny mt">V21: modal definitivo corrigido</p>
+ <p class="tiny mt">V22: abertura normal corrigida</p>
 </section>
 
 <section id="home" class="screen">
@@ -2517,6 +2517,374 @@ V21 LOGIN OK
   }, true);
 
   if(typeof setLoginDebug==='function') setLoginDebug('V21 pronto. Modal definitivo isolado.');
+})();
+</script>
+
+
+
+<!-- =========================================================
+     EFRESH V22 - CORREÇÃO DEFINITIVA DE ABERTURA NORMAL
+     Mantém o HTML antigo, apenas isola e corrige os painéis.
+     ========================================================= -->
+<style id="efresh-v22-modal-normal-fix">
+  html.efresh-modal-lock,
+  body.efresh-modal-lock{
+    overflow:hidden!important;
+    height:100%!important;
+  }
+
+  #modal,
+  #modal .modalBox,
+  .modalBox{
+    display:none!important;
+  }
+
+  #efModalV21{
+    position:fixed!important;
+    inset:0!important;
+    width:100vw!important;
+    height:100vh!important;
+    z-index:2147483647!important;
+    background:rgba(15,23,42,.62)!important;
+    display:none;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    padding:14px 10px 90px!important;
+    box-sizing:border-box!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+
+  #efModalPanelV21{
+    position:relative!important;
+    z-index:2147483647!important;
+    width:min(720px,calc(100vw - 20px))!important;
+    max-width:720px!important;
+    max-height:none!important;
+    min-height:auto!important;
+    margin:max(8px,env(safe-area-inset-top)) auto 110px!important;
+    background:#fff!important;
+    border-radius:30px!important;
+    box-shadow:0 35px 100px rgba(0,0,0,.35)!important;
+    padding:0!important;
+    overflow:hidden!important;
+    box-sizing:border-box!important;
+    color:#0f172a!important;
+  }
+
+  #efModalHeadV21{
+    position:sticky!important;
+    top:0!important;
+    z-index:5!important;
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:space-between!important;
+    gap:14px!important;
+    background:#fff!important;
+    padding:26px 24px 16px!important;
+    border-bottom:1px solid #eef2f7!important;
+  }
+
+  #efModalTitleV21{
+    display:block!important;
+    font-size:34px!important;
+    line-height:1.02!important;
+    letter-spacing:-1.5px!important;
+    font-weight:1000!important;
+    margin:0!important;
+    padding:0!important;
+    color:#0f172a!important;
+    max-width:calc(100% - 64px)!important;
+  }
+
+  #efModalCloseV21{
+    flex:0 0 auto!important;
+    width:52px!important;
+    height:52px!important;
+    border-radius:20px!important;
+    border:1px solid #e2e8f0!important;
+    background:#fff!important;
+    color:#0f172a!important;
+    font-size:32px!important;
+    line-height:1!important;
+    font-weight:500!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    box-shadow:0 10px 30px rgba(15,23,42,.08)!important;
+  }
+
+  #efModalBodyV21{
+    display:block!important;
+    background:#fff!important;
+    padding:18px 18px 34px!important;
+    color:#0f172a!important;
+    min-height:120px!important;
+    overflow:visible!important;
+  }
+
+  #efModalBodyV21 .card,
+  #efModalBodyV21 .item,
+  #efModalBodyV21 .kpi,
+  #efModalBodyV21 .service,
+  #efModalBodyV21 .finance-box{
+    background:#fff!important;
+    color:#0f172a!important;
+  }
+
+  #efModalBodyV21 .grid2{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:10px!important;
+  }
+
+  @media(max-width:430px){
+    #efModalV21{
+      padding:10px 8px 84px!important;
+    }
+    #efModalPanelV21{
+      width:calc(100vw - 16px)!important;
+      border-radius:28px!important;
+      margin:max(6px,env(safe-area-inset-top)) auto 100px!important;
+    }
+    #efModalHeadV21{
+      padding:24px 20px 14px!important;
+    }
+    #efModalTitleV21{
+      font-size:30px!important;
+      line-height:1.06!important;
+      max-width:calc(100% - 62px)!important;
+    }
+    #efModalBodyV21{
+      padding:16px 16px 32px!important;
+    }
+    #efModalBodyV21 .grid2{
+      grid-template-columns:1fr 1fr!important;
+    }
+  }
+</style>
+
+<script id="efresh-v22-modal-normal-fix-js">
+(function(){
+  function el(id){return document.getElementById(id)}
+  function read(key,fallback){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback||[]))}catch(e){return fallback||[]}}
+  function write(key,val){localStorage.setItem(key,JSON.stringify(val))}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
+  function today(){return new Date().toISOString().slice(0,10)}
+  function money(n){return (Number(n)||0).toLocaleString('pt-MZ')+' MT'}
+
+  function ensureV22Modal(){
+    let m=el('efModalV21');
+    if(!m){
+      m=document.createElement('div');
+      m.id='efModalV21';
+      document.body.appendChild(m);
+    }
+    m.innerHTML=`
+      <div id="efModalPanelV21" role="dialog" aria-modal="true">
+        <div id="efModalHeadV21">
+          <h2 id="efModalTitleV21">EFresh</h2>
+          <button id="efModalCloseV21" type="button" aria-label="Fechar" onclick="closeModal()">×</button>
+        </div>
+        <div id="efModalBodyV21"></div>
+      </div>`;
+    m.onclick=function(ev){ if(ev.target===m) window.closeModal(); };
+    return m;
+  }
+
+  window.openModalV21=function(title,html){
+    const m=ensureV22Modal();
+    el('efModalTitleV21').textContent=title||'EFresh';
+    el('efModalBodyV21').innerHTML=html||'';
+    document.documentElement.classList.add('efresh-modal-lock');
+    document.body.classList.add('efresh-modal-lock','ef-modal-open');
+    m.style.display='flex';
+    m.scrollTop=0;
+    setTimeout(function(){m.scrollTop=0},30);
+  };
+
+  window.closeModal=function(){
+    const m=el('efModalV21');
+    if(m) m.style.display='none';
+    document.documentElement.classList.remove('efresh-modal-lock');
+    document.body.classList.remove('efresh-modal-lock','ef-modal-open','modal-open');
+  };
+
+  window.openFunds=function(){
+    const funds=read('ef_funds',[]);
+    window.openModalV21('Requisição de fundos',`
+      <div class="card">
+        <h3>Solicitar fundos</h3>
+        <p class="small mt2">Preencha a necessidade e o valor. A requisição fica gravada no histórico interno.</p>
+        <div class="field"><label>Solicitante</label><input id="fundWho" value="${esc(window.currentUser||'Administrador')}"></div>
+        <div class="field"><label>Produto / necessidade</label><textarea id="fundDesc" placeholder="Ex: detergente, embalagens, combustível"></textarea></div>
+        <div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="Ex: 5000"></div>
+        <div class="field"><label>Observações</label><textarea id="fundObs" placeholder="Detalhes da necessidade"></textarea></div>
+        <button class="btn mt" onclick="saveFundV22()">Submeter requisição</button>
+      </div>
+      <div class="card mt">
+        <h3>Requisições existentes</h3>
+        <div id="fundListV22">${funds.length?'':'<p class="small mt2">Sem requisições.</p>'}</div>
+      </div>`);
+    renderFundListV22();
+  };
+
+  window.saveFundV22=function(){
+    const desc=(el('fundDesc')?.value||'').trim();
+    const val=(el('fundVal')?.value||'').trim();
+    if(!desc || !val){alert('Preencha a necessidade e o valor.');return}
+    const funds=read('ef_funds',[]);
+    funds.push({id:Date.now(),desc,val,obs:el('fundObs')?.value||'',status:'Pendente',data:today(),solicitante:el('fundWho')?.value||window.currentUser||'Administrador'});
+    write('ef_funds',funds);
+    window.funds=funds;
+    if(typeof window.incNotif==='function') window.incNotif('funds');
+    renderFundListV22();
+    if(el('fundDesc')) el('fundDesc').value='';
+    if(el('fundVal')) el('fundVal').value='';
+    if(el('fundObs')) el('fundObs').value='';
+  };
+
+  window.renderFundListV22=function(){
+    const box=el('fundListV22'); if(!box) return;
+    const funds=read('ef_funds',[]).slice().reverse();
+    box.innerHTML=funds.length?funds.map(function(f,i){return `
+      <div class="item">
+        <div class="row">
+          <div>
+            <b>${esc(f.desc||f.finalidade||'Requisição')}</b>
+            <p class="small">${esc(f.val||0)} MT • ${esc(f.data||'')} • ${esc(f.solicitante||'')}</p>
+            ${f.obs?`<p class="tiny">${esc(f.obs)}</p>`:''}
+          </div>
+          <span class="pill ${f.status==='Autorizado'?'ok':'warn'}">${esc(f.status||'Pendente')}</span>
+        </div>
+        ${((window.currentRole||'admin')==='admin')?`<button class="btn btn2 mini mt2" onclick="authorizeFundV22(${funds.length-1-i})">Autorizar</button>`:''}
+      </div>`}).join(''):'<p class="small mt2">Sem requisições.</p>';
+  };
+
+  window.authorizeFundV22=function(originalIndex){
+    const funds=read('ef_funds',[]);
+    if(funds[originalIndex]) funds[originalIndex].status='Autorizado';
+    write('ef_funds',funds);
+    window.funds=funds;
+    renderFundListV22();
+  };
+
+  window.openFinancePanel=function(){
+    const allOrders=[].concat(window.localOrders||[],window.orders||[]);
+    const docs=read('ef_docs',[]);
+    const payments=read('ef_payments',[]);
+    const funds=read('ef_funds',[]);
+    const total=allOrders.reduce((a,o)=>a+(parseFloat(o.valor)||0),0);
+    const paid=docs.filter(d=>d.estado==='Pago'||d.tipo==='Recibo').reduce((a,d)=>a+(parseFloat(d.valor)||0),0);
+    const pending=Math.max(0,total-paid);
+    const fundTotal=funds.reduce((a,f)=>a+(parseFloat(f.val)||0),0);
+    const docHtml=docs.length?docs.slice().reverse().map(d=>`<div class="item"><div class="row"><div><b>${esc(d.ref||'Documento')}</b><p class="small">Pedido EFW-${String(d.pedido||0).padStart(4,'0')}</p></div><span class="pill ${d.estado==='Pago'?'ok':'warn'}">${esc(d.estado||'Pendente')}</span></div><div class="row mt2"><span>Valor</span><b>${money(d.valor)}</b></div></div>`).join(''):'<p class="small">Sem faturas/recibos.</p>';
+    const payHtml=payments.length?payments.slice().reverse().map(p=>`<div class="item"><b>${esc(p.ref||'Comprovativo')}</b><p class="small">${esc(p.name||p.fileName||'')}</p></div>`).join(''):'<p class="small">Sem comprovativos.</p>';
+    window.openModalV21('Painel financeiro EFresh',`
+      <div class="finance-grid">
+        <div class="finance-box"><small>Receita estimada</small><b>${money(total)}</b></div>
+        <div class="finance-box"><small>Recebido</small><b>${money(paid)}</b></div>
+        <div class="finance-box"><small>Pendente</small><b>${money(pending)}</b></div>
+        <div class="finance-box"><small>Fundos solicitados</small><b>${money(fundTotal)}</b></div>
+      </div>
+      <div class="card mt"><h3>Faturas e recibos</h3>${docHtml}</div>
+      <div class="card mt"><h3>Comprovativos</h3>${payHtml}</div>
+      <div class="card mt"><h3>Relatório</h3><button class="btn mt" onclick="window.print()">Exportar PDF</button></div>`);
+  };
+
+  window.openDrivers=function(){
+    const allOrders=[].concat(window.localOrders||[],window.orders||[]);
+    const body=allOrders.length?allOrders.map(o=>`
+      <div class="item">
+        <div class="row"><div><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${esc(o.estado||'')}</p></div><span class="pill info">Rota</span></div>
+        <p class="small mt2">${esc(o.endereco_recolha||'-')}</p>
+        <p class="tiny">${esc(o.horario||'')}</p>
+        <button class="btn btn2 mini mt2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Abrir rota</button>
+      </div>`).join(''):'<p class="small">Sem rotas para motorista.</p>';
+    window.openModalV21('Motoristas',`<div class="card"><h3>Plano dos motoristas</h3>${body}</div>`);
+  };
+  window.openMotoristas=window.openDrivers;
+
+  window.openCompleted=function(){
+    const done=[].concat(window.localOrders||[],window.orders||[]).filter(o=>['entregue','concluído','concluido'].some(s=>(o.estado||'').toLowerCase().includes(s)));
+    const body=done.length?done.map(o=>`<div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${esc(o.servico||'')}</p><p class="small">${money(o.valor)}</p></div>`).join(''):'<p class="small">Sem pedidos concluídos.</p>';
+    window.openModalV21('Concluídos',`<div class="card">${body}</div>`);
+  };
+
+  window.openAdminSettings=function(){
+    const users=read('ef_users',[]);
+    const root=users.find(u=>u.root)||{nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456'};
+    window.openModalV21('Admin',`
+      <div class="card">
+        <h3>Administrador principal</h3>
+        <div class="field"><label>Nome</label><input id="rootNome" value="${esc(root.nome||'Edmilson')}"></div>
+        <div class="field"><label>Apelido</label><input id="rootApelido" value="${esc(root.apelido||'Fumo')}"></div>
+        <div class="field"><label>Número</label><input id="rootTelefone" value="${esc(root.telefone||'845178833')}"></div>
+        <div class="field"><label>Password</label><input id="rootPass" type="password" value="${esc(root.pass||'123456')}"></div>
+        <button class="btn mt" onclick="saveRootAdmin&&saveRootAdmin()">Guardar</button>
+      </div>`);
+  };
+
+  window.openTerms=function(){
+    window.openModalV21('Termos de uso e privacidade',`
+      <div class="card terms-box">
+        <h3>EFresh Lavandaria</h3>
+        <p>Os dados do cliente são usados para recolha, entrega, contacto, cobrança, documentos e histórico do serviço.</p>
+        <p>O valor final pode ser ajustado após pesagem real e confirmação operacional.</p>
+        <button class="btn mt" onclick="closeModal()">Entendi</button>
+      </div>`);
+  };
+
+  window.openAssign=function(id){
+    if((window.currentRole||'admin')!=='admin'){alert('Apenas administrador atribui trabalhos.');return}
+    const staff=read('ef_staff',window.staff||[]);
+    const ops=staff.filter(s=>['Operador','Administrador','Atendimento'].includes(s.role));
+    const mots=staff.filter(s=>s.role==='Motorista');
+    window.openModalV21('Atribuir Pedido EFW-'+String(id).padStart(4,'0'),`
+      <div class="card">
+        <div class="field"><label>Operador / lavandaria</label><select id="assignOp">${ops.map(s=>`<option>${esc(s.nome)}</option>`).join('')}</select></div>
+        <div class="field"><label>Motorista / transportador</label><select id="assignMot">${mots.map(s=>`<option>${esc(s.nome)}</option>`).join('')}</select></div>
+        <button class="btn mt" onclick="saveAssign('${id}')">Guardar atribuição</button>
+      </div>`);
+  };
+
+  window.openWork=function(id){
+    const allOrders=[].concat(window.localOrders||[],window.orders||[]);
+    const o=allOrders.find(x=>String(x.id)===String(id))||{};
+    const stages=window.STAGES||['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Em secagem','Em engomadoria','Controle de qualidade','Em entrega','Entregue'];
+    const current=o.estado||'Pedido recebido';
+    const idx=Math.max(0,stages.indexOf(current));
+    const next=stages[Math.min(idx+1,stages.length-1)];
+    window.openModalV21('Executar EFW-'+String(id).padStart(4,'0'),`
+      <div class="card">
+        <p><b>Serviço:</b> ${esc(o.servico||'-')}</p>
+        <p><b>Endereço:</b> ${esc(o.endereco_recolha||'-')}</p>
+        <p><b>Horário:</b> ${esc(o.horario||'-')}</p>
+        <p><b>Estado atual:</b> ${esc(current)}</p>
+        <div class="grid2 mt">
+          <button class="btn" onclick="setEstado('${id}','${esc(next)}');closeModal()">Avançar para ${esc(next)}</button>
+          <button class="btn btn2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Mapa</button>
+        </div>
+      </div>`);
+  };
+
+  window.renderMore=function(){
+    const box=el('adminContent'); if(!box) return;
+    box.innerHTML=`
+      <div class="grid2">
+        <button class="service ${window.currentRole!=='admin'?'locked':''}" onclick="adminTab('equipe')">👥<br><b>Funcionários</b></button>
+        <button class="service" onclick="openDrivers()">🚚<br><b>Motoristas</b></button>
+        <button class="service" onclick="openFunds()">💰<br><b>Fundos</b></button>
+        <button class="service" onclick="openFinancePanel()">📊<br><b>Financeiro</b></button>
+        <button class="service" onclick="openAdminSettings()">🔐<br><b>Admin</b></button>
+        <button class="service" onclick="openCompleted()">✅<br><b>Concluídos</b></button>
+      </div>`;
+  };
+
+  document.addEventListener('keydown',function(e){if(e.key==='Escape') window.closeModal();});
+  ensureV22Modal();
+  if(typeof window.setLoginDebug==='function') window.setLoginDebug('V22 LOGIN OK');
 })();
 </script>
 
