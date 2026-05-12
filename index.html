@@ -504,6 +504,90 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   }
 </style>
 
+
+<style id="efresh-v21-true-modal">
+  #modal, .modalBox { display:none!important; }
+
+  #efModalV21{
+    position:fixed!important;
+    inset:0!important;
+    width:100vw!important;
+    height:100vh!important;
+    z-index:2147483647!important;
+    background:rgba(15,23,42,.68)!important;
+    display:none;
+    padding:22px 12px 80px!important;
+    box-sizing:border-box!important;
+    overflow-y:auto!important;
+  }
+
+  #efModalPanelV21{
+    width:min(720px,96vw)!important;
+    min-height:320px!important;
+    max-height:calc(100vh - 70px)!important;
+    overflow-y:auto!important;
+    background:white!important;
+    border-radius:30px!important;
+    box-shadow:0 35px 100px rgba(0,0,0,.35)!important;
+    margin:0 auto!important;
+    padding:24px!important;
+    box-sizing:border-box!important;
+    color:#0f172a!important;
+  }
+
+  #efModalHeadV21{
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:space-between!important;
+    gap:16px!important;
+    position:sticky!important;
+    top:0!important;
+    background:white!important;
+    z-index:3!important;
+    padding-bottom:14px!important;
+    border-bottom:1px solid #eef2f7!important;
+  }
+
+  #efModalTitleV21{
+    font-size:30px!important;
+    line-height:1.12!important;
+    font-weight:900!important;
+    margin:0!important;
+    color:#0f172a!important;
+  }
+
+  #efModalCloseV21{
+    width:48px!important;
+    height:48px!important;
+    border-radius:18px!important;
+    border:1px solid #e2e8f0!important;
+    background:#fff!important;
+    font-size:30px!important;
+    line-height:1!important;
+    color:#0f172a!important;
+  }
+
+  #efModalBodyV21{
+    padding-top:18px!important;
+    padding-bottom:40px!important;
+    display:block!important;
+    color:#0f172a!important;
+  }
+
+  #efModalBodyV21 .card,
+  #efModalBodyV21 .item{
+    background:#fff!important;
+  }
+
+  body.ef-modal-open{
+    overflow:hidden!important;
+  }
+
+  .app-version-badge{
+    z-index:2147483646!important;
+  }
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -536,7 +620,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   <button class="btn mt" onclick="authEnterV17()">Continuar</button>
   <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button><div id="loginDebug" style="margin-top:8px;font-size:12px;color:#0369a1;font-weight:800"></div></div>
  </div>
- <p class="tiny mt">V20: modais corrigidos sobre tela</p>
+ <p class="tiny mt">V21: modal definitivo corrigido</p>
 </section>
 
 <section id="home" class="screen">
@@ -1340,7 +1424,7 @@ function resetLoginDataOnly(){
 </script>
 
 <div class="app-version-badge" style="background:#071424;color:#fff;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:900;box-shadow:0 8px 20px #0003">
-V20 LOGIN OK
+V21 LOGIN OK
 </div>
 
 
@@ -2245,6 +2329,194 @@ V20 LOGIN OK
   window.openMotoristas=window.openDrivers;
 
   if(typeof setLoginDebug==='function') setLoginDebug('V20 pronto. Modal sobreposto corrigido.');
+})();
+</script>
+
+
+<script id="efresh-v21-modal-definitivo">
+(function(){
+  function el(id){return document.getElementById(id)}
+  function read(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return []}}
+  function today(){return new Date().toISOString().slice(0,10)}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+  function ensureModal(){
+    let m=el('efModalV21');
+    if(!m){
+      m=document.createElement('div');
+      m.id='efModalV21';
+      m.innerHTML=`
+        <div id="efModalPanelV21">
+          <div id="efModalHeadV21">
+            <h2 id="efModalTitleV21">EFresh</h2>
+            <button id="efModalCloseV21" onclick="closeModal()">×</button>
+          </div>
+          <div id="efModalBodyV21"></div>
+        </div>`;
+      document.body.appendChild(m);
+    }
+    return m;
+  }
+
+  window.closeModal=function(){
+    const m=el('efModalV21');
+    if(m) m.style.display='none';
+    document.body.classList.remove('ef-modal-open');
+  };
+
+  window.openModalV21=function(title, html){
+    const m=ensureModal();
+    el('efModalTitleV21').innerText=title||'EFresh';
+    el('efModalBodyV21').innerHTML=html||'';
+    document.body.classList.add('ef-modal-open');
+    m.style.display='block';
+    m.scrollTop=0;
+    const p=el('efModalPanelV21'); if(p) p.scrollTop=0;
+  };
+
+  window.openFunds=function(){
+    openModalV21('Requisição de fundos', `
+      <div class="card">
+        <h3>Solicitar fundos</h3>
+        <div class="field"><label>Solicitante</label><input id="fundWho" value="${esc(window.currentUser||'Administrador')}"></div>
+        <div class="field"><label>Finalidade</label><input id="fundDesc" placeholder="Ex: detergente, combustível, material"></div>
+        <div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="0"></div>
+        <div class="field"><label>Observações</label><textarea id="fundObs" placeholder="Detalhes da necessidade"></textarea></div>
+        <button class="btn mt" onclick="saveFundV21()">Guardar requisição</button>
+      </div>
+      <div class="card mt"><h3>Requisições existentes</h3><div id="fundListV21"></div></div>`);
+    renderFundListV21();
+  };
+
+  window.saveFundV21=function(){
+    const f={
+      id:Date.now(),
+      solicitante:el('fundWho')?.value||window.currentUser||'',
+      desc:el('fundDesc')?.value||'',
+      val:el('fundVal')?.value||0,
+      obs:el('fundObs')?.value||'',
+      status:'Pendente',
+      data:today()
+    };
+    if(!f.desc || !f.val){alert('Preencha finalidade e valor.');return}
+    const funds=read('ef_funds');
+    funds.push(f);
+    localStorage.setItem('ef_funds',JSON.stringify(funds));
+    window.funds=funds;
+    renderFundListV21();
+    alert('Requisição guardada.');
+  };
+
+  window.renderFundListV21=function(){
+    const box=el('fundListV21'); if(!box) return;
+    const funds=read('ef_funds');
+    box.innerHTML=funds.length?funds.slice().reverse().map(f=>`
+      <div class="item">
+        <div class="row">
+          <div><b>${esc(f.desc)}</b><p class="small">${esc(f.solicitante||'')} • ${esc(f.data||'')}</p><p class="tiny">${esc(f.obs||'')}</p></div>
+          <span class="pill warn">${esc(f.status||'Pendente')}</span>
+        </div>
+        <div class="row mt2"><span>Valor</span><b>${esc(f.val)} MT</b></div>
+      </div>`).join(''):'<p class="small">Sem requisições.</p>';
+  };
+
+  window.openFinancePanel=function(){
+    const orders=((window.localOrders||[]).concat(window.orders||[]));
+    const docs=read('ef_docs');
+    const payments=read('ef_payments');
+    const total=orders.reduce((a,o)=>a+(parseFloat(o.valor)||0),0);
+    const paid=docs.filter(d=>d.estado==='Pago'||d.tipo==='Recibo').reduce((a,d)=>a+(parseFloat(d.valor)||0),0);
+    const pending=Math.max(0,total-paid);
+    const payHtml=payments.length?payments.slice().reverse().map((p,i)=>`
+      <div class="item">
+        <div class="row"><div><b>${esc(p.ref||'Comprovativo')}</b><p class="small">${esc(p.name||p.fileName||'')}</p><p class="tiny">${esc(p.fileName||'')} • ${esc(p.fileSize||'')}</p></div><span class="pill warn">${esc(p.estado||'Recebido')}</span></div>
+      </div>`).join(''):'<p class="small">Sem comprovativos submetidos.</p>';
+    openModalV21('Painel financeiro EFresh', `
+      <div class="finance-grid">
+        <div class="finance-box"><small>Receita estimada</small><b>${total} MT</b></div>
+        <div class="finance-box"><small>Recebido</small><b>${paid} MT</b></div>
+        <div class="finance-box"><small>Pendente</small><b>${pending} MT</b></div>
+      </div>
+      <div class="card mt"><h3>Comprovativos</h3>${payHtml}</div>
+      <div class="card mt"><h3>Relatório mensal</h3><button class="btn mt" onclick="window.print()">Exportar PDF</button></div>`);
+  };
+
+  window.openDrivers=function(){
+    const orders=((window.localOrders||[]).concat(window.orders||[]));
+    const body=orders.length?orders.map(o=>`
+      <div class="item">
+        <b>EFW-${String(o.id).padStart(4,'0')}</b>
+        <p class="small">${esc(o.endereco_recolha||'-')}</p>
+        <p class="small">${esc(o.horario||'')}</p>
+        <button class="btn btn2 mini mt2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Abrir rota</button>
+      </div>`).join(''):'<p class="small">Sem rotas para motorista.</p>';
+    openModalV21('Plano dos motoristas', `<div class="card">${body}</div>`);
+  };
+  window.openMotoristas=window.openDrivers;
+
+  window.openCompleted=function(){
+    const orders=((window.localOrders||[]).concat(window.orders||[])).filter(o=>(o.estado||'').toLowerCase().includes('entregue') || (o.estado||'').toLowerCase().includes('conclu'));
+    const body=orders.length?orders.map(o=>`
+      <div class="item"><b>EFW-${String(o.id).padStart(4,'0')}</b><p class="small">${esc(o.servico||'')}</p><p class="small">${esc(o.valor||0)} MT</p></div>`).join(''):'<p class="small">Sem pedidos concluídos.</p>';
+    openModalV21('Pedidos concluídos', `<div class="card">${body}</div>`);
+  };
+
+  window.openAdminSettings=function(){
+    const users=read('ef_users');
+    const root=users.find(u=>u.root)||{nome:'Edmilson',apelido:'Fumo',telefone:'845178833',pass:'123456'};
+    openModalV21('Administrador principal', `
+      <div class="card">
+        <p class="small">Perfil principal da EFresh. Apenas este número entra como administrador geral.</p>
+        <div class="field"><label>Nome</label><input id="rootNome" value="${esc(root.nome||'Edmilson')}"></div>
+        <div class="field"><label>Apelido</label><input id="rootApelido" value="${esc(root.apelido||'Fumo')}"></div>
+        <div class="field"><label>Número</label><input id="rootTelefone" value="${esc(root.telefone||'845178833')}"></div>
+        <div class="field"><label>Password</label><input id="rootPass" type="password" value="${esc(root.pass||'123456')}"></div>
+        <button class="btn mt" onclick="saveRootAdmin()">Guardar</button>
+      </div>`);
+  };
+
+  window.openTerms=function(){
+    openModalV21('Termos de uso e privacidade', `
+      <div class="card">
+        <h3>EFresh Lavandaria</h3>
+        <p class="small mt2">Os dados do cliente são usados apenas para recolha, entrega, contacto, cobrança, documentos e histórico do serviço.</p>
+        <p class="small mt2">Cada cliente deve ver apenas os próprios pedidos, documentos e comprovativos associados ao seu número de celular.</p>
+        <p class="small mt2">O valor final pode ser ajustado após pesagem real e confirmação operacional.</p>
+        <button class="btn mt" onclick="closeModal()">Entendi</button>
+      </div>`);
+  };
+
+  window.openWork=function(id){
+    const orders=((window.localOrders||[]).concat(window.orders||[]));
+    const o=orders.find(x=>String(x.id)===String(id))||{};
+    const ST=window.STAGES||['Pedido recebido','Motorista a caminho','Roupa recolhida','Em lavagem','Controle de qualidade','Em entrega','Entregue'];
+    const idx=Math.max(0,ST.indexOf(o.estado||'Pedido recebido'));
+    const next=ST[Math.min(idx+1,ST.length-1)];
+    openModalV21('Executar EFW-'+String(id).padStart(4,'0'), `
+      <div class="card">
+        <p><b>Estado atual:</b> ${esc(o.estado||'Pedido recebido')}</p>
+        <p><b>Próximo passo:</b> ${esc(next)}</p>
+        <p><b>Serviço:</b> ${esc(o.servico||'')}</p>
+        <p><b>Endereço:</b> ${esc(o.endereco_recolha||'-')}</p>
+        <div class="grid2 mt">
+          <button class="btn" onclick="setEstado('${id}','${next}');closeModal()">Avançar</button>
+          <button class="btn btn2" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.endereco_recolha||'Maputo')}','_blank')">Mapa</button>
+        </div>
+      </div>`);
+  };
+
+  // captura cliques nos cartões do menu Mais e força o modal V21, mesmo que o HTML antigo chame outra função
+  document.addEventListener('click', function(e){
+    const txt=(e.target?.innerText||'').toLowerCase();
+    if(!txt) return;
+    if(txt.includes('financeiro')){ e.preventDefault(); e.stopImmediatePropagation(); openFinancePanel(); }
+    if(txt.includes('motoristas')){ e.preventDefault(); e.stopImmediatePropagation(); openDrivers(); }
+    if(txt.includes('concluídos')||txt.includes('concluidos')){ e.preventDefault(); e.stopImmediatePropagation(); openCompleted(); }
+    if(txt.trim()==='admin' || txt.includes('administrador principal')){ e.preventDefault(); e.stopImmediatePropagation(); openAdminSettings(); }
+    if(txt.includes('fundos') || txt.includes('req. fundos') || txt.includes('requisição')){ e.preventDefault(); e.stopImmediatePropagation(); openFunds(); }
+  }, true);
+
+  if(typeof setLoginDebug==='function') setLoginDebug('V21 pronto. Modal definitivo isolado.');
 })();
 </script>
 
