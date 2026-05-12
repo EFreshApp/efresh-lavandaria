@@ -3498,7 +3498,7 @@ V21 LOGIN OK
 
 
 <!-- ============================================================
-     EFRESH V29 - SUPABASE BASE + LOGIN SEM COLUNA ACTIVO
+     EFRESH V30 - LOGIN LIMPO SEM AUTO-SESSAO
      Corrige: V27 a aparecer, admin cair como cliente, erro activo em clientes.
      ============================================================ -->
 <style id="efresh-v29-final-fix">
@@ -3506,7 +3506,7 @@ V21 LOGIN OK
 </style>
 <script id="efresh-v29-supabase-login-no-activo">
 (function(){
-  const V29='V29 SUPABASE BASE OK';
+  const V29='V30 LOGIN LIMPO OK';
   const API=(typeof SUPABASE_REST_URL!=='undefined'?SUPABASE_REST_URL:'https://ijzrogjjpdhgxntsjdmg.supabase.co/rest/v1');
   const KEY=(typeof SUPABASE_KEY!=='undefined'?SUPABASE_KEY:'sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg');
 
@@ -3903,6 +3903,74 @@ V21 LOGIN OK
   document.addEventListener('DOMContentLoaded',boot);
   setTimeout(boot,400);
   setTimeout(badge,1200);
+})();
+</script>
+
+
+<!-- ============================================================
+     EFRESH V30 - LOGIN LIMPO / SEM ENTRAR AUTOMATICAMENTE
+     Corrige: link abrir direto no perfil admin por sessão antiga.
+     ============================================================ -->
+<style id="efresh-v30-login-limpo-style">
+  .app-version-badge{z-index:999999!important}
+</style>
+<script id="efresh-v30-login-limpo">
+(function(){
+  const V30='V30 LOGIN LIMPO OK';
+  function el(id){return document.getElementById(id)}
+  function forceBadge(){
+    let b=document.querySelector('.app-version-badge');
+    if(!b){
+      b=document.createElement('div');
+      b.className='app-version-badge';
+      b.style.cssText='position:fixed;right:10px;bottom:10px;background:#071424;color:white;padding:12px 18px;border-radius:999px;font-weight:900;font-size:12px;z-index:999999;box-shadow:0 18px 40px #0003';
+      document.body.appendChild(b);
+    }
+    b.textContent=V30;
+    const t=document.querySelector('#login .tiny');
+    if(t) t.textContent=V30+' - sem entrada automática';
+  }
+  function clearSessionOnly(){
+    localStorage.removeItem('ef_session');
+    localStorage.removeItem('ef_current_user');
+    localStorage.removeItem('ef_current_role');
+    localStorage.removeItem('ef_current_client');
+  }
+  function openLoginClean(){
+    clearSessionOnly();
+    if(typeof show==='function'){
+      show('login');
+    }else{
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      const login=el('login');
+      if(login) login.classList.add('active');
+    }
+    const nav=el('nav');
+    if(nav) nav.style.display='none';
+    if(el('loginDebug')) el('loginDebug').innerText='Sessão limpa. Faça login manualmente.';
+    forceBadge();
+  }
+
+  const oldReset=window.resetLoginDataOnly;
+  window.resetLoginDataOnly=function(){
+    clearSessionOnly();
+    localStorage.removeItem('ef_users');
+    localStorage.removeItem('ef_local_orders');
+    localStorage.removeItem('ef_docs');
+    localStorage.removeItem('ef_assignments');
+    localStorage.removeItem('ef_funds');
+    localStorage.removeItem('ef_notifications');
+    localStorage.removeItem('ef_proofs');
+    openLoginClean();
+    alert('Acessos e sessão antiga removidos. Agora faça login manualmente.');
+  };
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    setTimeout(openLoginClean,700);
+    setTimeout(forceBadge,1200);
+  });
+  setTimeout(openLoginClean,1200);
+  setTimeout(forceBadge,1800);
 })();
 </script>
 
