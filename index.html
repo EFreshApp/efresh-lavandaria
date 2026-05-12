@@ -381,6 +381,51 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   .login-note{padding:10px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0;font-size:12px;color:#475569;margin-top:10px;line-height:1.4}
 </style>
 
+
+<style id="efresh-v19-modal-filter-fix">
+  #modal{
+    position:fixed!important;
+    inset:0!important;
+    z-index:999999!important;
+    display:none;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    background:rgba(15,23,42,.55)!important;
+    padding:18px 12px 90px!important;
+    overflow-y:auto!important;
+  }
+  #modal .modalBox,
+  .modalBox{
+    width:min(720px,96vw)!important;
+    max-height:none!important;
+    margin:40px auto 120px!important;
+    border-radius:26px!important;
+    overflow:visible!important;
+  }
+  #modalBody{
+    max-height:none!important;
+    overflow:visible!important;
+    padding-bottom:26px!important;
+  }
+  #modalTitle{
+    line-height:1.15!important;
+    word-break:normal!important;
+  }
+  .bottom-sheet,
+  .sheet,
+  .popup,
+  .modal{
+    max-height:calc(100vh - 60px)!important;
+    overflow-y:auto!important;
+  }
+  .app-version-badge{
+    position:fixed!important;
+    right:10px!important;
+    bottom:10px!important;
+    z-index:999998!important;
+  }
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -413,7 +458,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   <button class="btn mt" onclick="authEnterV17()">Continuar</button>
   <div class="login-note">Login simples por telefone e código. O perfil determina automaticamente o painel que cada pessoa vê.<br><br><button class="btn btn2 mini" onclick="resetLoginDataOnly()">Reiniciar acessos</button><div id="loginDebug" style="margin-top:8px;font-size:12px;color:#0369a1;font-weight:800"></div></div>
  </div>
- <p class="tiny mt">V18: perfis internos corrigidos por função</p>
+ <p class="tiny mt">V19: documentos isolados e modais corrigidos</p>
 </section>
 
 <section id="home" class="screen">
@@ -1216,8 +1261,8 @@ function resetLoginDataOnly(){
 
 </script>
 
-<div style="position:fixed;right:10px;bottom:10px;z-index:9999;background:#071424;color:#fff;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:900;box-shadow:0 8px 20px #0003">
-V18 LOGIN OK
+<div class="app-version-badge" style="background:#071424;color:#fff;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:900;box-shadow:0 8px 20px #0003">
+V19 LOGIN OK
 </div>
 
 
@@ -1848,6 +1893,162 @@ V18 LOGIN OK
 
   fixAllUserRolesV18();
   if(typeof setLoginDebug==='function') setLoginDebug('V18 pronto. Perfis entram no painel correto.');
+})();
+</script>
+
+
+<script id="efresh-v19-isolation-modal-fix">
+(function(){
+  function el(id){return document.getElementById(id)}
+  function digits(v){return String(v||'').replace(/\D+/g,'')}
+  function todayV(){return new Date().toISOString().slice(0,10)}
+  function clientPhone(){
+    return digits(window.currentClientPhone || el('telefoneCliente')?.value || el('loginPhone')?.value || '');
+  }
+  function role(){return String(window.currentRole||'cliente').toLowerCase()}
+
+  function read(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return []}}
+  function write(key,val){localStorage.setItem(key,JSON.stringify(val)); window[key.replace('ef_','')]=val}
+
+  function isAdminLike(){return ['admin','financeiro','operador','motorista','atendimento'].includes(role())}
+  function belongsToClient(obj){
+    if(isAdminLike()) return true;
+    const p=clientPhone();
+    if(!p) return false;
+    const op=digits(obj.cliente_telefone || obj.telefone || obj.phone || '');
+    if(op && (op===p || op.endsWith(p) || p.endsWith(op))) return true;
+
+    // fallback: if document/proof references an order, verify the order owner
+    const pedido = obj.pedido || String(obj.ref||'').replace(/\D/g,'');
+    const orders=(read('ef_local_orders')||[]).concat(read('ef_orders')||[]);
+    const o=orders.find(x=>String(x.id)===String(pedido) || String(x.id).endsWith(String(pedido)));
+    if(o){
+      const po=digits(o.cliente_telefone||'');
+      return po && (po===p || po.endsWith(p) || p.endsWith(po));
+    }
+    return false;
+  }
+
+  // Limpador opcional: remove comprovativos/documentos antigos sem dono quando estiver numa conta cliente.
+  window.cleanForeignClientData=function(){
+    if(isAdminLike()) return;
+    let docs=read('ef_docs').filter(d=>belongsToClient(d));
+    let proofs=read('ef_proofs').filter(p=>belongsToClient(p));
+    localStorage.setItem('ef_docs',JSON.stringify(docs));
+    localStorage.setItem('ef_proofs',JSON.stringify(proofs));
+    window.docs=docs; window.proofs=proofs;
+  };
+
+  window.renderDocs=function(){
+    if(typeof clearNotif==='function') clearNotif('docs');
+
+    let allDocs=read('ef_docs');
+    let visibleDocs=isAdminLike()?allDocs:allDocs.filter(d=>belongsToClient(d));
+
+    const clientDocs=el('clientDocs');
+    if(clientDocs){
+      clientDocs.innerHTML=visibleDocs.length?visibleDocs.map(d=>`<div class="item"><div class="row"><div><b>${d.ref}</b><p class="small">${d.tipo} • Pedido EFW-${String(d.pedido).padStart(4,'0')}</p></div><span class="pill ${d.estado==='Pago'?'ok':'warn'}">${d.estado}</span></div><div class="row mt2"><span>Valor</span><b>${d.valor} MT</b></div><button class="btn btn2 mini mt2" onclick="printDoc('${d.ref}')">Ver/Imprimir</button></div>`).join(''):'<p class="small">Ainda não há documentos para esta conta.</p>';
+    }
+    if(typeof renderProofs==='function') renderProofs();
+  };
+
+  window.renderProofs=function(){
+    const proofList=el('proofList'); if(!proofList) return;
+    let allProofs=read('ef_proofs');
+    let visibleProofs=isAdminLike()?allProofs:allProofs.filter(p=>belongsToClient(p));
+    proofList.innerHTML = visibleProofs.length ? visibleProofs.slice().reverse().map(p=>`<div class="item"><div class="proof-row"><div><b>${p.ref}</b><p class="small">${p.name}</p><span class="pill ${p.estado==='Aprovado'?'ok':p.estado==='Recusado'?'bad':'warn'}">${p.estado||'Recebido'}</span><p class="tiny">${p.fileName||'ficheiro'} • ${p.fileSize||''} • ${p.fileType||''}</p></div><span class="tiny">${p.data}</span></div></div>`).join('') : '<p class="small">Sem comprovativos nesta conta.</p>';
+  };
+
+  window.saveProof=function(){
+    const ref=(el('proofRef')?.value||'').trim();
+    const desc=(el('proofName')?.value||'').trim();
+    const file=el('proofFile')?.files?.[0];
+    if(!ref){alert('Preencha a referência do pedido.');return}
+    if(!file){alert('Selecione o ficheiro do comprovativo.');return}
+
+    const phone=clientPhone();
+    const pid=ref.replace(/\D/g,'');
+    const doc=read('ef_docs').find(d=>String(d.pedido).endsWith(pid)||d.ref===ref)||{};
+    const proof={id:Date.now(),pedido:pid,ref,name:desc||file.name,fileName:file.name,fileType:file.type||'ficheiro',fileSize:Math.round(file.size/1024)+' KB',data:todayV(),estado:'Recebido',valor:doc.valor||0,cliente_telefone:phone};
+    let proofs=read('ef_proofs'); proofs.push(proof); localStorage.setItem('ef_proofs',JSON.stringify(proofs)); window.proofs=proofs;
+    let payments=read('ef_payments'); payments.push({...proof,estado:'Aguardando aprovação'}); localStorage.setItem('ef_payments',JSON.stringify(payments)); window.payments=payments;
+    if(typeof incNotif==='function') incNotif('docs');
+    renderProofs();
+    if(el('proofFile')) el('proofFile').value='';
+    if(typeof previewProofFile==='function') previewProofFile();
+    alert('Comprovativo carregado e associado apenas a esta conta.');
+  };
+
+  // modal robusto para termos e requisição de fundos
+  window.closeModal=function(){
+    const m=el('modal');
+    if(m) m.style.display='none';
+  };
+
+  window.openTerms=function(){
+    const m=el('modal'), title=el('modalTitle'), body=el('modalBody');
+    if(!m || !title || !body){alert('Termos de uso e privacidade EFresh. Dados usados para recolha, entrega, cobrança e histórico do serviço.');return}
+    title.innerText='Termos de uso e privacidade';
+    body.innerHTML=`<div class="card">
+      <h3>EFresh Lavandaria</h3>
+      <p class="small mt2">Os dados do cliente são usados apenas para identificação, recolha, entrega, contacto, cobrança, emissão de faturas/recibos e histórico do serviço.</p>
+      <p class="small mt2">Cada cliente acede apenas aos seus próprios pedidos, documentos e comprovativos ligados ao seu número de celular.</p>
+      <p class="small mt2">A confirmação final de preço pode depender da pesagem real da roupa e validação da equipa.</p>
+      <button class="btn mt" onclick="closeModal()">Entendi</button>
+    </div>`;
+    m.style.display='flex';
+    m.scrollTop=0;
+  };
+
+  window.openFunds=function(){
+    const m=el('modal'), title=el('modalTitle'), body=el('modalBody');
+    if(!m || !title || !body){return}
+    title.innerText='Requisição de fundos';
+    body.innerHTML=`<div class="card">
+      <h3>Solicitar fundos</h3>
+      <div class="field"><label>Solicitante</label><input id="fundWho" value="${window.currentUser||'Administrador'}"></div>
+      <div class="field"><label>Finalidade</label><input id="fundDesc" placeholder="Ex: detergente, combustível, material"></div>
+      <div class="field"><label>Valor solicitado</label><input id="fundVal" type="number" placeholder="0"></div>
+      <div class="field"><label>Observações</label><textarea id="fundObs" placeholder="Detalhes da necessidade"></textarea></div>
+      <button class="btn mt" onclick="saveFundV19()">Guardar requisição</button>
+    </div>
+    <div class="card mt"><h3>Requisições existentes</h3><div id="fundListV19"></div></div>`;
+    m.style.display='flex';
+    m.scrollTop=0;
+    renderFundListV19();
+  };
+
+  window.saveFundV19=function(){
+    const f={id:Date.now(),solicitante:el('fundWho')?.value||window.currentUser||'',desc:el('fundDesc')?.value||'',val:el('fundVal')?.value||0,obs:el('fundObs')?.value||'',status:'Pendente',data:todayV()};
+    if(!f.desc || !f.val){alert('Preencha finalidade e valor.');return}
+    let funds=read('ef_funds'); funds.push(f); localStorage.setItem('ef_funds',JSON.stringify(funds)); window.funds=funds;
+    renderFundListV19();
+    alert('Requisição guardada.');
+  };
+
+  window.renderFundListV19=function(){
+    const box=el('fundListV19'); if(!box) return;
+    const funds=read('ef_funds');
+    box.innerHTML=funds.length?funds.slice().reverse().map(f=>`<div class="item"><div class="row"><div><b>${f.desc}</b><p class="small">${f.solicitante||''} • ${f.data}</p><p class="tiny">${f.obs||''}</p></div><span class="pill warn">${f.status}</span></div><div class="row mt2"><span>Valor</span><b>${f.val} MT</b></div></div>`).join(''):'<p class="small">Sem requisições.</p>';
+  };
+
+  // ao entrar como cliente, atualizar docs filtrados
+  const oldEnterClient=window.enterClient;
+  window.enterClient=function(){
+    if(typeof oldEnterClient==='function') oldEnterClient();
+    setTimeout(()=>{renderDocs(); renderProofs();},150);
+  };
+
+  // botão para limpar lixo de testes visível só para cliente
+  window.addCleanButtonV19=function(){
+    const note=document.querySelector('.login-note');
+    if(note && !el('cleanClientDataBtn')){
+      note.insertAdjacentHTML('beforeend','<br><button id="cleanClientDataBtn" class="btn btn2 mini" onclick="cleanForeignClientData();alert(\\'Dados antigos de outros clientes ocultados/removidos desta sessão.\\')">Limpar dados de outros testes</button>');
+    }
+  };
+  addCleanButtonV19();
+
+  if(typeof setLoginDebug==='function') setLoginDebug('V19 pronto. Docs isolados e modais corrigidos.');
 })();
 </script>
 
