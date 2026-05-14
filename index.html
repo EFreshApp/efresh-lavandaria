@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="theme-color" content="#0284c7"/>
-<title>EFresh Lavandaria Pro V32 CargoClear Logic</title>
+<title>EFresh Lavandaria Pro V33 Supabase Auth</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif}
 :root{--b:#0284c7;--g:#10b981;--d:#071424;--m:#64748b;--l:#e2e8f0;--bg:#eef8ff;--r:#ef4444;--y:#f59e0b}
@@ -588,6 +588,7 @@ input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-r
   }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="app">
@@ -4386,6 +4387,169 @@ V21 LOGIN OK
   const oldTab=window.tab; window.tab=function(id){if(typeof oldTab==='function')oldTab(id); if(id==='docs')setTimeout(renderDocs,80); if(id==='chat')setTimeout(renderClientChatV32,80); if(id==='home'||id==='tracking')setTimeout(loadClientFull,80); setBadge()};
   document.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{setBadge(); if(document.querySelector('#docs.active'))renderDocs();},1200)});
   setTimeout(setBadge,1600);
+})();
+</script>
+
+
+
+<script id="efresh-v33-supabase-auth-migration">
+/* ============================================================
+   EFRESH V33 - SUPABASE AUTH MIGRATION LAYER
+   Login real via Supabase Auth + perfil em public.usuarios
+   ============================================================ */
+(function(){
+  const V33='V33 SUPABASE AUTH OK';
+  const PROJECT_URL='https://ijzrogjjpdhgxntsjdmg.supabase.co';
+  const ANON_KEY='sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg';
+  const REST_URL=PROJECT_URL+'/rest/v1';
+  const STORAGE_URL=PROJECT_URL+'/storage/v1';
+  const BUCKET='efresh-documentos';
+  let sb=null;
+  function el(id){return document.getElementById(id)}
+  function digits(v){return String(v||'').replace(/\D/g,'')}
+  function esc(v){return String(v??'').replace(/[&<>"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]))}
+  function normalizePhone(v){let d=digits(v); if(!d)return ''; if(d.startsWith('00'))d=d.slice(2); if(!d.startsWith('258'))d='258'+d.replace(/^0+/,''); return '+'+d}
+  function authEmailFromPhone(phone){const d=digits(normalizePhone(phone)); return d+'@efresh.local'}
+  function normRole(r){r=String(r||'cliente').toLowerCase(); if(r.includes('admin'))return 'admin'; if(r.includes('fin'))return 'financeiro'; if(r.includes('oper'))return 'operador'; if(r.includes('motor'))return 'motorista'; if(r.includes('atend'))return 'atendimento'; return 'cliente'}
+  function setBadge(){let b=document.querySelector('.app-version-badge'); if(!b){b=document.createElement('div'); b.className='app-version-badge'; document.body.appendChild(b)} b.textContent=V33; b.style.cssText='position:fixed;right:10px;bottom:10px;background:#071424;color:#fff;padding:12px 18px;border-radius:999px;font-weight:900;font-size:12px;z-index:2147483647;box-shadow:0 18px 40px #0003'; const t=document.querySelector('#login .tiny'); if(t)t.textContent=V33+' - autenticação real Supabase'; document.title='EFresh Lavandaria Pro V33 Auth'}
+  function setDebug(t){const d=el('loginDebug'); if(d)d.textContent=t||'';}
+  function client(){ if(!sb){ if(!window.supabase){throw new Error('Biblioteca Supabase não carregou. Verifique internet/CDN.')} sb=window.supabase.createClient(PROJECT_URL,ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); } return sb; }
+  async function sessionToken(){ try{const {data}=await client().auth.getSession(); return data?.session?.access_token || ANON_KEY;}catch(e){return ANON_KEY} }
+  async function authUser(){ const {data}=await client().auth.getUser(); return data?.user||null; }
+  async function headers(prefer){const token=await sessionToken(); const h={apikey:ANON_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'}; if(prefer)h.Prefer=prefer; return h;}
+  async function api(path,opt={}){ opt.headers=Object.assign({}, await headers(opt.prefer), opt.headers||{}); delete opt.prefer; const r=await fetch(path,opt); if(!r.ok)throw new Error(await r.text()); if(r.status===204)return null; const tx=await r.text(); return tx?JSON.parse(tx):null; }
+  async function sget(table,q=''){return api(REST_URL+'/'+table+q)}
+  async function spost(table,b){return api(REST_URL+'/'+table,{method:'POST',prefer:'return=representation',body:JSON.stringify(b)})}
+  async function spatch(table,id,b){return api(REST_URL+'/'+table+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',prefer:'return=representation',body:JSON.stringify(b)})}
+  window.H=function(prefer){return {apikey:ANON_KEY,Authorization:'Bearer '+(window.__efAuthAccessToken||ANON_KEY),'Content-Type':'application/json',...(prefer?{Prefer:prefer}:{})}};
+  window.get=sget; window.post=spost; window.patch=spatch;
+  window.postRobust=spost; window.patchRobust=spatch;
+  window.safeGet=async function(table,q=''){try{return await sget(table,q)}catch(e){console.warn('safeGet',table,e);return []}};
+  async function ensureUsuarioFromAuth(user, meta={}){
+    if(!user)throw new Error('Sessão Auth não encontrada.');
+    const uid=user.id;
+    const found=await sget('usuarios','?select=*&auth_user_id=eq.'+uid+'&limit=1');
+    if(found&&found.length){return found[0]}
+    const phone=normalizePhone(meta.telefone || user.user_metadata?.telefone || el('loginPhone')?.value || '');
+    const nome=meta.nome || user.user_metadata?.nome || 'Cliente EFresh';
+    const apelido=meta.apelido || user.user_metadata?.apelido || '';
+    const role='cliente';
+    const rows=await spost('usuarios',{auth_user_id:uid,nome,apelido,telefone:phone,email:user.email||authEmailFromPhone(phone),role,activo:true});
+    return rows[0];
+  }
+  async function ensureCliente(usuario){
+    if(!usuario||usuario.role!=='cliente')return null;
+    let rows=[];
+    if(usuario.auth_user_id)rows=await sget('clientes','?select=*&auth_user_id=eq.'+usuario.auth_user_id+'&limit=1');
+    if((!rows||!rows.length)&&usuario.telefone)rows=await sget('clientes','?select=*&telefone=eq.'+encodeURIComponent(usuario.telefone)+'&limit=1');
+    if(rows&&rows.length){ const c=rows[0]; try{ if(!c.auth_user_id) await spatch('clientes',c.id,{auth_user_id:usuario.auth_user_id}); }catch(e){} return c; }
+    const created=await spost('clientes',{auth_user_id:usuario.auth_user_id,nome:((usuario.nome||'')+' '+(usuario.apelido||'')).trim()||'Cliente EFresh',telefone:usuario.telefone||'',email:usuario.email||'',senha:null,activo:true});
+    return created[0];
+  }
+  function applyLoggedProfile(usuario,cliente){
+    window.currentAuthUserId=usuario.auth_user_id;
+    window.currentUsuarioId=usuario.id;
+    window.currentRole=normRole(usuario.role);
+    window.currentUser=((usuario.nome||'')+' '+(usuario.apelido||'')).trim() || usuario.email || 'Usuário';
+    window.currentClientPhone=usuario.telefone||'';
+    window.currentClientId=cliente?.id || usuario.cliente_id || null;
+    const n=el('nomeCliente'); if(n)n.value=window.currentUser;
+    const t=el('telefoneCliente'); if(t)t.value=usuario.telefone||'';
+    setDebug('Auth OK: '+window.currentUser+' / '+window.currentRole);
+    if(window.currentRole==='cliente'){
+      if(typeof enterClient==='function')enterClient();
+      setTimeout(()=>{ if(typeof renderDocs==='function')renderDocs(); if(typeof renderClientChatV32==='function')renderClientChatV32(); },250);
+    }else{
+      if(typeof showAdminForRole==='function')showAdminForRole();
+    }
+  }
+  async function finishLogin(){
+    const user=await authUser();
+    if(!user)throw new Error('Login não criou sessão. Confirme se Email confirmation está desligado no Supabase Auth para teste.');
+    window.__efAuthAccessToken=await sessionToken();
+    let rows=await sget('usuarios','?select=*&auth_user_id=eq.'+user.id+'&limit=1');
+    let usuario=rows?.[0] || await ensureUsuarioFromAuth(user);
+    let cliente=await ensureCliente(usuario);
+    applyLoggedProfile(usuario,cliente);
+    return usuario;
+  }
+  window.authEnterV17=async function(){
+    const mode=(window.authMode||'login');
+    const phone=normalizePhone(el('loginPhone')?.value||'');
+    const pass=String(el('loginPass')?.value||'');
+    if(!phone||!pass){alert('Informe telefone e password.');return}
+    try{
+      setDebug('A autenticar no Supabase Auth...');
+      const email=authEmailFromPhone(phone);
+      if(mode==='register'){
+        const nome=(el('regNome')?.value||'Cliente').trim();
+        const apelido=(el('regApelido')?.value||'').trim();
+        const {data,error}=await client().auth.signUp({email,password:pass,options:{data:{nome,apelido,telefone:phone,role:'cliente'}}});
+        if(error)throw error;
+        if(!data.session){alert('Conta criada, mas precisa confirmar email/ativar login. Para este projeto, desligue temporariamente “Confirm email” em Supabase > Authentication > Providers > Email.');return}
+        await finishLogin();
+      }else{
+        const {error}=await client().auth.signInWithPassword({email,password:pass});
+        if(error)throw error;
+        await finishLogin();
+      }
+    }catch(e){alert('Erro Supabase Auth: '+(e.message||e)); setDebug('Erro Auth.');}
+  };
+  window.authEnter=window.authEnterV17;
+  window.resetLoginDataOnly=async function(){try{await client().auth.signOut({scope:'local'})}catch(e){} ['ef_current_user','ef_current_role','ef_current_client_id','ef_current_auth_id'].forEach(k=>localStorage.removeItem(k)); window.currentRole='cliente'; window.currentUser=''; window.currentClientId=null; window.currentAuthUserId=null; setDebug('Sessão Auth limpa. Faça login novamente.'); if(typeof show==='function')show('login');};
+  const oldSubmit=window.submitOrder;
+  window.submitOrder=async function(){
+    const btn=el('submitBtn'); if(btn){btn.disabled=true;btn.innerText='A gravar no Supabase Auth...'}
+    try{
+      const user=await authUser(); if(!user)throw new Error('Faça login antes de criar pedido.');
+      if(!window.currentClientId)await finishLogin();
+      const est=(typeof calcEstimate==='function')?calcEstimate():{servicos:'Serviço EFresh',totalGeral:0,transporte:0,kgAuto:0};
+      const cid=window.currentClientId;
+      const pedido={
+        auth_user_id:user.id,
+        cliente_id:cid,
+        cliente_nome:window.currentUser||el('nomeCliente')?.value||'Cliente EFresh',
+        cliente_telefone:window.currentClientPhone||el('telefoneCliente')?.value||'',
+        servico:est.servicos||'Lavandaria',
+        quantidade:(el('pecas')?.value?el('pecas').value+' peças ':'')+(el('kg')?.value?el('kg').value+' kg':''),
+        kg_estimado:Number(est.kgAuto||el('kg')?.value||0),
+        pecas:Number(el('pecas')?.value||0),
+        endereco_recolha:el('address')?.value||'',
+        horario:(el('pickupDate')?.value||'')+' das '+(el('hIni')?.value||'')+' às '+(el('hFim')?.value||''),
+        data_recolha:el('pickupDate')?.value||null,
+        hora_inicio:el('hIni')?.value||null,
+        hora_fim:el('hFim')?.value||null,
+        observacoes:el('obs')?.value||'',
+        estado:'Pedido recebido',
+        valor:Number(est.totalGeral||0),
+        transporte:Number(est.transporte||0)
+      };
+      const rows=await spost('pedidos',pedido); const p=rows[0];
+      window.currentPedidoId=p.id;
+      if(typeof afterOrderCreated==='function'){
+        try{afterOrderCreated(p,est)}catch(e){console.warn('afterOrderCreated fallback',e);}
+      }
+      alert('Pedido gravado com Supabase Auth ✅');
+      if(typeof tab==='function')tab('tracking');
+    }catch(e){alert('Erro ao gravar pedido/Auth: '+(e.message||e));}
+    finally{if(btn){btn.disabled=false;btn.innerText='Confirmar pedido'}}
+  };
+  const oldSaveStaff=window.saveStaffV32;
+  window.saveStaffV32=async function(){
+    if(normRole(window.currentRole)!=='admin'){alert('Apenas administrador cria funcionários.');return}
+    const nome=el('stNome')?.value||'Funcionário'; const tel=normalizePhone(el('stTel')?.value||''); const pass=el('stPass')?.value||'123456'; const cargo=el('stRole')?.value||'Operador'; const role=normRole(cargo);
+    if(!tel){alert('Informe telefone do funcionário.');return}
+    try{
+      await spost('funcionarios',{nome,telefone:tel,email:authEmailFromPhone(tel),senha:null,cargo,role,activo:true});
+      alert('Funcionário criado na tabela. Agora crie o utilizador no Supabase Auth com email '+authEmailFromPhone(tel)+' e a password definida, depois atualize usuarios.role para '+role+'.');
+      if(typeof renderTeam==='function')await renderTeam();
+    }catch(e){alert('Erro ao guardar funcionário: '+e.message)}
+  };
+  document.addEventListener('DOMContentLoaded',async()=>{
+    setBadge();
+    try{ const {data}=await client().auth.getSession(); window.__efAuthAccessToken=data?.session?.access_token||ANON_KEY; }catch(e){}
+  });
+  setTimeout(setBadge,1500);
 })();
 </script>
 
