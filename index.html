@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0284c7" />
-<title>EFresh Lavandaria — Premium Ops V40</title>
+<title>EFresh Lavandaria — Premium Ops V43</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 :root{--b:#0284c7;--g:#10b981;--n:#071424;--m:#64748b;--l:#e2e8f0;--bg:#f3fbff;--r:#ef4444;--y:#f59e0b;--ok:#047857;--soft:#f8fafc}*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif}body{background:radial-gradient(circle at 12% 4%,#dff7ff,transparent 32%),radial-gradient(circle at 90% 22%,#d9fff1,transparent 30%),linear-gradient(180deg,#fff,#effdf7);color:#0f172a}.app{width:min(430px,100%);min-height:100vh;margin:0 auto;background:#f8fafc;box-shadow:0 0 80px #0001;position:relative;padding-bottom:94px}.screen{display:none;padding:20px}.screen.active{display:block;animation:fade .2s ease}@keyframes fade{from{opacity:.35;transform:translateY(8px)}to{opacity:1;transform:none}}h1{font-size:30px;line-height:1.05;letter-spacing:-1.1px}h2{font-size:24px;line-height:1.1}h3{font-size:18px}.blue{color:var(--b)}.green{color:var(--g)}.small{font-size:13px;color:var(--m);line-height:1.45}.tiny{font-size:11px;color:var(--m);line-height:1.35}.mt{margin-top:16px}.mt2{margin-top:9px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.card,.item,.service,.kpi{background:#fff;border:1px solid rgba(2,132,199,.13);border-radius:24px;padding:16px;box-shadow:0 18px 48px rgba(2,132,199,.12)}.item{margin-top:9px;border-radius:18px}.kpi{border-radius:18px}.kpi b{font-size:18px}.btn{width:100%;border:0;border-radius:18px;padding:15px;background:linear-gradient(90deg,var(--b),var(--g));color:#fff;font-weight:900;font-size:15px;box-shadow:0 16px 34px rgba(16,185,129,.25);cursor:pointer}.btn:disabled{opacity:.65;cursor:not-allowed}.btn2{background:#fff!important;color:#0369a1!important;border:1px solid var(--l)!important;box-shadow:none!important}.btn3{background:#071424!important}.danger{background:#fee2e2!important;color:#991b1b!important;box-shadow:none!important}.warnBtn{background:#fef3c7!important;color:#92400e!important;box-shadow:none!important}.mini{padding:10px;border-radius:13px;font-size:12px}.field{margin-top:11px}.field label{display:block;font-size:12px;color:#334155;font-weight:900;margin-bottom:5px}input,select,textarea{width:100%;padding:14px;border:1px solid var(--l);border-radius:16px;background:#fff;outline:0;font-size:14px}textarea{min-height:86px;resize:none}.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:7px 10px;background:#e0f2fe;color:#0369a1;font-size:12px;font-weight:900}.ok{background:#dcfce7;color:#047857}.warn{background:#fef3c7;color:#92400e}.bad{background:#fee2e2;color:#991b1b}.dark{background:#e2e8f0;color:#334155}.notice{display:none;padding:11px;border-radius:14px;font-size:13px;font-weight:800;margin-top:10px}.success{display:block;background:#ecfdf5;color:#047857;border:1px solid #bbf7d0}.error{display:block;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:15px}.ib{width:44px;height:44px;border-radius:16px;border:1px solid var(--l);background:#fff;font-size:20px}.logo{width:116px;height:116px;border-radius:34px;margin:0 auto;background:linear-gradient(135deg,var(--b),var(--g));display:grid;place-items:center;color:#fff;font-size:46px;font-weight:1000;box-shadow:0 24px 70px rgba(2,132,199,.28)}.brand{font-size:42px;font-weight:1000;letter-spacing:-2px;text-align:center;margin-top:20px}.sub{text-align:center;letter-spacing:9px;font-size:12px;font-weight:900;color:#64748b}.hero{background:linear-gradient(140deg,#071424,#08213d 55%,#064e3b);color:#fff;overflow:hidden}.hero .small{color:#dbeafe}.service{text-align:left;border-radius:20px}.service.active{border:2px solid var(--g);background:#ecfdf5}.emoji{font-size:26px}.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(430px,100%);display:none;grid-template-columns:repeat(5,1fr);background:#fffffff3;backdrop-filter:blur(16px);border-top:1px solid var(--l);z-index:80;padding:8px 4px 10px}.bottom button{border:0;background:transparent;color:#64748b;font-size:10px;font-weight:900;border-radius:14px;padding:7px;position:relative}.bottom button.active{background:#e0f2fe;color:#0369a1}.ico{display:block;font-size:19px}.notif{display:none;position:absolute;top:3px;right:12px;min-width:18px;height:18px;border-radius:99px;background:#ef4444;color:#fff;font-size:10px;font-weight:900;padding:0 5px;align-items:center;justify-content:center}.notif.show{display:inline-flex}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0}.tabs button{border:1px solid var(--l);background:#fff;border-radius:14px;padding:10px 4px;font-size:11px;font-weight:900;color:#64748b}.tabs button.active{background:#e0f2fe;color:#0369a1}.table{width:100%;border-collapse:collapse;font-size:12px}.table td,.table th{padding:8px;border-bottom:1px solid var(--l);text-align:left}.progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--b),var(--g))}.modalWrap{position:fixed;inset:0;background:rgba(15,23,42,.72);display:none;z-index:2147483647;padding:0;overflow:hidden;align-items:stretch;justify-content:center}.modalPanel{width:min(430px,100vw);height:100dvh;margin:0 auto;background:#fff;border-radius:0;box-shadow:0 35px 100px rgba(0,0,0,.35);padding:18px 18px 100px;overflow:auto}.modalHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;position:sticky;top:0;background:#fff;padding:8px 0 14px;border-bottom:1px solid #eef2f7;z-index:3}.modalTitle{font-size:28px;font-weight:1000;line-height:1.1}.closeBtn{width:48px;height:48px;border-radius:18px;border:1px solid var(--l);background:#fff;font-size:30px;flex:0 0 auto}.invoice{background:#fff;border:1px solid var(--l);border-radius:24px;overflow:hidden}.invoiceHead{background:linear-gradient(135deg,var(--b),var(--g));color:white;padding:20px}.invoiceBody{padding:18px}.invoiceBox{background:#f8fafc;border:1px solid var(--l);border-radius:16px;padding:12px}.version{position:fixed;right:10px;bottom:10px;z-index:85;background:#071424;color:#fff;border-radius:18px;padding:11px 15px;font-size:12px;font-weight:1000;box-shadow:0 12px 30px rgba(0,0,0,.22)}.landing{min-height:100vh;padding:0;background:linear-gradient(140deg,#071424,#08213d 55%,#064e3b);color:white}.landingTop{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)}.landingMark{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--b),var(--g));font-weight:1000}.landingHero{text-align:center;padding:34px 22px}.landingHero h1{font-size:38px;color:white}.landingHero p{color:rgba(255,255,255,.78);line-height:1.5;margin-top:14px}.landingCard{margin:22px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:30px;padding:18px;backdrop-filter:blur(18px)}@media(max-width:380px){h1{font-size:27px}.grid2,.grid3{grid-template-columns:1fr}.brand{font-size:36px}}
@@ -20,29 +20,290 @@
 @media(max-width:380px){.actionGrid{grid-template-columns:1fr}.moneyBig{font-size:26px}}
 
 @media print{body *{visibility:hidden!important}.modalWrap,.modalWrap *{visibility:visible!important}.modalWrap{position:absolute!important;display:block!important;background:white!important}.modalPanel{box-shadow:none!important;border-radius:0!important;max-height:none!important}.closeBtn,.btn{display:none!important}}
+
+
+/* ===== V41 PREMIUM LANDING / LOGIN REDESIGN ===== */
+body{background:linear-gradient(115deg,#ecfbff 0%,#ffffff 42%,#eafff6 100%)!important;}
+.app{max-width:430px;background:linear-gradient(180deg,#f8fdff 0%,#ffffff 54%,#f4fffb 100%)!important;box-shadow:0 30px 90px rgba(2,132,199,.16)!important;overflow:hidden;}
+.premiumAuth{min-height:100vh;padding:14px 18px 108px!important;position:relative;background:
+  radial-gradient(circle at 16% 18%,rgba(2,132,199,.12),transparent 28%),
+  radial-gradient(circle at 87% 12%,rgba(16,185,129,.13),transparent 24%),
+  linear-gradient(180deg,#fafdff 0%,#ffffff 54%,#f6fffb 100%);}
+.premiumAuth:before{content:"";position:absolute;inset:0;background:
+  linear-gradient(135deg,rgba(14,165,233,.30),transparent 24%),
+  radial-gradient(circle at 9% 27%,rgba(226,244,255,.95),rgba(226,244,255,.55) 10%,transparent 24%),
+  radial-gradient(circle at 96% 25%,rgba(226,244,255,.95),rgba(226,244,255,.55) 10%,transparent 24%);pointer-events:none;}
+.premiumAuth:after{content:"";position:absolute;right:-26px;top:92px;width:122px;height:122px;border-radius:50%;border:13px solid rgba(148,163,184,.18);box-shadow:inset 0 0 0 28px rgba(255,255,255,.48),0 22px 60px rgba(15,23,42,.10);background:radial-gradient(circle,rgba(255,255,255,.95),rgba(226,244,255,.72));opacity:.78;pointer-events:none;}
+.authPhone{position:relative;z-index:1;min-height:calc(100vh - 28px);border-radius:36px;padding:20px 15px 28px;background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(255,255,255,.94));box-shadow:0 28px 80px rgba(15,23,42,.12),inset 0 0 0 1px rgba(255,255,255,.82);overflow:hidden;}
+.authPhone:before{content:"";position:absolute;inset:0;background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22430%22%20height%3D%22900%22%20viewBox%3D%220%200%20430%20900%22%3E%0A%3Cdefs%3E%0A%20%20%3ClinearGradient%20id%3D%22g1%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f7fbff%22/%3E%0A%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ffffff%22/%3E%0A%20%20%3C/linearGradient%3E%0A%20%20%3ClinearGradient%20id%3D%22g2%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%231c8eea%22/%3E%0A%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2316c58e%22/%3E%0A%20%20%3C/linearGradient%3E%0A%20%20%3CradialGradient%20id%3D%22bubble%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2255%25%22%3E%0A%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ffffff%22%20stop-opacity%3D%220.95%22/%3E%0A%20%20%20%20%3Cstop%20offset%3D%2255%25%22%20stop-color%3D%22%23dff4ff%22%20stop-opacity%3D%220.6%22/%3E%0A%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23dff4ff%22%20stop-opacity%3D%220%22/%3E%0A%20%20%3C/radialGradient%3E%0A%20%20%3Cfilter%20id%3D%22blur%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%3CfeGaussianBlur%20stdDeviation%3D%228%22/%3E%3C/filter%3E%0A%3C/defs%3E%0A%3Crect%20width%3D%22430%22%20height%3D%22900%22%20fill%3D%22url%28%23g1%29%22/%3E%0A%3Cpath%20d%3D%22M0%200H165C135%2018%20113%2047%20100%2082C81%20130%2058%20148%200%20154Z%22%20fill%3D%22%237be4ee%22%20opacity%3D%220.65%22/%3E%0A%3Cpath%20d%3D%22M0%200H191C152%2029%20126%2062%20114%2097C98%20139%2076%20162%200%20168Z%22%20fill%3D%22%23d8f5fb%22%20opacity%3D%220.95%22/%3E%0A%3Cpath%20d%3D%22M0%200H213C171%2032%20144%2068%20131%20105C115%20152%2092%20175%200%20180Z%22%20fill%3D%22%23f8fdff%22%20opacity%3D%221%22/%3E%0A%3Cg%20opacity%3D%220.95%22%3E%0A%20%20%3Crect%20x%3D%2228%22%20y%3D%22300%22%20rx%3D%2216%22%20ry%3D%2216%22%20width%3D%22108%22%20height%3D%2234%22%20fill%3D%22%23f4fbff%22%20stroke%3D%22%23e2eef4%22/%3E%0A%20%20%3Crect%20x%3D%2235%22%20y%3D%22274%22%20rx%3D%2216%22%20ry%3D%2216%22%20width%3D%22100%22%20height%3D%2234%22%20fill%3D%22%23f9fdff%22%20stroke%3D%22%23e2eef4%22/%3E%0A%20%20%3Crect%20x%3D%2245%22%20y%3D%22248%22%20rx%3D%2216%22%20ry%3D%2216%22%20width%3D%2286%22%20height%3D%2233%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23e2eef4%22/%3E%0A%20%20%3Crect%20x%3D%2254%22%20y%3D%22223%22%20rx%3D%2216%22%20ry%3D%2216%22%20width%3D%2274%22%20height%3D%2230%22%20fill%3D%22%23f5fbff%22%20stroke%3D%22%23e2eef4%22/%3E%0A%20%20%3Cellipse%20cx%3D%2286%22%20cy%3D%22337%22%20rx%3D%2260%22%20ry%3D%2210%22%20fill%3D%22%23dbeaf2%22%20opacity%3D%220.45%22/%3E%0A%3C/g%3E%0A%3Cg%20transform%3D%22translate%28299%20194%29%22%3E%0A%20%20%3Cellipse%20cx%3D%2258%22%20cy%3D%22228%22%20rx%3D%2266%22%20ry%3D%2210%22%20fill%3D%22%23d9e8ef%22%20opacity%3D%220.5%22/%3E%0A%20%20%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22118%22%20height%3D%22180%22%20rx%3D%2212%22%20fill%3D%22%23ffffff%22%20stroke%3D%22%23dbe7ee%22/%3E%0A%20%20%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22118%22%20height%3D%2231%22%20rx%3D%2212%22%20fill%3D%22%23f7fbfe%22%20stroke%3D%22%23dbe7ee%22/%3E%0A%20%20%3Ccircle%20cx%3D%2220%22%20cy%3D%2215.5%22%20r%3D%224%22%20fill%3D%22%23e2e8f0%22/%3E%0A%20%20%3Crect%20x%3D%2237%22%20y%3D%2211%22%20width%3D%2235%22%20height%3D%229%22%20rx%3D%224.5%22%20fill%3D%22%23e8eef3%22/%3E%0A%20%20%3Ccircle%20cx%3D%2293%22%20cy%3D%2216%22%20r%3D%228%22%20fill%3D%22%23eef4f8%22%20stroke%3D%22%23dbe7ee%22/%3E%0A%20%20%3Ccircle%20cx%3D%2259%22%20cy%3D%2298%22%20r%3D%2241%22%20fill%3D%22%23eaf4fb%22%20stroke%3D%22%23d5e3eb%22%20stroke-width%3D%226%22/%3E%0A%20%20%3Ccircle%20cx%3D%2259%22%20cy%3D%2298%22%20r%3D%2228%22%20fill%3D%22%23bfd6e7%22%20opacity%3D%220.75%22/%3E%0A%20%20%3Ccircle%20cx%3D%2250%22%20cy%3D%2290%22%20r%3D%2217%22%20fill%3D%22%23dbeaf4%22%20opacity%3D%220.8%22/%3E%0A%20%20%3Crect%20x%3D%2212%22%20y%3D%22145%22%20width%3D%2218%22%20height%3D%2210%22%20rx%3D%224%22%20fill%3D%22%23eef4f8%22/%3E%0A%20%20%3Crect%20x%3D%2237%22%20y%3D%22145%22%20width%3D%2218%22%20height%3D%2210%22%20rx%3D%224%22%20fill%3D%22%23eef4f8%22/%3E%0A%20%20%3Crect%20x%3D%2262%22%20y%3D%22145%22%20width%3D%2218%22%20height%3D%2210%22%20rx%3D%224%22%20fill%3D%22%23eef4f8%22/%3E%0A%20%20%3Crect%20x%3D%2287%22%20y%3D%22145%22%20width%3D%2218%22%20height%3D%2210%22%20rx%3D%224%22%20fill%3D%22%23eef4f8%22/%3E%0A%3C/g%3E%0A%3Cg%20opacity%3D%220.8%22%3E%0A%20%20%3Ccircle%20cx%3D%2251%22%20cy%3D%22118%22%20r%3D%228%22%20fill%3D%22url%28%23bubble%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%2282%22%20cy%3D%22145%22%20r%3D%2211%22%20fill%3D%22url%28%23bubble%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22348%22%20cy%3D%22152%22%20r%3D%228%22%20fill%3D%22url%28%23bubble%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22391%22%20cy%3D%22134%22%20r%3D%2211%22%20fill%3D%22url%28%23bubble%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22360%22%20cy%3D%22177%22%20r%3D%2215%22%20fill%3D%22url%28%23bubble%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22309%22%20cy%3D%22287%22%20r%3D%2210%22%20fill%3D%22url%28%23bubble%29%22/%3E%0A%3C/g%3E%0A%3C/svg%3E');background-repeat:no-repeat;background-size:cover;background-position:center top;opacity:1;pointer-events:none;}
+.authPhone:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.26) 18%,rgba(255,255,255,.05) 46%,rgba(255,255,255,.44) 100%);pointer-events:none;}
+.authPhoneTop{display:flex;justify-content:space-between;align-items:center;font-weight:900;color:#071424;padding:2px 8px 10px;font-size:15px;position:relative;z-index:2}.statusDots{letter-spacing:3px;font-size:16px;color:#071424}.heroLogo{width:92px;height:92px;border-radius:26px;margin:10px auto 14px;background:linear-gradient(135deg,#0284c7,#10b981);display:grid;place-items:center;color:#fff;font-size:38px;font-weight:1000;box-shadow:0 20px 55px rgba(2,132,199,.25);position:relative;z-index:2}.heroBrand{text-align:center;font-size:42px;line-height:.9;font-weight:1000;letter-spacing:-2px;position:relative;z-index:2}.heroBrand span:first-child{color:#0879d7}.heroBrand span:last-child{color:#10a97d}.heroSub{text-align:center;letter-spacing:8px;font-size:11px;font-weight:1000;color:#475569;margin-top:6px;position:relative;z-index:2}.heroTitle{text-align:center;font-size:31px;line-height:1.05;font-weight:1000;letter-spacing:-1px;color:#071424;margin-top:24px;position:relative;z-index:2}.heroTitle .mark{color:#0da982;display:inline-block;position:relative}.heroTitle .mark:after{content:"";position:absolute;left:3px;right:1px;height:4px;border-radius:999px;bottom:-3px;background:#0da982;transform:rotate(-5deg)}.heroText{text-align:center;color:#64748b;font-size:16px;line-height:1.35;margin:12px auto 18px;max-width:320px;font-weight:700;position:relative;z-index:2}.featureMatrix{position:relative;z-index:2;background:rgba(255,255,255,.82);border:1px solid rgba(226,232,240,.86);border-radius:26px;padding:14px 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;box-shadow:0 18px 60px rgba(2,132,199,.10);backdrop-filter:blur(16px)}.fMini{padding:10px 4px;text-align:center;border-right:1px solid rgba(226,232,240,.8);border-bottom:1px solid rgba(226,232,240,.8);font-size:12px;font-weight:1000;color:#071424;min-height:86px}.fMini:nth-child(3n){border-right:0}.fMini:nth-last-child(-n+3){border-bottom:0}.fIcon{width:43px;height:43px;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;font-size:20px;background:#e0f2fe;color:#0284c7}.fMini:nth-child(2) .fIcon,.fMini:nth-child(6) .fIcon{background:#ccfbf1;color:#0f766e}.fMini:nth-child(3) .fIcon{background:#dcfce7;color:#16a34a}.fMini:nth-child(4) .fIcon{background:#f3e8ff;color:#7c3aed}.fMini:nth-child(5) .fIcon{background:#ffedd5;color:#ea580c}.authCard{position:relative;z-index:2;margin-top:14px;background:rgba(255,255,255,.90);border:1px solid rgba(226,232,240,.95);border-radius:28px;padding:14px;box-shadow:0 20px 70px rgba(15,23,42,.10);backdrop-filter:blur(18px)}.premiumTabs{display:grid;grid-template-columns:1fr 1fr;gap:12px}.premiumTabs .btn{border-radius:17px;padding:14px;font-size:16px;box-shadow:none!important}.premiumTabs .btn2{border:1px solid #dbe5ef!important;color:#0f9a72!important;background:white!important}.premiumTabs .btn3{background:linear-gradient(90deg,#0676df,#10b981)!important;color:white!important;border:0!important;box-shadow:0 12px 28px rgba(16,185,129,.23)!important}.premiumAuth .field{margin-top:12px}.premiumAuth .field label{font-size:13px;color:#1e293b}.inputWrap{position:relative}.inputWrap .leftIcon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:18px}.inputWrap .eyeIcon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#64748b;font-size:18px}.premiumAuth input{height:52px;border-radius:17px;border:1px solid #dbe5ef;background:rgba(255,255,255,.82);box-shadow:inset 0 1px 1px rgba(15,23,42,.03);font-size:15px}.inputWrap input{padding-left:44px}.continuePremium{margin-top:14px!important;height:56px;border-radius:19px!important;font-size:18px!important}.logoutPremium{height:52px;border-radius:18px!important;border:1px solid #bfdbfe!important;color:#0879d7!important;font-weight:1000!important}.trustStrip{position:relative;z-index:2;margin-top:18px;background:rgba(255,255,255,.82);border:1px solid rgba(226,232,240,.84);border-radius:24px;padding:13px 8px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;box-shadow:0 16px 50px rgba(15,23,42,.07);backdrop-filter:blur(14px)}.trustItem{padding:0 7px;border-right:1px solid rgba(226,232,240,.9);font-size:10px;color:#64748b;line-height:1.25}.trustItem:last-child{border-right:0}.trustItem b{display:block;font-size:11px;color:#071424;margin-bottom:3px}.trustIcon{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;margin-bottom:6px;font-size:16px;background:#e0f2fe;color:#0284c7}.trustItem:nth-child(2) .trustIcon{background:#dcfce7;color:#16a34a}.trustItem:nth-child(3) .trustIcon{background:#ccfbf1;color:#0f766e}.trustItem:nth-child(4) .trustIcon{background:#e0f2fe;color:#0284c7}.metricsPremium{position:relative;z-index:2;margin-top:15px;border-radius:24px;padding:17px 10px;background:linear-gradient(95deg,#0879d7,#10b981);color:#fff;display:grid;grid-template-columns:repeat(4,1fr);gap:0;box-shadow:0 24px 55px rgba(16,185,129,.23);border:4px solid rgba(255,255,255,.88)}.metricP{padding:0 7px;border-right:1px solid rgba(255,255,255,.24);font-size:11px;line-height:1.15}.metricP:last-child{border-right:0}.metricP i{font-style:normal;font-size:22px;display:block;margin-bottom:5px}.metricP b{font-size:18px;display:block}.footerTrust{position:relative;z-index:2;text-align:center;color:#64748b;font-size:14px;line-height:1.45;margin:16px 18px 0;font-weight:700}.footerTrust b{color:#0da982}.premiumAuth .notice{border-radius:18px;margin-top:12px;text-align:center}.version{background:#061528!important}
+@media(max-width:380px){.premiumAuth{padding:10px 12px 100px!important}.authPhone{border-radius:28px;padding:16px 12px}.heroLogo{width:76px;height:76px;font-size:32px}.heroBrand{font-size:35px}.heroTitle{font-size:26px}.heroText{font-size:14px}.featureMatrix{grid-template-columns:repeat(3,1fr);padding:10px 6px}.fMini{font-size:10px;min-height:78px}.fIcon{width:36px;height:36px}.trustStrip{grid-template-columns:repeat(2,1fr);gap:10px}.trustItem:nth-child(2){border-right:0}.metricsPremium{grid-template-columns:repeat(2,1fr);gap:12px}.metricP:nth-child(2){border-right:0}.metricP{border-right:1px solid rgba(255,255,255,.24)}}
+
+
+/* ===== V43 ULTRA PREMIUM LOGIN POLISH ===== */
+body{
+  background:
+    radial-gradient(circle at 18% 8%,rgba(125,226,245,.38),transparent 30%),
+    radial-gradient(circle at 86% 12%,rgba(16,185,129,.22),transparent 28%),
+    linear-gradient(120deg,#eefbff 0%,#ffffff 48%,#ecfff7 100%)!important;
+}
+.app{
+  background:transparent!important;
+  box-shadow:0 40px 120px rgba(2,132,199,.18)!important;
+}
+.premiumAuth{
+  padding:0!important;
+  background:
+    linear-gradient(90deg,rgba(236,251,255,.95),rgba(255,255,255,.98) 50%,rgba(236,255,247,.95))!important;
+}
+.authPhone{
+  min-height:100vh;
+  border-radius:0;
+  padding:22px 18px 32px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.60),rgba(255,255,255,.92) 42%,rgba(255,255,255,.96))!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.72);
+}
+.authPhone:before{
+  opacity:.98;
+  filter:saturate(1.05) contrast(1.02);
+  transform:scale(1.03);
+  transform-origin:center top;
+}
+.authPhone:after{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.18) 18%,rgba(255,255,255,.02) 44%,rgba(255,255,255,.50) 100%),
+    radial-gradient(circle at 50% 20%,rgba(255,255,255,.42),transparent 38%)!important;
+}
+.authPhoneTop{
+  padding:2px 10px 12px;
+  font-size:15px;
+}
+.statusDots{
+  font-size:14px;
+  letter-spacing:4px;
+}
+.heroLogo{
+  width:98px!important;
+  height:98px!important;
+  border-radius:28px!important;
+  margin-top:8px!important;
+  margin-bottom:15px!important;
+  background:linear-gradient(135deg,#0879d7 0%,#0ea5e9 36%,#10b981 100%)!important;
+  box-shadow:
+    0 22px 60px rgba(2,132,199,.28),
+    inset 0 1px 0 rgba(255,255,255,.32)!important;
+}
+.heroBrand{
+  font-size:45px!important;
+  letter-spacing:-2.4px!important;
+  text-shadow:0 10px 28px rgba(2,132,199,.10);
+}
+.heroSub{
+  letter-spacing:10px!important;
+  margin-top:8px!important;
+  color:#3b4b60!important;
+}
+.heroTitle{
+  font-size:34px!important;
+  margin-top:25px!important;
+  color:#061528!important;
+}
+.heroText{
+  max-width:330px!important;
+  font-size:16.5px!important;
+  line-height:1.35!important;
+  color:#5b6b80!important;
+}
+.featureMatrix{
+  margin-top:4px!important;
+  border-radius:29px!important;
+  padding:15px 10px!important;
+  background:rgba(255,255,255,.86)!important;
+  border:1px solid rgba(226,232,240,.92)!important;
+  box-shadow:
+    0 20px 70px rgba(2,132,199,.12),
+    inset 0 1px 0 rgba(255,255,255,.86)!important;
+}
+.fMini{
+  min-height:90px!important;
+  font-size:12.5px!important;
+  line-height:1.12!important;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.fIcon{
+  width:46px!important;
+  height:46px!important;
+  font-size:20px!important;
+  box-shadow:0 10px 25px rgba(15,23,42,.07);
+}
+.authCard{
+  margin-top:16px!important;
+  border-radius:30px!important;
+  padding:16px!important;
+  background:rgba(255,255,255,.94)!important;
+  box-shadow:
+    0 24px 80px rgba(15,23,42,.12),
+    inset 0 1px 0 rgba(255,255,255,.90)!important;
+}
+.premiumTabs{
+  gap:13px!important;
+}
+.premiumTabs .btn{
+  height:54px!important;
+  border-radius:18px!important;
+  font-size:17px!important;
+}
+.premiumTabs .btn3{
+  background:linear-gradient(90deg,#0676df 0%,#0ea5e9 34%,#10b981 100%)!important;
+  box-shadow:0 16px 34px rgba(16,185,129,.26)!important;
+}
+.premiumAuth input{
+  height:55px!important;
+  border-radius:18px!important;
+  background:rgba(255,255,255,.92)!important;
+  border:1px solid #dce8f1!important;
+  box-shadow:
+    inset 0 1px 1px rgba(15,23,42,.03),
+    0 8px 20px rgba(15,23,42,.03)!important;
+}
+.continuePremium{
+  height:59px!important;
+  border-radius:20px!important;
+  font-size:19px!important;
+  background:linear-gradient(90deg,#0676df 0%,#0ea5e9 38%,#10b981 100%)!important;
+  box-shadow:0 18px 42px rgba(16,185,129,.28)!important;
+}
+.logoutPremium{
+  height:54px!important;
+  border-radius:19px!important;
+  background:rgba(255,255,255,.92)!important;
+}
+.premiumAuth .notice.success{
+  background:rgba(236,253,245,.96)!important;
+  border:1px solid #b7f0d4!important;
+  color:#047857!important;
+  font-weight:1000!important;
+  box-shadow:0 10px 25px rgba(16,185,129,.08);
+}
+.trustStrip{
+  margin-top:19px!important;
+  border-radius:27px!important;
+  padding:15px 9px!important;
+  background:rgba(255,255,255,.87)!important;
+  box-shadow:
+    0 22px 65px rgba(2,132,199,.10),
+    inset 0 1px 0 rgba(255,255,255,.88)!important;
+}
+.trustItem{
+  font-size:10.5px!important;
+  line-height:1.25!important;
+}
+.trustItem b{
+  font-size:11.5px!important;
+}
+.trustIcon{
+  width:37px!important;
+  height:37px!important;
+  box-shadow:0 10px 22px rgba(15,23,42,.06);
+}
+.metricsPremium{
+  margin-top:17px!important;
+  border-radius:27px!important;
+  padding:18px 11px!important;
+  background:linear-gradient(95deg,#0676df 0%,#0ea5e9 36%,#10b981 100%)!important;
+  border:4px solid rgba(255,255,255,.96)!important;
+  box-shadow:
+    0 26px 60px rgba(16,185,129,.28),
+    inset 0 1px 0 rgba(255,255,255,.26)!important;
+}
+.metricP{
+  font-size:11px!important;
+}
+.metricP i{
+  font-size:23px!important;
+  opacity:.96;
+}
+.metricP b{
+  font-size:20px!important;
+  letter-spacing:-.7px;
+}
+.footerTrust{
+  margin-top:18px!important;
+  font-size:14.5px!important;
+}
+.version{
+  background:#061528!important;
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 14px 36px rgba(15,23,42,.28)!important;
+}
+@media(max-width:380px){
+  .heroLogo{width:82px!important;height:82px!important;font-size:34px!important}
+  .heroBrand{font-size:37px!important}
+  .heroTitle{font-size:27px!important}
+  .heroText{font-size:14px!important}
+  .featureMatrix{padding:11px 6px!important}
+  .fMini{min-height:80px!important;font-size:10.5px!important}
+  .fIcon{width:38px!important;height:38px!important;font-size:17px!important}
+}
+
 </style>
 <!-- V40: premium operations, finance, staff, invoices and receipts -->
 </head>
 <body>
 <div class="app">
-  <section id="landing" class="screen active landing">
+  <section id="landing" class="screen landing">
     <div class="landingTop"><div class="row" style="justify-content:flex-start"><div class="landingMark">EF</div><b>EFresh</b></div><button class="btn btn2 mini" onclick="show('login')">Entrar</button></div>
     <div class="landingHero"><h1>Lavandaria premium com recolha e entrega.</h1><p>Peça recolha, acompanhe etapas, veja faturas, recibos e fale com a equipa pelo app.</p></div>
     <div class="landingCard"><button class="btn" onclick="show('login')">Começar agora</button><button class="btn btn2 mt2" onclick="openWhatsApp()">Falar no WhatsApp</button></div>
-    <div class="landingCard"><h3>Transparência</h3><p class="small" style="color:#dbeafe;margin-top:8px">O preço é estimado antes da recolha. O valor final pode ser confirmado após pesagem real.</p><button class="btn btn2 mt2" onclick="openTerms()">Termos e privacidade</button></div>
   </section>
 
-  <section id="login" class="screen">
-    <div class="logo">EF</div><div class="brand"><span class="blue">EF</span><span class="green">resh</span></div><div class="sub">LAVANDARIA</div><p class="blue mt2" style="text-align:center"><b>Mais tempo para si.</b></p><p class="green mt2" style="text-align:center">O futuro da lavandaria chegou.</p>
-    <div class="card mt">
-      <div class="grid2"><button id="btnLogin" class="btn btn2" onclick="setMode('login')">Entrar</button><button id="btnRegister" class="btn btn2" onclick="setMode('register')">Criar conta</button></div>
-      <div id="registerBox" style="display:none"><div class="grid2"><div class="field"><label>Nome</label><input id="regNome" placeholder="Nome"></div><div class="field"><label>Apelido</label><input id="regApelido" placeholder="Apelido"></div></div></div>
-      <div class="field"><label>Número de celular</label><input id="loginPhone" placeholder="845178833"></div>
-      <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="Digite a password"></div>
-      <button id="authBtn" class="btn mt" onclick="authSubmit()">Continuar</button>
-      <button class="btn btn2 mt2" onclick="logout()">Sair / limpar sessão</button>
-      <div id="authMsg" class="notice"></div>
-      <p class="tiny mt2">Login real com Supabase Auth. Cliente cria conta sozinho; admin/operador/motorista são atribuídos por função.</p>
+  <section id="login" class="screen active premiumAuth">
+    <div class="authPhone">
+      <div class="authPhoneTop"><span>9:41</span><span class="statusDots">●●●  ◜◝ ▱</span></div>
+      <div class="heroLogo">EF</div>
+      <div class="heroBrand"><span>EF</span><span>resh</span></div>
+      <div class="heroSub">LAVANDARIA</div>
+      <div class="heroTitle">Mais tempo para <span class="mark">si.</span></div>
+      <p class="heroText">Recolha, lavagem, entrega e gestão completa num só lugar.</p>
+
+      <div class="featureMatrix">
+        <div class="fMini"><div class="fIcon">👜</div>Pedir<br>recolha</div>
+        <div class="fMini"><div class="fIcon">📋</div>Acompanhar<br>pedido</div>
+        <div class="fMini"><div class="fIcon">💳</div>Pagamentos</div>
+        <div class="fMini"><div class="fIcon">📄</div>Faturas e<br>recibos</div>
+        <div class="fMini"><div class="fIcon">🎧</div>Suporte</div>
+        <div class="fMini"><div class="fIcon">🕘</div>Histórico</div>
+      </div>
+
+      <div class="authCard">
+        <div class="premiumTabs"><button id="btnLogin" class="btn btn3" onclick="setMode('login')">Entrar</button><button id="btnRegister" class="btn btn2" onclick="setMode('register')">Criar conta</button></div>
+        <div id="registerBox" style="display:none"><div class="grid2"><div class="field"><label>Nome</label><input id="regNome" placeholder="Nome"></div><div class="field"><label>Apelido</label><input id="regApelido" placeholder="Apelido"></div></div></div>
+        <div class="field"><label>Número de celular</label><div class="inputWrap"><span class="leftIcon">⌕</span><input id="loginPhone" inputmode="tel" placeholder="845 178 833"></div></div>
+        <div class="field"><label>Password</label><div class="inputWrap"><span class="leftIcon">▣</span><input id="loginPass" type="password" placeholder="Digite a password"><span class="eyeIcon">👁</span></div></div>
+        <button id="authBtn" class="btn continuePremium" onclick="authSubmit()">Continuar →</button>
+        <button class="btn btn2 mt2 logoutPremium" onclick="logout()">↪ &nbsp; Sair / limpar sessão</button>
+        <div id="authMsg" class="notice success">Login limpo. Entre ou crie conta para continuar.</div>
+      </div>
+
+      <div class="trustStrip">
+        <div class="trustItem"><div class="trustIcon">ϟ</div><b>Rápido</b>Processos ágeis em poucos cliques</div>
+        <div class="trustItem"><div class="trustIcon">✓</div><b>Seguro</b>Os seus dados sempre protegidos</div>
+        <div class="trustItem"><div class="trustIcon">⌖</div><b>Tracking em tempo real</b>Acompanhe cada etapa do serviço</div>
+        <div class="trustItem"><div class="trustIcon">👥</div><b>Clientes e equipa conectados</b>Tudo organizado num só lugar</div>
+      </div>
+
+      <div class="metricsPremium">
+        <div class="metricP"><i>👥</i><b>1.248+</b>Clientes ativos</div>
+        <div class="metricP"><i>▣</i><b>12.893+</b>Serviços realizados</div>
+        <div class="metricP"><i>◷</i><b>98%</b>Entregas no prazo</div>
+        <div class="metricP"><i>☆</i><b>4,9/5</b>Avaliação de clientes</div>
+      </div>
+      <div class="footerTrust">🔒 Plataforma confiável, moderna e feita para <b>simplificar a gestão</b> da sua lavandaria.</div>
     </div>
   </section>
 
@@ -74,7 +335,7 @@
   <nav class="bottom" id="nav"><button id="n-home" class="active" onclick="tab('home')"><span class="ico">⌂</span>Início</button><button id="n-order" onclick="tab('order')"><span class="ico">＋</span>Pedido</button><button id="n-tracking" onclick="tab('tracking')"><span class="ico">◎</span>Estado</button><button id="n-docs" onclick="tab('docs')"><span class="ico">🧾</span>Docs</button><button id="n-chat" onclick="tab('chat')"><span class="ico">💬</span>Chat</button></nav>
   <div id="modal" class="modalWrap"><div class="modalPanel"><div class="modalHead"><h2 id="modalTitle" class="modalTitle">EFresh</h2><button class="closeBtn" onclick="closeModal()">×</button></div><div id="modalBody" class="mt"></div></div></div>
 </div>
-<div class="version">V40 PREMIUM OPS OK</div>
+<div class="version">V43 ULTRA PREMIUM OK</div>
 <script>
 const SUPABASE_URL='https://ijzrogjjpdhgxntsjdmg.supabase.co';
 const SUPABASE_KEY='sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg';
