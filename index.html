@@ -63,11 +63,33 @@
   <nav class="bottom" id="nav"><button id="n-home" class="active" onclick="tab('home')"><span class="ico">⌂</span>Início</button><button id="n-order" onclick="tab('order')"><span class="ico">＋</span>Pedido</button><button id="n-tracking" onclick="tab('tracking')"><span class="ico">◎</span>Estado</button><button id="n-docs" onclick="tab('docs')"><span class="ico">🧾</span>Docs</button><button id="n-chat" onclick="tab('chat')"><span class="ico">💬</span>Chat</button></nav>
   <div id="modal" class="modalWrap"><div class="modalPanel"><div class="modalHead"><h2 id="modalTitle" class="modalTitle">EFresh</h2><button class="closeBtn" onclick="closeModal()">×</button></div><div id="modalBody" class="mt"></div></div></div>
 </div>
-<div class="version">V37 SELF REGISTER OK</div>
+<div class="version">V39 LOGIN SEMPRE MANUAL OK</div>
 <script>
 const SUPABASE_URL='https://ijzrogjjpdhgxntsjdmg.supabase.co';
 const SUPABASE_KEY='sb_publishable_T0FWNRWo3g04e8UJa5_l3w_dkZ4CRNg';
-const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+function hardClearAuthStorage(){
+  try{
+    const kill=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i)||'';
+      const lk=k.toLowerCase();
+      if(lk.includes('supabase')||lk.includes('sb-')||lk.includes('auth')||lk.includes('efresh')) kill.push(k);
+    }
+    kill.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+  try{
+    const kill=[];
+    for(let i=0;i<sessionStorage.length;i++){
+      const k=sessionStorage.key(i)||'';
+      const lk=k.toLowerCase();
+      if(lk.includes('supabase')||lk.includes('sb-')||lk.includes('auth')||lk.includes('efresh')) kill.push(k);
+    }
+    kill.forEach(k=>sessionStorage.removeItem(k));
+  }catch(e){}
+  try{document.cookie.split(';').forEach(c=>{const n=c.split('=')[0].trim(); if(n.toLowerCase().includes('sb')||n.toLowerCase().includes('supabase')||n.toLowerCase().includes('auth')||n.toLowerCase().includes('efresh')) document.cookie=n+'=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';});}catch(e){}
+}
+hardClearAuthStorage();
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storage:{getItem(){return null},setItem(){},removeItem(){}}}});
 const WHATSAPP_NUMBER='258845178833', PHONE_NUMBER='+258845178833';
 const ROOT_PHONE='258845178833';
 const ROOT_EMAIL='258845178833@efreshapp.com';
@@ -139,7 +161,7 @@ async function authSubmit(){
     el('authBtn').disabled=false
   }
 }
-async function logout(){await db.auth.signOut(); sessionUser=null; perfil=null; cliente=null; pedidos=[]; faturas=[]; recibos=[]; comprovativos=[]; mensagens=[]; show('login'); el('nav').style.display='none'}
+async function logout(){try{await db.auth.signOut({scope:'global'});}catch(e){} try{await db.auth.signOut();}catch(e){} hardClearAuthStorage(); sessionUser=null; perfil=null; cliente=null; pedidos=[]; faturas=[]; recibos=[]; comprovativos=[]; mensagens=[]; usuarios=[]; show('login'); el('nav').style.display='none'; msg('authMsg','Sessão limpa. Entre novamente.','success')}
 async function ensurePerfil(nome,apelido,telefone,email,role){if(!sessionUser)return null; let {data}=await db.from('usuarios').select('*').eq('auth_user_id',sessionUser.id).maybeSingle(); if(data){perfil=data; return data} const ins={auth_user_id:sessionUser.id,nome,apelido,telefone,email,role,activo:true}; let res=await db.from('usuarios').insert(ins).select().single(); if(res.error)throw res.error; perfil=res.data; return perfil}
 async function loadPerfil(){const {data:{user}}=await db.auth.getUser(); sessionUser=user; if(!user)return null; let {data,error}=await db.from('usuarios').select('*').eq('auth_user_id',user.id).maybeSingle(); if(error)throw error; if(!data){const md=user.user_metadata||{}; data=await ensurePerfil(md.nome||'Cliente',md.apelido||'',md.telefone||'',user.email,'cliente')} perfil=data; return data}
 async function initAfterAuth(){await loadPerfil(); await enforceRootAdmin(); await ensureCliente(); renderAuthUI(); const r=effectiveRole(); if(['admin','financeiro','operador','motorista'].includes(r)){showAdmin()}else{await loadClientData(); renderHome(); tab('home')}}
@@ -187,7 +209,16 @@ async function printAdminDoc(tipo,id){let oldCliente=cliente; if(!cliente)client
 function openProofsAdmin(){if(!['admin','financeiro'].includes(effectiveRole())){alert('Sem permissão para comprovativos.');return} openModal('Comprovativos recebidos',`<div class="card">${comprovativos.map(c=>`<div class="item"><div class="row"><div><b>${c.descricao||'Comprovativo'}</b><p class="small">Fatura ${c.fatura_id||'-'} • Pedido ${c.pedido_id||'-'}</p></div><span class="pill ${c.estado==='Aprovado'?'ok':'warn'}">${c.estado}</span></div>${c.url?`<button class="btn btn2 mini mt2" onclick="window.open('${c.url}','_blank')">Abrir anexo</button>`:''}<button class="btn mini mt2" onclick="approveProof(${c.id})">Aprovar e emitir recibo</button></div>`).join('')||'<p class="small">Sem comprovativos.</p>'}</div>`)}
 async function approveProof(id){const c=comprovativos.find(x=>x.id==id); if(!c)return; const f=faturas.find(x=>x.id==c.fatura_id); const val=Number(f?.total||f?.valor||0); await db.from('comprovativos').update({estado:'Aprovado'}).eq('id',id); if(f)await db.from('faturas').update({estado:'Pago'}).eq('id',f.id); const exists=await db.from('recibos').select('*').eq('fatura_id',c.fatura_id).maybeSingle(); if(!exists.data)await db.from('recibos').insert({auth_user_id:c.auth_user_id,fatura_id:c.fatura_id,pedido_id:c.pedido_id,cliente_id:c.cliente_id,valor:val,metodo_pagamento:c.descricao,referencia_pagamento:c.nome_ficheiro}); await loadAdmin(); closeModal(); openProofsAdmin()}
 function tabAdminChat(){openModal('Mensagens',`<div class="card"><div id="adminMessages">${mensagens.map(m=>`<div class="item"><b>${m.remetente||m.tipo_remetente}</b><p class="small">${m.mensagem}</p></div>`).join('')||'<p class="small">Sem mensagens.</p>'}</div></div>`)}
-async function boot(){el('pickupDate').value=today(); renderServices(); calcEstimate(); setMode('login'); const {data}=await db.auth.getSession(); if(data.session){sessionUser=data.session.user; try{await initAfterAuth()}catch(e){console.warn(e);show('login');msg('authMsg','Sessão encontrada, mas precisa completar perfil: '+e.message,'error')}}}
+async function boot(){
+  hardClearAuthStorage();
+  try{await db.auth.signOut({scope:'global'});}catch(e){}
+  try{await db.auth.signOut();}catch(e){}
+  hardClearAuthStorage();
+  sessionUser=null; perfil=null; cliente=null; pedidos=[]; faturas=[]; recibos=[]; comprovativos=[]; mensagens=[]; usuarios=[];
+  el('pickupDate').value=today(); renderServices(); calcEstimate(); setMode('login');
+  show('login'); el('nav').style.display='none';
+  msg('authMsg','Login limpo. Entre ou crie conta para continuar.','success');
+}
 document.addEventListener('DOMContentLoaded',boot);
 </script>
 </body>
